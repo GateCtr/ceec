@@ -28,25 +28,48 @@ function WhatsappIcon() {
 
 function CrossIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" style={{ color: "#1e3a8a" }}>
+    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-[#1e3a8a]">
       <path d="M12 2v8M12 14v8M4 12h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.58 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.06 6.06l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
     </svg>
   );
 }
 
 export default function Footer() {
   return (
-    <footer className="text-slate-400" style={{ background: "#0f172a" }}>
+    <footer className="bg-[#0f172a] text-slate-400">
       <div className="max-w-[1280px] mx-auto px-4 pt-14 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
 
           {/* Identité — 2 colonnes sur lg */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-4 no-underline">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "#c59b2e" }}
-              >
+              <div className="w-10 h-10 rounded-full bg-[#c59b2e] flex items-center justify-center flex-shrink-0">
                 <CrossIcon />
               </div>
               <div>
@@ -67,8 +90,7 @@ export default function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
-                style={{ background: "rgba(255,255,255,0.08)" }}
+                className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20 hover:scale-110"
                 aria-label="Facebook"
               >
                 <FacebookIcon />
@@ -77,8 +99,7 @@ export default function Footer() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
-                style={{ background: "rgba(255,255,255,0.08)" }}
+                className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20 hover:scale-110"
                 aria-label="YouTube"
               >
                 <YoutubeIcon />
@@ -87,8 +108,7 @@ export default function Footer() {
                 href="https://wa.me/243000000000"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
-                style={{ background: "rgba(255,255,255,0.08)" }}
+                className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20 hover:scale-110"
                 aria-label="WhatsApp"
               >
                 <WhatsappIcon />
@@ -98,7 +118,7 @@ export default function Footer() {
 
           {/* Liens rapides */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider" style={{ color: "#c59b2e" }}>
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
               Liens rapides
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -122,7 +142,7 @@ export default function Footer() {
 
           {/* Mon espace */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider" style={{ color: "#c59b2e" }}>
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
               Mon espace
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -146,28 +166,20 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider" style={{ color: "#c59b2e" }}>
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
               Contact
             </h4>
             <div className="flex flex-col gap-3 text-sm text-slate-400">
               <p className="flex items-start gap-2">
-                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                  <circle cx="12" cy="9" r="2.5"/>
-                </svg>
+                <PinIcon />
                 Kinshasa, République Démocratique du Congo
               </p>
               <p className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
+                <MailIcon />
                 contact@ceec-rdc.org
               </p>
               <p className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 flex-shrink-0 text-slate-500" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.58 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.06 6.06l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                </svg>
+                <PhoneIcon />
                 +243 xxx xxx xxx
               </p>
             </div>
@@ -175,19 +187,16 @@ export default function Footer() {
         </div>
 
         {/* Barre du bas */}
-        <div
-          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500"
-          style={{ borderTop: "1px solid #1e293b" }}
-        >
+        <div className="pt-6 border-t border-[#1e293b] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>
             © {new Date().getFullYear()} CEEC — Communauté des Églises Évangéliques au Congo.
             Tous droits réservés.
           </p>
           <div className="flex items-center gap-4">
-            <Link href="/confidentialite" className="hover:text-slate-300 transition-colors duration-150">
+            <Link href="/contact" className="hover:text-slate-300 transition-colors duration-150">
               Politique de confidentialité
             </Link>
-            <Link href="/mentions-legales" className="hover:text-slate-300 transition-colors duration-150">
+            <Link href="/contact" className="hover:text-slate-300 transition-colors duration-150">
               Mentions légales
             </Link>
           </div>

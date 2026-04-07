@@ -110,28 +110,12 @@ export default async function HomePage() {
       <main>
 
         {/* ——— HERO ——— */}
-        <section
-          className="relative overflow-hidden text-white"
-          style={{
-            background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 55%, #0f172a 100%)",
-            paddingTop: "7rem",
-            paddingBottom: "5rem",
-          }}
-        >
-          {/* Décoration géométrique */}
+        <section className="relative overflow-hidden text-white pt-28 pb-20 bg-[linear-gradient(135deg,#1e3a8a_0%,#1e2d6b_55%,#0f172a_100%)]">
+          {/* Blobs décoratifs */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
-            <div
-              className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10"
-              style={{ background: "#c59b2e", filter: "blur(60px)" }}
-            />
-            <div
-              className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10"
-              style={{ background: "#c59b2e", filter: "blur(50px)" }}
-            />
-            <svg
-              className="absolute inset-0 w-full h-full opacity-[0.03]"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10 bg-[#c59b2e] blur-[60px]" />
+            <div className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10 bg-[#c59b2e] blur-[50px]" />
+            <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="crosses" width="60" height="60" patternUnits="userSpaceOnUse">
                   <path d="M30 10v20M20 20h20" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
@@ -143,33 +127,20 @@ export default async function HomePage() {
 
           <div className="relative max-w-3xl mx-auto px-4 text-center">
             {/* Badge */}
-            <div
-              className="inline-block text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full mb-6"
-              style={{
-                background: "rgba(197,155,46,0.15)",
-                border: "1px solid rgba(197,155,46,0.35)",
-                color: "#fcd34d",
-              }}
-            >
+            <div className="inline-block text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full mb-6 bg-[rgba(197,155,46,0.15)] border border-[rgba(197,155,46,0.35)] text-[#fcd34d]">
               Communauté des Églises Évangéliques au Congo
             </div>
 
             <h1
-              className="font-extrabold leading-tight mb-5"
-              style={{
-                fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                textShadow: "0 2px 16px rgba(0,0,0,0.3)",
-              }}
+              className="font-extrabold leading-tight mb-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
+              style={{ textShadow: "0 2px 16px rgba(0,0,0,0.3)" }}
             >
               Ensemble dans la Foi,
               <br />
-              <span style={{ color: "#fcd34d" }}>unis pour le Congo</span>
+              <span className="text-[#fcd34d]">unis pour le Congo</span>
             </h1>
 
-            <p
-              className="mx-auto mb-10 leading-relaxed text-white/80"
-              style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: 580 }}
-            >
+            <p className="mx-auto mb-10 leading-relaxed text-white/80 max-w-xl text-base md:text-lg">
               La CEEC regroupe des dizaines d&apos;églises évangéliques à travers toutes les
               provinces du Congo, toutes unies dans la foi, la prière et le service au peuple congolais.
             </p>
@@ -177,18 +148,13 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/paroisses"
-                className="px-8 py-3.5 rounded-lg font-bold text-base transition-all duration-200 hover:brightness-110"
-                style={{ background: "#c59b2e", color: "#1e3a8a" }}
+                className="px-8 py-3.5 rounded-lg font-bold text-base text-[#1e3a8a] bg-[#c59b2e] transition-all duration-200 hover:brightness-110"
               >
                 Nos Églises
               </Link>
               <Link
                 href="/sign-up"
-                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white transition-all duration-200 hover:bg-white/25"
-                style={{
-                  background: "rgba(255,255,255,0.12)",
-                  border: "1px solid rgba(255,255,255,0.28)",
-                }}
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white bg-white/[0.12] border border-white/[0.28] transition-all duration-200 hover:bg-white/25"
               >
                 Rejoindre la CEEC
               </Link>
@@ -197,24 +163,15 @@ export default async function HomePage() {
 
           {/* Bande stats */}
           <div className="relative max-w-4xl mx-auto px-4 mt-14">
-            <div
-              className="grid grid-cols-2 md:grid-cols-4"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 16,
-              }}
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 bg-white/[0.06] border border-white/[0.12] rounded-2xl overflow-hidden">
               {stats.map((stat, idx) => (
                 <div
                   key={stat.label}
-                  className="flex flex-col items-center justify-center py-5 px-4 text-center"
-                  style={idx < stats.length - 1 ? { borderRight: "1px solid rgba(255,255,255,0.12)" } : {}}
+                  className={`flex flex-col items-center justify-center py-5 px-4 text-center ${
+                    idx < stats.length - 1 ? "border-r border-white/[0.12]" : ""
+                  }`}
                 >
-                  <span
-                    className="font-extrabold text-2xl md:text-3xl leading-none mb-1"
-                    style={{ color: "#fcd34d" }}
-                  >
+                  <span className="font-extrabold text-2xl md:text-3xl leading-none mb-1 text-[#fcd34d]">
                     {stat.valeur}
                   </span>
                   <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -227,19 +184,13 @@ export default async function HomePage() {
         </section>
 
         {/* ——— NOS MISSIONS ——— */}
-        <section className="py-20 px-4" style={{ background: "white" }}>
+        <section className="py-20 px-4 bg-white">
           <div className="max-w-[1280px] mx-auto">
             <div className="text-center mb-12">
-              <p
-                className="text-xs font-bold uppercase tracking-widest mb-2"
-                style={{ color: "#c59b2e" }}
-              >
+              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-[#c59b2e]">
                 Nos piliers
               </p>
-              <h2
-                className="text-3xl font-bold mb-3"
-                style={{ color: "#1e3a8a" }}
-              >
+              <h2 className="text-3xl font-bold mb-3 text-[#1e3a8a]">
                 Nos Missions
               </h2>
               <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
@@ -252,30 +203,32 @@ export default async function HomePage() {
               {missions.map((mission, i) => (
                 <div
                   key={mission.titre}
-                  className="group flex flex-col p-7 rounded-2xl transition-all duration-200 hover:shadow-lg"
-                  style={{
-                    background: i === 1 ? "#1e3a8a" : "#f8fafc",
-                    border: `1px solid ${i === 1 ? "transparent" : "#e2e8f0"}`,
-                  }}
+                  className={`group flex flex-col p-7 rounded-2xl transition-all duration-200 hover:shadow-lg border ${
+                    i === 1
+                      ? "bg-[#1e3a8a] border-transparent"
+                      : "bg-[#f8fafc] border-[#e2e8f0]"
+                  }`}
                 >
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
-                    style={{
-                      background: i === 1 ? "rgba(197,155,46,0.2)" : "rgba(30,58,138,0.08)",
-                      color: i === 1 ? "#fcd34d" : "#1e3a8a",
-                    }}
+                    className={`w-14 h-14 rounded-xl flex items-center justify-center mb-5 ${
+                      i === 1
+                        ? "bg-[rgba(197,155,46,0.2)] text-[#fcd34d]"
+                        : "bg-[rgba(30,58,138,0.08)] text-[#1e3a8a]"
+                    }`}
                   >
                     {mission.icon}
                   </div>
                   <h3
-                    className="text-lg font-bold mb-3"
-                    style={{ color: i === 1 ? "white" : "#0f172a" }}
+                    className={`text-lg font-bold mb-3 ${
+                      i === 1 ? "text-white" : "text-[#0f172a]"
+                    }`}
                   >
                     {mission.titre}
                   </h3>
                   <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: i === 1 ? "rgba(255,255,255,0.7)" : "#64748b" }}
+                    className={`text-sm leading-relaxed ${
+                      i === 1 ? "text-white/70" : "text-slate-500"
+                    }`}
                   >
                     {mission.desc}
                   </p>
@@ -286,16 +239,13 @@ export default async function HomePage() {
         </section>
 
         {/* ——— VALEURS ——— */}
-        <section className="py-20 px-4" style={{ background: "#f8fafc" }}>
+        <section className="py-20 px-4 bg-[#f8fafc]">
           <div className="max-w-[1280px] mx-auto">
             <div className="text-center mb-12">
-              <p
-                className="text-xs font-bold uppercase tracking-widest mb-2"
-                style={{ color: "#c59b2e" }}
-              >
+              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-[#c59b2e]">
                 Ce qui nous unit
               </p>
-              <h2 className="text-3xl font-bold mb-3" style={{ color: "#1e3a8a" }}>
+              <h2 className="text-3xl font-bold mb-3 text-[#1e3a8a]">
                 Nos Valeurs Fondamentales
               </h2>
               <p className="text-slate-500 max-w-md mx-auto leading-relaxed">
@@ -308,19 +258,12 @@ export default async function HomePage() {
               {valeurs.map((valeur) => (
                 <div
                   key={valeur.titre}
-                  className="bg-white rounded-2xl p-7 text-center border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                  style={{ border: "1px solid #e2e8f0" }}
+                  className="bg-white rounded-2xl p-7 text-center border border-[#e2e8f0] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                 >
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
-                    style={{ background: "rgba(30,58,138,0.07)", color: "#1e3a8a" }}
-                  >
+                  <div className="w-14 h-14 rounded-xl bg-[rgba(30,58,138,0.07)] text-[#1e3a8a] flex items-center justify-center mx-auto mb-4">
                     {valeur.icon}
                   </div>
-                  <h3
-                    className="text-base font-bold mb-2"
-                    style={{ color: "#1e3a8a" }}
-                  >
+                  <h3 className="text-base font-bold mb-2 text-[#1e3a8a]">
                     {valeur.titre}
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
@@ -337,40 +280,25 @@ export default async function HomePage() {
           <div className="max-w-[1280px] mx-auto">
             <div className="flex justify-between items-end mb-10 flex-wrap gap-4">
               <div>
-                <p
-                  className="text-xs font-bold uppercase tracking-widest mb-1"
-                  style={{ color: "#c59b2e" }}
-                >
+                <p className="text-xs font-bold uppercase tracking-widest mb-1 text-[#c59b2e]">
                   Notre réseau
                 </p>
-                <h2 className="text-3xl font-bold" style={{ color: "#1e3a8a" }}>
-                  Nos Églises
-                </h2>
+                <h2 className="text-3xl font-bold text-[#1e3a8a]">Nos Églises</h2>
                 <p className="text-slate-500 mt-1">
                   Découvrez les églises membres de la CEEC
                 </p>
               </div>
               <Link
                 href="/paroisses"
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-[#1e3a8a] hover:text-white"
-                style={{
-                  border: "2px solid #1e3a8a",
-                  color: "#1e3a8a",
-                }}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold border-2 border-[#1e3a8a] text-[#1e3a8a] transition-all duration-200 hover:bg-[#1e3a8a] hover:text-white"
               >
                 Voir toutes les églises →
               </Link>
             </div>
 
             {eglisesList.length === 0 ? (
-              <div
-                className="text-center py-16 rounded-2xl"
-                style={{ background: "#f8fafc", border: "2px dashed #e2e8f0" }}
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "rgba(30,58,138,0.07)", color: "#1e3a8a" }}
-                >
+              <div className="text-center py-16 rounded-2xl bg-[#f8fafc] border-2 border-dashed border-[#e2e8f0]">
+                <div className="w-16 h-16 rounded-full bg-[rgba(30,58,138,0.07)] text-[#1e3a8a] flex items-center justify-center mx-auto mb-4">
                   <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8" stroke="currentColor" strokeWidth="1.5">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" />
                     <polyline points="9 22 9 12 15 12 15 22" strokeLinecap="round" />
@@ -386,31 +314,19 @@ export default async function HomePage() {
                   <Link
                     key={eglise.id}
                     href={`/paroisses/${eglise.id}`}
-                    className="group block rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
-                    style={{ border: "1px solid #e2e8f0" }}
+                    className="group block rounded-2xl overflow-hidden border border-[#e2e8f0] transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
                   >
                     {/* Barre couleur CEEC */}
-                    <div
-                      className="h-2"
-                      style={{ background: "linear-gradient(90deg, #1e3a8a, #c59b2e)" }}
-                    />
+                    <div className="h-2 bg-[linear-gradient(90deg,#1e3a8a,#c59b2e)]" />
                     {/* Initiale */}
-                    <div
-                      className="h-32 flex items-center justify-center text-6xl font-black text-white"
-                      style={{
-                        background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
-                      }}
-                    >
+                    <div className="h-32 flex items-center justify-center text-6xl font-black text-white bg-[linear-gradient(135deg,#1e3a8a_0%,#1e2d6b_100%)]">
                       {eglise.nom.charAt(0)}
                     </div>
                     <div className="p-5 bg-white">
                       <h3 className="font-bold text-base text-slate-900 mb-2 group-hover:text-[#1e3a8a] transition-colors">
                         {eglise.nom}
                       </h3>
-                      <span
-                        className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2"
-                        style={{ background: "rgba(197,155,46,0.12)", color: "#c59b2e" }}
-                      >
+                      <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 bg-[rgba(197,155,46,0.12)] text-[#c59b2e]">
                         {eglise.ville}
                       </span>
                       {eglise.pasteur && (
@@ -427,7 +343,7 @@ export default async function HomePage() {
         </section>
 
         {/* ——— ANNONCES & ÉVÉNEMENTS ——— */}
-        <section className="py-20 px-4" style={{ background: "#f8fafc" }}>
+        <section className="py-20 px-4 bg-[#f8fafc]">
           <div className="max-w-[1280px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
@@ -435,30 +351,21 @@ export default async function HomePage() {
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p
-                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
-                      style={{ color: "#c59b2e" }}
-                    >
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-[#c59b2e]">
                       Informations
                     </p>
-                    <h2 className="text-xl font-bold" style={{ color: "#1e3a8a" }}>
-                      Annonces
-                    </h2>
+                    <h2 className="text-xl font-bold text-[#1e3a8a]">Annonces</h2>
                   </div>
                   <Link
                     href="/annonces"
-                    className="text-sm font-semibold transition-colors"
-                    style={{ color: "#c59b2e" }}
+                    className="text-sm font-semibold text-[#c59b2e] hover:text-[#1e3a8a] transition-colors"
                   >
                     Tout voir →
                   </Link>
                 </div>
 
                 {annoncesList.length === 0 ? (
-                  <div
-                    className="py-8 px-5 rounded-xl text-sm text-slate-500"
-                    style={{ background: "white", border: "1px dashed #e2e8f0" }}
-                  >
+                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-[#e2e8f0]">
                     Aucune annonce pour le moment.
                   </div>
                 ) : (
@@ -466,17 +373,15 @@ export default async function HomePage() {
                     {annoncesList.map((annonce) => (
                       <div
                         key={annonce.id}
-                        className="bg-white rounded-xl p-5 border transition-shadow hover:shadow-sm"
-                        style={{ border: "1px solid #e2e8f0" }}
+                        className="bg-white rounded-xl p-5 border border-[#e2e8f0] transition-shadow hover:shadow-sm"
                       >
                         <div className="flex items-start gap-3">
                           <span
-                            className="mt-0.5 flex-shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide"
-                            style={
+                            className={`mt-0.5 flex-shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide ${
                               annonce.priorite === "urgente"
-                                ? { background: "#fee2e2", color: "#dc2626" }
-                                : { background: "#e0f2fe", color: "#0369a1" }
-                            }
+                                ? "bg-red-100 text-red-600"
+                                : "bg-sky-100 text-sky-700"
+                            }`}
                           >
                             {annonce.priorite === "urgente" ? "Urgent" : "Info"}
                           </span>
@@ -500,30 +405,21 @@ export default async function HomePage() {
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p
-                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
-                      style={{ color: "#c59b2e" }}
-                    >
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-[#c59b2e]">
                       Agenda
                     </p>
-                    <h2 className="text-xl font-bold" style={{ color: "#1e3a8a" }}>
-                      Événements
-                    </h2>
+                    <h2 className="text-xl font-bold text-[#1e3a8a]">Événements</h2>
                   </div>
                   <Link
                     href="/evenements"
-                    className="text-sm font-semibold transition-colors"
-                    style={{ color: "#c59b2e" }}
+                    className="text-sm font-semibold text-[#c59b2e] hover:text-[#1e3a8a] transition-colors"
                   >
                     Tout voir →
                   </Link>
                 </div>
 
                 {evenementsList.length === 0 ? (
-                  <div
-                    className="py-8 px-5 rounded-xl text-sm text-slate-500"
-                    style={{ background: "white", border: "1px dashed #e2e8f0" }}
-                  >
+                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-[#e2e8f0]">
                     Aucun événement planifié pour le moment.
                   </div>
                 ) : (
@@ -531,13 +427,9 @@ export default async function HomePage() {
                     {evenementsList.map((evt) => (
                       <div
                         key={evt.id}
-                        className="bg-white rounded-xl p-5 border flex gap-4 items-start transition-shadow hover:shadow-sm"
-                        style={{ border: "1px solid #e2e8f0" }}
+                        className="bg-white rounded-xl p-5 border border-[#e2e8f0] flex gap-4 items-start transition-shadow hover:shadow-sm"
                       >
-                        <div
-                          className="flex-shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center text-white"
-                          style={{ background: "#1e3a8a" }}
-                        >
+                        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#1e3a8a] flex flex-col items-center justify-center text-white">
                           <span className="text-lg font-extrabold leading-none">
                             {new Date(evt.dateDebut).getDate()}
                           </span>
@@ -569,16 +461,8 @@ export default async function HomePage() {
         </section>
 
         {/* ——— CTA ——— */}
-        <section className="relative overflow-hidden py-20 px-4">
-          {/* Fond */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(135deg, #c59b2e 0%, #d4af5a 60%, #b8882a 100%)",
-            }}
-            aria-hidden
-          />
-          {/* Décoration */}
+        <section className="relative overflow-hidden py-20 px-4 bg-[linear-gradient(135deg,#c59b2e_0%,#d4af5a_60%,#b8882a_100%)]">
+          {/* Décoration points */}
           <div className="absolute inset-0 pointer-events-none opacity-10" aria-hidden>
             <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -591,35 +475,23 @@ export default async function HomePage() {
           </div>
 
           <div className="relative max-w-2xl mx-auto text-center">
-            <h2
-              className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight"
-              style={{ color: "#1e3a8a" }}
-            >
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-[#1e3a8a]">
               Faites partie de notre communauté
             </h2>
-            <p
-              className="text-base leading-relaxed mb-10"
-              style={{ color: "rgba(30,58,138,0.78)" }}
-            >
+            <p className="text-base leading-relaxed mb-10 text-[#1e3a8a]/80">
               Rejoignez la CEEC, accédez aux ressources de votre église, restez informé
               des événements et annonces de toute la communauté évangélique du Congo.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/sign-up"
-                className="px-8 py-3.5 rounded-lg font-bold text-base text-white transition-all duration-200 hover:brightness-110"
-                style={{ background: "#1e3a8a" }}
+                className="px-8 py-3.5 rounded-lg font-bold text-base text-white bg-[#1e3a8a] transition-all duration-200 hover:brightness-110"
               >
                 Créer mon compte
               </Link>
               <Link
                 href="/contact"
-                className="px-8 py-3.5 rounded-lg font-semibold text-base transition-all duration-200 hover:bg-[rgba(30,58,138,0.15)]"
-                style={{
-                  background: "rgba(30,58,138,0.08)",
-                  color: "#1e3a8a",
-                  border: "2px solid rgba(30,58,138,0.25)",
-                }}
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-[#1e3a8a] bg-[rgba(30,58,138,0.08)] border-2 border-[rgba(30,58,138,0.25)] transition-all duration-200 hover:bg-[rgba(30,58,138,0.15)]"
               >
                 Nous contacter
               </Link>

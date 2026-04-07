@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============ TENANT ============
+
+model Eglise {
+  id           Int           @id @default(autoincrement())
+  nom          String        @db.VarChar(255)
+  slug         String?       @unique @db.VarChar(50)
+  sousDomaine  String?       @unique @map("sous_domaine") @db.VarChar(100)
+  statut       String        @default("actif") @db.VarChar(20)
+  ville        String        @db.VarChar(100)
+  adresse      String?       @db.Text
+  pasteur      String?       @db.VarChar(255)
+  telephone    String?       @db.VarChar(20)
+  email        String?       @db.VarChar(255)
+  description  String?       @db.Text
+  logoUrl      String?       @map("logo_url") @db.Text
+  photoUrl     String?       @map("photo_url") @db.Text
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
+  membres      Membre[]
+  annonces     Annonce[]
+  evenements   Evenement[]
+  userRoles    UserRole[]
+  inviteTokens InviteToken[]
+
+  @@map("paroisses")
+}
+
+// ============ USER / MEMBRE ============
+
+model Membre {
+  id           Int       @id @default(autoincrement())
+  clerkUserId  String    @map("clerk_user_id") @db.VarChar(255)
+  nom          String    @db.VarChar(100)
+  prenom       String    @db.VarChar(100)
+  email        String    @db.VarChar(255)
+  telephone    String?   @db.VarChar(20)
+  egliseId     Int?      @map("paroisse_id")
+  eglise       Eglise?   @relation(fields: [egliseId], references: [id])
+  role         String    @default("fidele") @db.VarChar(20)
+  dateAdhesion DateTime? @map("date_adhesion") @db.Date
+  statut              String    @default("actif") @db.VarChar(20)
+  suspendedByChurch   Boolean   @default(false) @map("suspended_by_church")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+  annonces            Annonce[]
+
+  @@unique([clerkUserId, egliseId], name: "membre_clerk_eglise_unique")
+  @@index([clerkUserId])
+  @@map("membres")
+}
+
+// ============ CONTENT ============
+
+model Annonce {
+  id              Int       @id @default(autoincrement())
+  titre           String    @db.VarChar(255)
+  contenu         String    @db.Text
+  auteurId        Int?      @map("auteur_id")
+  auteur          Membre?   @relation(fields: [auteurId], references: [id])
+  egliseId        Int?      @map("paroisse_id")
+  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
+  datePublication DateTime  @default(now()) @map("date_publication")
+  dateExpiration  DateTime? @map("date_expiration")
+  priorite        String    @default("normale") @db.VarChar(20)
+  publie          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@map("annonces")
+}
+
+model Evenement {
+  id          Int       @id @default(autoincrement())
+  titre       String    @db.VarChar(255)
+  description String?   @db.Text
+  dateDebut   DateTime  @map("date_debut")
+  dateFin     DateTime? @map("date_fin")
+  lieu        String?   @db.VarChar(255)
+  egliseId    Int?      @map("paroisse_id")
+  eglise      Eglise?   @relation(fields: [egliseId], references: [id])
+  imageUrl    String?   @map("image_url") @db.Text
+  publie      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@map("evenements")
+}
+
+// ============ RBAC ============
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  nom         String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id           Int              @id @default(autoincrement())
+  nom          String           @unique @db.VarChar(50)
+  scope        String           @db.VarChar(20)
+  permissions  String[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+  userRoles    UserRole[]
+  inviteTokens InviteToken[]
+  rolePerms    RolePermission[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int        @map("role_id")
+  role         Role       @relation(fields: [roleId], references: [id])
+  permissionId Int        @map("permission_id")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id          Int      @id @default(autoincrement())
+  clerkUserId String   @map("clerk_user_id") @db.VarChar(255)
+  egliseId    Int?     @map("eglise_id")
+  eglise      Eglise?  @relation(fields: [egliseId], references: [id])
+  roleId      Int      @map("role_id")
+  role        Role     @relation(fields: [roleId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([clerkUserId, roleId, egliseId], name: "user_role_unique")
+  @@index([clerkUserId])
+  @@index([egliseId])
+  @@map("user_roles")
+}
+
+model InviteToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique @default(dbgenerated("gen_random_uuid()::text")) @db.VarChar(255)
+  email     String    @db.VarChar(255)
+  egliseId  Int?      @map("eglise_id")
+  eglise    Eglise?   @relation(fields: [egliseId], references: [id])
+  roleId    Int?      @map("role_id")
+  role      Role?     @relation(fields: [roleId], references: [id])
+  usedAt    DateTime? @map("used_at")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("invite_tokens")
+}

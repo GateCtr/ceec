@@ -1,0 +1,127 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/db";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const DEV_DOMAIN = process.env.REPLIT_DEV_DOMAIN;
+
+function buildRedirectUrl(slug: string): string {
+  if (APP_URL && !DEV_DOMAIN) {
+    const url = new URL(APP_URL);
+    url.hostname = `${slug}.${url.hostname}`;
+    return `${url.origin}/gestion`;
+  }
+  return `/gestion?eglise=${slug}`;
+}
+
+export async function POST(
+  _req: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Vous devez être connecté pour finaliser la configuration" },
+        { status: 401 }
+      );
+    }
+
+    const { token } = await params;
+
+    const invite = await prisma.inviteToken.findUnique({
+      where: { token },
+      include: { eglise: true, role: true },
+    });
+
+    if (!invite) {
+      return NextResponse.json({ error: "Token introuvable" }, { status: 404 });
+    }
+
+    if (invite.usedAt) {
+      return NextResponse.json({ error: "Ce lien a déjà été utilisé" }, { status: 410 });
+    }
+
+    if (invite.expiresAt < new Date()) {
+      return NextResponse.json({ error: "Ce lien a expiré" }, { status: 410 });
+    }
+
+    if (!invite.eglise || !invite.roleId) {
+      return NextResponse.json({ error: "Configuration du token invalide" }, { status: 400 });
+    }
+
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+    const verifiedEmails = clerkUser.emailAddresses
+      .filter((ea) => ea.verification?.status === "verified")
+      .map((ea) => ea.emailAddress.toLowerCase());
+
+    if (!verifiedEmails.includes(invite.email.toLowerCase())) {
+      return NextResponse.json(
+        {
+          error: `Ce lien d'invitation est destiné à ${invite.email}. Connectez-vous avec cette adresse e-mail.`,
+        },
+        { status: 403 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.inviteToken.update({
+        where: { token },
+        data: { usedAt: new Date() },
+      }),
+
+      prisma.userRole.upsert({
+        where: {
+          user_role_unique: {
+            clerkUserId: userId,
+            roleId: invite.roleId,
+            egliseId: invite.eglise.id,
+          },
+        },
+        update: {},
+        create: {
+          clerkUserId: userId,
+          roleId: invite.roleId,
+          egliseId: invite.eglise.id,
+        },
+      }),
+
+      prisma.eglise.update({
+        where: { id: invite.eglise.id },
+        data: { statut: "actif" },
+      }),
+
+      prisma.membre.upsert({
+        where: {
+          membre_clerk_eglise_unique: {
+            clerkUserId: userId,
+            egliseId: invite.eglise.id,
+          },
+        },
+        update: {},
+        create: {
+          clerkUserId: userId,
+          nom: clerkUser.lastName ?? "",
+          prenom: clerkUser.firstName ?? "",
+          email: invite.email,
+          egliseId: invite.eglise.id,
+          role: "admin_eglise",
+          statut: "actif",
+        },
+      }),
+    ]);
+
+    const slug = invite.eglise.slug;
+    const redirectUrl = slug ? buildRedirectUrl(slug) : "/dashboard";
+
+    return NextResponse.json({
+      success: true,
+      slug,
+      egliseId: invite.eglise.id,
+      redirectUrl,
+    });
+  } catch {
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}

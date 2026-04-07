@@ -1,0 +1,200 @@
+"use client";
+
+import React, { useState } from "react";
+import type { Evenement } from "@prisma/client";
+
+interface Props {
+  initialEvenements: Evenement[];
+}
+
+type FormData = {
+  titre: string;
+  description: string;
+  dateDebut: string;
+  dateFin: string;
+  lieu: string;
+  publie: boolean;
+};
+
+const emptyForm: FormData = { titre: "", description: "", dateDebut: "", dateFin: "", lieu: "", publie: true };
+
+export default function GestionEvenementsClient({ initialEvenements }: Props) {
+  const [evenements, setEvenements] = useState<Evenement[]>(initialEvenements);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Evenement | null>(null);
+  const [form, setForm] = useState<FormData>(emptyForm);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function toDateInput(d: Date | string | null | undefined): string {
+    if (!d) return "";
+    return new Date(d).toISOString().slice(0, 16);
+  }
+
+  function openCreate() {
+    setEditing(null);
+    setForm(emptyForm);
+    setShowForm(true);
+    setError(null);
+  }
+
+  function openEdit(e: Evenement) {
+    setEditing(e);
+    setForm({
+      titre: e.titre,
+      description: e.description ?? "",
+      dateDebut: toDateInput(e.dateDebut),
+      dateFin: toDateInput(e.dateFin),
+      lieu: e.lieu ?? "",
+      publie: e.publie,
+    });
+    setShowForm(true);
+    setError(null);
+  }
+
+  async function handleSubmit(ev: React.FormEvent) {
+    ev.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const body = {
+        ...form,
+        dateFin: form.dateFin || null,
+        description: form.description || null,
+        lieu: form.lieu || null,
+      };
+      let res;
+      if (editing) {
+        res = await fetch(`/api/gestion/evenements/${editing.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        res = await fetch("/api/gestion/evenements", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Erreur");
+        return;
+      }
+      const updated = await res.json();
+      if (editing) {
+        setEvenements((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+      } else {
+        setEvenements((prev) => [...prev, updated].sort((a, b) => new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime()));
+      }
+      setShowForm(false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Supprimer cet événement ?")) return;
+    const res = await fetch(`/api/gestion/evenements/${id}`, { method: "DELETE" });
+    if (res.ok) setEvenements((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  const isPast = (d: Date | string) => new Date(d) < new Date();
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+        <button onClick={openCreate} style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+          + Nouvel événement
+        </button>
+      </div>
+
+      {showForm && (
+        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+          <h2 style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#0f172a" }}>
+            {editing ? "Modifier l'événement" : "Nouvel événement"}
+          </h2>
+          {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "8px 12px", borderRadius: 6, marginBottom: 12, fontSize: 13 }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <label style={s.label}>Titre *</label>
+              <input style={s.input} value={form.titre} onChange={(e) => setForm({ ...form, titre: e.target.value })} required />
+            </div>
+            <div>
+              <label style={s.label}>Description</label>
+              <textarea style={{ ...s.input, minHeight: 90, resize: "vertical" }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
+              <div style={{ flex: 1 }}>
+                <label style={s.label}>Date de début *</label>
+                <input type="datetime-local" style={s.input} value={form.dateDebut} onChange={(e) => setForm({ ...form, dateDebut: e.target.value })} required />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={s.label}>Date de fin</label>
+                <input type="datetime-local" style={s.input} value={form.dateFin} onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label style={s.label}>Lieu</label>
+              <input style={s.input} value={form.lieu} onChange={(e) => setForm({ ...form, lieu: e.target.value })} placeholder="Ex: Salle principale, Kinshasa" />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input type="checkbox" id="publie-evt" checked={form.publie} onChange={(e) => setForm({ ...form, publie: e.target.checked })} />
+              <label htmlFor="publie-evt" style={{ fontSize: 14, color: "#374151" }}>Publier immédiatement</label>
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button type="button" onClick={() => setShowForm(false)} style={s.cancelBtn}>Annuler</button>
+              <button type="submit" style={s.submitBtn} disabled={loading}>
+                {loading ? "Enregistrement…" : (editing ? "Mettre à jour" : "Créer")}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {evenements.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🗓️</div>
+          <p style={{ color: "#64748b" }}>Aucun événement pour l&apos;instant.</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {evenements.map((e) => {
+            const past = isPast(e.dateDebut);
+            return (
+              <div key={e.id} style={{ background: "white", borderRadius: 12, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, opacity: past ? 0.7 : 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{e.titre}</span>
+                    {past && <span style={{ ...s.badge, background: "#f1f5f9", color: "#94a3b8" }}>Passé</span>}
+                    {!e.publie && <span style={{ ...s.badge, background: "#f1f5f9", color: "#64748b" }}>Brouillon</span>}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                    📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    {e.lieu && <> — 📍 {e.lieu}</>}
+                  </div>
+                  {e.description && <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{e.description}</p>}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  <button onClick={() => openEdit(e)} style={s.editBtn}>Modifier</button>
+                  <button onClick={() => handleDelete(e.id)} style={s.deleteBtn}>Supprimer</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const s = {
+  label: { fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 } as React.CSSProperties,
+  input: { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" as const } as React.CSSProperties,
+  badge: { padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600 } as React.CSSProperties,
+  editBtn: { padding: "7px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
+  deleteBtn: { padding: "7px 14px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
+  cancelBtn: { padding: "9px 20px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
+  submitBtn: { padding: "9px 24px", borderRadius: 8, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
+};

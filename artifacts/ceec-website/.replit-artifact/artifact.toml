@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "CEEC Website"
+version = "1.0.0"
+id = "ceec-website-main"
+
+[[services]]
+localPort = 3000
+name = "CEEC Website"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/ceec-website run dev"
+
+[services.production]
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/ceec-website", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["pnpm", "--filter", "@workspace/ceec-website", "run", "start"]
+
+[services.production.run.env]
+PORT = "3000"
+NODE_ENV = "production"

@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, useAuth, useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const isAdmin = (user?.publicMetadata as { role?: string })?.role === "admin";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const links = [
     { href: "/", label: "Accueil" },
@@ -20,153 +27,233 @@ export default function Navbar() {
     { href: "/contact", label: "Contact" },
   ];
 
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
-    <nav style={{ background: "#1e3a8a", color: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", position: "sticky", top: 0, zIndex: 100 }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: "50%",
-            background: "#c59b2e", display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 700, fontSize: 16, color: "#1e3a8a", flexShrink: 0
-          }}>
-            C
+    <nav
+      className="sticky top-0 z-50 transition-all duration-300"
+      style={{
+        background: scrolled
+          ? "#1e3a8a"
+          : "linear-gradient(to bottom, rgba(30,58,138,0.97), rgba(30,58,138,0.94))",
+        boxShadow: scrolled ? "0 2px 16px rgba(0,0,0,0.2)" : "none",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div className="max-w-[1280px] mx-auto px-4 flex items-center justify-between h-16">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 no-underline group">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
+            style={{ background: "#c59b2e" }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-5 h-5"
+              style={{ color: "#1e3a8a" }}
+            >
+              <path
+                d="M12 2v8M12 14v8M4 12h16"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2, color: "white" }}>CEEC</div>
-            <div style={{ fontSize: 11, opacity: 0.8, lineHeight: 1.2 }}>Communauté Évangélique au Congo</div>
+            <div className="font-bold text-base leading-tight text-white tracking-wide">
+              CEEC
+            </div>
+            <div className="text-[11px] leading-tight text-white/70">
+              Communauté Évangélique au Congo
+            </div>
           </div>
         </Link>
 
         {/* Desktop nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "nowrap" }}
-          className="desktop-nav">
+        <div className="hidden md:flex items-center gap-1">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              className="px-3 py-1.5 rounded-md text-sm transition-all duration-150"
               style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                fontSize: 14,
-                fontWeight: pathname === link.href ? 600 : 400,
-                background: pathname === link.href ? "rgba(255,255,255,0.2)" : "transparent",
                 color: "white",
+                fontWeight: isActive(link.href) ? 600 : 400,
+                background: isActive(link.href)
+                  ? "rgba(255,255,255,0.18)"
+                  : "transparent",
+                borderBottom: isActive(link.href)
+                  ? "2px solid #c59b2e"
+                  : "2px solid transparent",
               }}
             >
               {link.label}
             </Link>
           ))}
 
-          {isSignedIn ? (
-            <>
-              <Link href="/dashboard" style={{
-                padding: "6px 12px", borderRadius: 6, fontSize: 14,
-                background: pathname.startsWith("/dashboard") ? "rgba(255,255,255,0.2)" : "transparent",
-                color: "white", fontWeight: 400
-              }}>
-                Mon espace
-              </Link>
-              {isAdmin && (
-                <Link href="/admin" style={{
-                  padding: "6px 12px", borderRadius: 6, fontSize: 14,
-                  background: pathname.startsWith("/admin") ? "rgba(197,155,46,0.3)" : "rgba(197,155,46,0.15)",
-                  color: "#fcd34d", fontWeight: 600
-                }}>
-                  Admin
-                </Link>
-              )}
-              <div style={{ marginLeft: 8 }}>
-                <UserButton />
-              </div>
-            </>
-          ) : (
-            <>
-              <Link href="/sign-in" style={{
-                padding: "6px 16px", borderRadius: 6, fontSize: 14,
-                background: "rgba(255,255,255,0.15)", color: "white", fontWeight: 500,
-                marginLeft: 4
-              }}>
-                Connexion
-              </Link>
-              <Link href="/sign-up" style={{
-                padding: "6px 16px", borderRadius: 6, fontSize: 14,
-                background: "#c59b2e", color: "#1e3a8a", fontWeight: 600,
-                marginLeft: 4
-              }}>
-                S&apos;inscrire
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{
-            display: "none",
-            background: "transparent", border: "none",
-            color: "white", cursor: "pointer", padding: 8
-          }}
-          className="mobile-menu-btn"
-          aria-label="Menu"
-        >
-          <div style={{ width: 24, height: 2, background: "white", marginBottom: 5 }} />
-          <div style={{ width: 24, height: 2, background: "white", marginBottom: 5 }} />
-          <div style={{ width: 24, height: 2, background: "white" }} />
-        </button>
-      </div>
-
-      {/* Mobile dropdown */}
-      {menuOpen && (
-        <div className="mobile-menu" style={{
-          background: "#1e2d6b", padding: "1rem",
-          borderTop: "1px solid rgba(255,255,255,0.1)"
-        }}>
-          {links.map((link) => (
+          {isSignedIn && (
             <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
+              href="/dashboard"
+              className="px-3 py-1.5 rounded-md text-sm transition-all duration-150"
               style={{
-                display: "block", padding: "12px 16px", borderRadius: 8,
-                color: "white", fontSize: 15, fontWeight: pathname === link.href ? 600 : 400,
-                background: pathname === link.href ? "rgba(255,255,255,0.15)" : "transparent",
-                marginBottom: 4
+                color: "white",
+                fontWeight: isActive("/dashboard") ? 600 : 400,
+                background: isActive("/dashboard")
+                  ? "rgba(255,255,255,0.18)"
+                  : "transparent",
+                borderBottom: isActive("/dashboard")
+                  ? "2px solid #c59b2e"
+                  : "2px solid transparent",
               }}
             >
-              {link.label}
+              Mon espace
             </Link>
-          ))}
+          )}
+
+          {isSignedIn && isAdmin && (
+            <Link
+              href="/admin"
+              className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
+              style={{
+                color: "#fcd34d",
+                background: "rgba(197,155,46,0.18)",
+              }}
+            >
+              Admin
+            </Link>
+          )}
+
+          {/* Séparateur */}
+          <div
+            className="w-px h-5 mx-2 self-center"
+            style={{ background: "rgba(255,255,255,0.2)" }}
+          />
+
           {isSignedIn ? (
-            <>
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "12px 16px", borderRadius: 8, color: "white", fontSize: 15, marginBottom: 4 }}>
-                Mon espace
-              </Link>
-              {isAdmin && (
-                <Link href="/admin" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "12px 16px", borderRadius: 8, color: "#fcd34d", fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
-                  Administration
-                </Link>
-              )}
-            </>
+            <div className="ml-1">
+              <UserButton />
+            </div>
           ) : (
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <Link href="/sign-in" onClick={() => setMenuOpen(false)} style={{ flex: 1, padding: "10px", borderRadius: 8, background: "rgba(255,255,255,0.15)", color: "white", fontWeight: 600, textAlign: "center", fontSize: 14 }}>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/sign-in"
+                className="px-4 py-1.5 rounded-md text-sm font-medium text-white transition-all duration-150"
+                style={{ background: "rgba(255,255,255,0.12)" }}
+              >
                 Connexion
               </Link>
-              <Link href="/sign-up" onClick={() => setMenuOpen(false)} style={{ flex: 1, padding: "10px", borderRadius: 8, background: "#c59b2e", color: "#1e3a8a", fontWeight: 700, textAlign: "center", fontSize: 14 }}>
+              <Link
+                href="/sign-up"
+                className="px-4 py-1.5 rounded-md text-sm font-semibold transition-all duration-150 hover:brightness-110"
+                style={{ background: "#c59b2e", color: "#1e3a8a" }}
+              >
                 S&apos;inscrire
               </Link>
             </div>
           )}
         </div>
-      )}
 
-      <style>{`
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
-        }
-      `}</style>
+        {/* Hamburger mobile */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden flex flex-col justify-center gap-1.5 p-2 rounded-md text-white"
+          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+        >
+          <span
+            className="block h-0.5 w-6 bg-white transition-all duration-300"
+            style={{
+              transform: menuOpen ? "rotate(45deg) translateY(8px)" : "none",
+            }}
+          />
+          <span
+            className="block h-0.5 w-6 bg-white transition-all duration-300"
+            style={{ opacity: menuOpen ? 0 : 1 }}
+          />
+          <span
+            className="block h-0.5 w-6 bg-white transition-all duration-300"
+            style={{
+              transform: menuOpen ? "rotate(-45deg) translateY(-8px)" : "none",
+            }}
+          />
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        className="md:hidden overflow-hidden transition-all duration-300"
+        style={{
+          maxHeight: menuOpen ? "500px" : "0",
+          background: "#1e2d6b",
+          borderTop: menuOpen ? "1px solid rgba(255,255,255,0.1)" : "none",
+        }}
+      >
+        <div className="px-4 py-3 flex flex-col gap-1">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 rounded-lg text-sm transition-colors duration-150"
+              style={{
+                color: "white",
+                fontWeight: isActive(link.href) ? 600 : 400,
+                background: isActive(link.href)
+                  ? "rgba(255,255,255,0.12)"
+                  : "transparent",
+                borderLeft: isActive(link.href)
+                  ? "3px solid #c59b2e"
+                  : "3px solid transparent",
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {isSignedIn && (
+            <Link
+              href="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 rounded-lg text-sm text-white"
+            >
+              Mon espace
+            </Link>
+          )}
+          {isSignedIn && isAdmin && (
+            <Link
+              href="/admin"
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 rounded-lg text-sm font-semibold"
+              style={{ color: "#fcd34d" }}
+            >
+              Administration
+            </Link>
+          )}
+
+          {!isSignedIn && (
+            <div className="flex gap-2 mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <Link
+                href="/sign-in"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center"
+                style={{ background: "rgba(255,255,255,0.12)" }}
+              >
+                Connexion
+              </Link>
+              <Link
+                href="/sign-up"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center"
+                style={{ background: "#c59b2e", color: "#1e3a8a" }}
+              >
+                S&apos;inscrire
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </nav>
   );
 }

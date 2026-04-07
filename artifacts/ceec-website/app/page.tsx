@@ -16,6 +16,91 @@ async function getData() {
   }
 }
 
+const stats = [
+  { valeur: "50+", label: "Églises membres" },
+  { valeur: "26", label: "Provinces couvertes" },
+  { valeur: "100k+", label: "Fidèles" },
+  { valeur: "1960", label: "Année de fondation" },
+];
+
+const missions = [
+  {
+    titre: "Évangélisation",
+    desc: "Partager la Bonne Nouvelle dans toutes les provinces du Congo, des grandes villes aux villages les plus reculés.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    titre: "Formation",
+    desc: "Former des leaders chrétiens solides, des pasteurs et diacres capables de servir avec intégrité et sagesse.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 7h6M9 11h4" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    titre: "Service communautaire",
+    desc: "Servir le peuple congolais à travers l'aide sociale, les soins médicaux et l'éducation dans nos communautés.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="9" cy="7" r="4" strokeLinecap="round" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+];
+
+const valeurs = [
+  {
+    titre: "La Foi",
+    desc: "Une foi solide fondée sur la Parole de Dieu, vécue au quotidien dans nos communautés à travers tout le Congo.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 2v8M12 14v8M4 12h16" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    titre: "La Fraternité",
+    desc: "Des liens fraternels forts entre toutes les églises membres de la CEEC, unies dans un même esprit.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    titre: "Le Service",
+    desc: "Un engagement constant au service de la communauté congolaise, dans le respect, l'amour et la dignité.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    titre: "La Prière",
+    desc: "La prière comme fondement de notre vie communautaire et de chacune de nos actions quotidiennes.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" stroke="currentColor" strokeWidth="1.8">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" strokeLinecap="round" />
+        <line x1="6" y1="1" x2="6" y2="4" strokeLinecap="round" />
+        <line x1="10" y1="1" x2="10" y2="4" strokeLinecap="round" />
+        <line x1="14" y1="1" x2="14" y2="4" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+];
+
 export default async function HomePage() {
   const { eglisesList, annoncesList, evenementsList } = await getData();
 
@@ -23,166 +108,316 @@ export default async function HomePage() {
     <>
       <Navbar />
       <main>
-        {/* Hero */}
-        <section style={{
-          background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 60%, #0f172a 100%)",
-          color: "white",
-          padding: "6rem 1rem",
-          textAlign: "center",
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-            background: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
-            opacity: 0.4
-          }} />
-          <div style={{ maxWidth: 800, margin: "0 auto", position: "relative" }}>
-            <div style={{
-              display: "inline-block",
-              background: "rgba(197,155,46,0.2)",
-              border: "1px solid rgba(197,155,46,0.4)",
-              borderRadius: 100,
-              padding: "6px 20px",
-              fontSize: 13,
-              color: "#fcd34d",
-              marginBottom: 24,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase" as const,
-            }}>
-              Communaute des Eglises Evangeliques au Congo
+
+        {/* ——— HERO ——— */}
+        <section
+          className="relative overflow-hidden text-white"
+          style={{
+            background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 55%, #0f172a 100%)",
+            paddingTop: "7rem",
+            paddingBottom: "5rem",
+          }}
+        >
+          {/* Décoration géométrique */}
+          <div className="absolute inset-0 pointer-events-none" aria-hidden>
+            <div
+              className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10"
+              style={{ background: "#c59b2e", filter: "blur(60px)" }}
+            />
+            <div
+              className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10"
+              style={{ background: "#c59b2e", filter: "blur(50px)" }}
+            />
+            <svg
+              className="absolute inset-0 w-full h-full opacity-[0.03]"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <pattern id="crosses" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <path d="M30 10v20M20 20h20" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#crosses)" />
+            </svg>
+          </div>
+
+          <div className="relative max-w-3xl mx-auto px-4 text-center">
+            {/* Badge */}
+            <div
+              className="inline-block text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full mb-6"
+              style={{
+                background: "rgba(197,155,46,0.15)",
+                border: "1px solid rgba(197,155,46,0.35)",
+                color: "#fcd34d",
+              }}
+            >
+              Communauté des Églises Évangéliques au Congo
             </div>
-            <h1 style={{
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              fontWeight: 800,
-              lineHeight: 1.2,
-              marginBottom: 20,
-              textShadow: "0 2px 10px rgba(0,0,0,0.3)"
-            }}>
+
+            <h1
+              className="font-extrabold leading-tight mb-5"
+              style={{
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                textShadow: "0 2px 16px rgba(0,0,0,0.3)",
+              }}
+            >
               Ensemble dans la Foi,
               <br />
               <span style={{ color: "#fcd34d" }}>unis pour le Congo</span>
             </h1>
-            <p style={{
-              fontSize: "clamp(1rem, 2vw, 1.25rem)",
-              opacity: 0.85,
-              marginBottom: 40,
-              maxWidth: 600,
-              margin: "0 auto 40px",
-              lineHeight: 1.7
-            }}>
-              La CEEC regroupe plusieurs eglises evangeliques a travers le Congo, toutes unies dans la foi, la priere et le service au peuple congolais.
+
+            <p
+              className="mx-auto mb-10 leading-relaxed text-white/80"
+              style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: 580 }}
+            >
+              La CEEC regroupe des dizaines d&apos;églises évangéliques à travers toutes les
+              provinces du Congo, toutes unies dans la foi, la prière et le service au peuple congolais.
             </p>
-            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" as const }}>
-              <Link href="/paroisses" style={{
-                padding: "14px 32px", borderRadius: 8,
-                background: "#c59b2e", color: "#1e3a8a",
-                fontWeight: 700, fontSize: 16, display: "inline-block"
-              }}>
-                Nos Eglises
+
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                href="/paroisses"
+                className="px-8 py-3.5 rounded-lg font-bold text-base transition-all duration-200 hover:brightness-110"
+                style={{ background: "#c59b2e", color: "#1e3a8a" }}
+              >
+                Nos Églises
               </Link>
-              <Link href="/sign-up" style={{
-                padding: "14px 32px", borderRadius: 8,
-                background: "rgba(255,255,255,0.15)", color: "white",
-                fontWeight: 600, fontSize: 16, display: "inline-block",
-                border: "1px solid rgba(255,255,255,0.3)"
-              }}>
+              <Link
+                href="/sign-up"
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white transition-all duration-200 hover:bg-white/25"
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  border: "1px solid rgba(255,255,255,0.28)",
+                }}
+              >
                 Rejoindre la CEEC
               </Link>
             </div>
           </div>
-        </section>
 
-        {/* Valeurs */}
-        <section style={{ padding: "5rem 1rem", background: "#f8fafc" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-              <h2 style={{ fontSize: "2rem", fontWeight: 700, color: "#1e3a8a", marginBottom: 12 }}>
-                Nos Valeurs Fondamentales
-              </h2>
-              <p style={{ color: "#64748b", maxWidth: 500, margin: "0 auto" }}>
-                Ces valeurs guident chacune de nos eglises et notre engagement envers Dieu et la nation.
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
-              {[
-                { titre: "La Foi", desc: "Une foi solide fondee sur la Parole de Dieu, vecue au quotidien dans nos communautes.", icon: "✝" },
-                { titre: "La Fraternite", desc: "Des liens fraternels forts entre toutes les eglises membres de la CEEC a travers le Congo.", icon: "🤝" },
-                { titre: "Le Service", desc: "Un engagement constant au service de la communaute congolaise, dans le respect et l'amour.", icon: "♡" },
-                { titre: "La Priere", desc: "La priere comme fondement de notre vie communautaire et de nos actions quotidiennes.", icon: "🙏" },
-              ].map((valeur) => (
-                <div key={valeur.titre} style={{
-                  background: "white",
-                  borderRadius: 12,
-                  padding: "2rem",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  border: "1px solid #e2e8f0",
-                  textAlign: "center"
-                }}>
-                  <div style={{
-                    fontSize: 36, marginBottom: 16,
-                    width: 64, height: 64,
-                    background: "rgba(30,58,138,0.08)",
-                    borderRadius: 16,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    margin: "0 auto 16px"
-                  }}>
-                    {valeur.icon}
-                  </div>
-                  <h3 style={{ fontWeight: 700, color: "#1e3a8a", marginBottom: 8, fontSize: 18 }}>{valeur.titre}</h3>
-                  <p style={{ color: "#64748b", lineHeight: 1.6, fontSize: 14 }}>{valeur.desc}</p>
+          {/* Bande stats */}
+          <div className="relative max-w-4xl mx-auto px-4 mt-14">
+            <div
+              className="grid grid-cols-2 md:grid-cols-4"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 16,
+              }}
+            >
+              {stats.map((stat, idx) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col items-center justify-center py-5 px-4 text-center"
+                  style={idx < stats.length - 1 ? { borderRight: "1px solid rgba(255,255,255,0.12)" } : {}}
+                >
+                  <span
+                    className="font-extrabold text-2xl md:text-3xl leading-none mb-1"
+                    style={{ color: "#fcd34d" }}
+                  >
+                    {stat.valeur}
+                  </span>
+                  <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
+                    {stat.label}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Eglises */}
-        <section style={{ padding: "5rem 1rem", background: "white" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem", flexWrap: "wrap" as const, gap: 12 }}>
+        {/* ——— NOS MISSIONS ——— */}
+        <section className="py-20 px-4" style={{ background: "white" }}>
+          <div className="max-w-[1280px] mx-auto">
+            <div className="text-center mb-12">
+              <p
+                className="text-xs font-bold uppercase tracking-widest mb-2"
+                style={{ color: "#c59b2e" }}
+              >
+                Nos piliers
+              </p>
+              <h2
+                className="text-3xl font-bold mb-3"
+                style={{ color: "#1e3a8a" }}
+              >
+                Nos Missions
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
+                Trois engagements fondamentaux qui guident l&apos;action de la CEEC
+                au service de la nation congolaise.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {missions.map((mission, i) => (
+                <div
+                  key={mission.titre}
+                  className="group flex flex-col p-7 rounded-2xl transition-all duration-200 hover:shadow-lg"
+                  style={{
+                    background: i === 1 ? "#1e3a8a" : "#f8fafc",
+                    border: `1px solid ${i === 1 ? "transparent" : "#e2e8f0"}`,
+                  }}
+                >
+                  <div
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
+                    style={{
+                      background: i === 1 ? "rgba(197,155,46,0.2)" : "rgba(30,58,138,0.08)",
+                      color: i === 1 ? "#fcd34d" : "#1e3a8a",
+                    }}
+                  >
+                    {mission.icon}
+                  </div>
+                  <h3
+                    className="text-lg font-bold mb-3"
+                    style={{ color: i === 1 ? "white" : "#0f172a" }}
+                  >
+                    {mission.titre}
+                  </h3>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: i === 1 ? "rgba(255,255,255,0.7)" : "#64748b" }}
+                  >
+                    {mission.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ——— VALEURS ——— */}
+        <section className="py-20 px-4" style={{ background: "#f8fafc" }}>
+          <div className="max-w-[1280px] mx-auto">
+            <div className="text-center mb-12">
+              <p
+                className="text-xs font-bold uppercase tracking-widest mb-2"
+                style={{ color: "#c59b2e" }}
+              >
+                Ce qui nous unit
+              </p>
+              <h2 className="text-3xl font-bold mb-3" style={{ color: "#1e3a8a" }}>
+                Nos Valeurs Fondamentales
+              </h2>
+              <p className="text-slate-500 max-w-md mx-auto leading-relaxed">
+                Ces valeurs guident chacune de nos églises et notre engagement
+                envers Dieu et la nation.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {valeurs.map((valeur) => (
+                <div
+                  key={valeur.titre}
+                  className="bg-white rounded-2xl p-7 text-center border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ border: "1px solid #e2e8f0" }}
+                >
+                  <div
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
+                    style={{ background: "rgba(30,58,138,0.07)", color: "#1e3a8a" }}
+                  >
+                    {valeur.icon}
+                  </div>
+                  <h3
+                    className="text-base font-bold mb-2"
+                    style={{ color: "#1e3a8a" }}
+                  >
+                    {valeur.titre}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    {valeur.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ——— ÉGLISES ——— */}
+        <section className="py-20 px-4 bg-white">
+          <div className="max-w-[1280px] mx-auto">
+            <div className="flex justify-between items-end mb-10 flex-wrap gap-4">
               <div>
-                <h2 style={{ fontSize: "2rem", fontWeight: 700, color: "#1e3a8a" }}>Nos Eglises</h2>
-                <p style={{ color: "#64748b", marginTop: 4 }}>Decouvrez les eglises membres de la CEEC</p>
+                <p
+                  className="text-xs font-bold uppercase tracking-widest mb-1"
+                  style={{ color: "#c59b2e" }}
+                >
+                  Notre réseau
+                </p>
+                <h2 className="text-3xl font-bold" style={{ color: "#1e3a8a" }}>
+                  Nos Églises
+                </h2>
+                <p className="text-slate-500 mt-1">
+                  Découvrez les églises membres de la CEEC
+                </p>
               </div>
-              <Link href="/paroisses" style={{
-                padding: "10px 24px", borderRadius: 8,
-                border: "2px solid #1e3a8a", color: "#1e3a8a",
-                fontWeight: 600, fontSize: 14
-              }}>
-                Voir toutes les eglises
+              <Link
+                href="/paroisses"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-[#1e3a8a] hover:text-white"
+                style={{
+                  border: "2px solid #1e3a8a",
+                  color: "#1e3a8a",
+                }}
+              >
+                Voir toutes les églises →
               </Link>
             </div>
+
             {eglisesList.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "3rem", background: "#f8fafc", borderRadius: 12, border: "1px dashed #e2e8f0" }}>
-                <p style={{ color: "#64748b" }}>Les eglises seront affichees ici une fois ajoutees par les administrateurs.</p>
+              <div
+                className="text-center py-16 rounded-2xl"
+                style={{ background: "#f8fafc", border: "2px dashed #e2e8f0" }}
+              >
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "rgba(30,58,138,0.07)", color: "#1e3a8a" }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" />
+                    <polyline points="9 22 9 12 15 12 15 22" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <p className="text-slate-500 font-medium">
+                  Les églises seront affichées ici une fois ajoutées par les administrateurs.
+                </p>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {eglisesList.map((eglise) => (
-                  <Link key={eglise.id} href={`/paroisses/${eglise.id}`} style={{ display: "block" }}>
-                    <div style={{
-                      borderRadius: 12, overflow: "hidden",
-                      border: "1px solid #e2e8f0",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      cursor: "pointer",
-                      background: "white"
-                    }}>
-                      <div style={{
-                        height: 160, background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        color: "white", fontSize: 48, fontWeight: 700
-                      }}>
-                        {eglise.nom.charAt(0)}
-                      </div>
-                      <div style={{ padding: "1.25rem" }}>
-                        <h3 style={{ fontWeight: 700, color: "#0f172a", marginBottom: 4, fontSize: 16 }}>{eglise.nom}</h3>
-                        <p style={{ color: "#c59b2e", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{eglise.ville}</p>
-                        {eglise.pasteur && (
-                          <p style={{ color: "#64748b", fontSize: 13 }}>Pasteur : {eglise.pasteur}</p>
-                        )}
-                      </div>
+                  <Link
+                    key={eglise.id}
+                    href={`/paroisses/${eglise.id}`}
+                    className="group block rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
+                    style={{ border: "1px solid #e2e8f0" }}
+                  >
+                    {/* Barre couleur CEEC */}
+                    <div
+                      className="h-2"
+                      style={{ background: "linear-gradient(90deg, #1e3a8a, #c59b2e)" }}
+                    />
+                    {/* Initiale */}
+                    <div
+                      className="h-32 flex items-center justify-center text-6xl font-black text-white"
+                      style={{
+                        background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
+                      }}
+                    >
+                      {eglise.nom.charAt(0)}
+                    </div>
+                    <div className="p-5 bg-white">
+                      <h3 className="font-bold text-base text-slate-900 mb-2 group-hover:text-[#1e3a8a] transition-colors">
+                        {eglise.nom}
+                      </h3>
+                      <span
+                        className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2"
+                        style={{ background: "rgba(197,155,46,0.12)", color: "#c59b2e" }}
+                      >
+                        {eglise.ville}
+                      </span>
+                      {eglise.pasteur && (
+                        <p className="text-slate-500 text-xs mt-1">
+                          Pasteur : {eglise.pasteur}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -191,56 +426,138 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Annonces & Evenements */}
-        <section style={{ padding: "5rem 1rem", background: "#f8fafc" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "3rem" }}>
+        {/* ——— ANNONCES & ÉVÉNEMENTS ——— */}
+        <section className="py-20 px-4" style={{ background: "#f8fafc" }}>
+          <div className="max-w-[1280px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+              {/* Annonces */}
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                  <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e3a8a" }}>Annonces</h2>
-                  <Link href="/annonces" style={{ color: "#c59b2e", fontWeight: 600, fontSize: 14 }}>Tout voir</Link>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <p
+                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "#c59b2e" }}
+                    >
+                      Informations
+                    </p>
+                    <h2 className="text-xl font-bold" style={{ color: "#1e3a8a" }}>
+                      Annonces
+                    </h2>
+                  </div>
+                  <Link
+                    href="/annonces"
+                    className="text-sm font-semibold transition-colors"
+                    style={{ color: "#c59b2e" }}
+                  >
+                    Tout voir →
+                  </Link>
                 </div>
+
                 {annoncesList.length === 0 ? (
-                  <p style={{ color: "#64748b", background: "white", padding: "1.5rem", borderRadius: 10, border: "1px dashed #e2e8f0" }}>
+                  <div
+                    className="py-8 px-5 rounded-xl text-sm text-slate-500"
+                    style={{ background: "white", border: "1px dashed #e2e8f0" }}
+                  >
                     Aucune annonce pour le moment.
-                  </p>
+                  </div>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="flex flex-col gap-3">
                     {annoncesList.map((annonce) => (
-                      <div key={annonce.id} style={{ background: "white", borderRadius: 10, padding: "1.25rem", border: "1px solid #e2e8f0", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                        <div style={{ display: "inline-block", fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: annonce.priorite === "urgente" ? "#fee2e2" : "#e0f2fe", color: annonce.priorite === "urgente" ? "#dc2626" : "#0369a1", marginBottom: 8 }}>
-                          {annonce.priorite === "urgente" ? "Urgent" : "Info"}
+                      <div
+                        key={annonce.id}
+                        className="bg-white rounded-xl p-5 border transition-shadow hover:shadow-sm"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className="mt-0.5 flex-shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide"
+                            style={
+                              annonce.priorite === "urgente"
+                                ? { background: "#fee2e2", color: "#dc2626" }
+                                : { background: "#e0f2fe", color: "#0369a1" }
+                            }
+                          >
+                            {annonce.priorite === "urgente" ? "Urgent" : "Info"}
+                          </span>
+                          <div>
+                            <h4 className="font-semibold text-slate-900 text-sm mb-1">
+                              {annonce.titre}
+                            </h4>
+                            <p className="text-slate-500 text-xs leading-relaxed">
+                              {annonce.contenu.substring(0, 110)}
+                              {annonce.contenu.length > 110 ? "…" : ""}
+                            </p>
+                          </div>
                         </div>
-                        <h4 style={{ fontWeight: 600, color: "#0f172a", marginBottom: 6, fontSize: 15 }}>{annonce.titre}</h4>
-                        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.5 }}>
-                          {annonce.contenu.substring(0, 100)}...
-                        </p>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
+              {/* Événements */}
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                  <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e3a8a" }}>Evenements</h2>
-                  <Link href="/evenements" style={{ color: "#c59b2e", fontWeight: 600, fontSize: 14 }}>Tout voir</Link>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <p
+                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "#c59b2e" }}
+                    >
+                      Agenda
+                    </p>
+                    <h2 className="text-xl font-bold" style={{ color: "#1e3a8a" }}>
+                      Événements
+                    </h2>
+                  </div>
+                  <Link
+                    href="/evenements"
+                    className="text-sm font-semibold transition-colors"
+                    style={{ color: "#c59b2e" }}
+                  >
+                    Tout voir →
+                  </Link>
                 </div>
+
                 {evenementsList.length === 0 ? (
-                  <p style={{ color: "#64748b", background: "white", padding: "1.5rem", borderRadius: 10, border: "1px dashed #e2e8f0" }}>
-                    Aucun evenement planifie pour le moment.
-                  </p>
+                  <div
+                    className="py-8 px-5 rounded-xl text-sm text-slate-500"
+                    style={{ background: "white", border: "1px dashed #e2e8f0" }}
+                  >
+                    Aucun événement planifié pour le moment.
+                  </div>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="flex flex-col gap-3">
                     {evenementsList.map((evt) => (
-                      <div key={evt.id} style={{ background: "white", borderRadius: 10, padding: "1.25rem", border: "1px solid #e2e8f0", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", display: "flex", gap: 16 }}>
-                        <div style={{ flexShrink: 0, width: 56, height: 56, background: "#1e3a8a", borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white" }}>
-                          <div style={{ fontSize: 18, fontWeight: 700 }}>{new Date(evt.dateDebut).getDate()}</div>
-                          <div style={{ fontSize: 10, opacity: 0.8 }}>{new Date(evt.dateDebut).toLocaleString("fr-FR", { month: "short" }).toUpperCase()}</div>
+                      <div
+                        key={evt.id}
+                        className="bg-white rounded-xl p-5 border flex gap-4 items-start transition-shadow hover:shadow-sm"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div
+                          className="flex-shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center text-white"
+                          style={{ background: "#1e3a8a" }}
+                        >
+                          <span className="text-lg font-extrabold leading-none">
+                            {new Date(evt.dateDebut).getDate()}
+                          </span>
+                          <span className="text-[9px] uppercase opacity-70 font-semibold tracking-wide">
+                            {new Date(evt.dateDebut).toLocaleString("fr-FR", { month: "short" })}
+                          </span>
                         </div>
-                        <div>
-                          <h4 style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4, fontSize: 15 }}>{evt.titre}</h4>
-                          {evt.lieu && <p style={{ color: "#64748b", fontSize: 13 }}>{evt.lieu}</p>}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-slate-900 text-sm mb-1 leading-snug">
+                            {evt.titre}
+                          </h4>
+                          {evt.lieu && (
+                            <p className="text-slate-500 text-xs flex items-center gap-1">
+                              <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                                <circle cx="12" cy="9" r="2.5"/>
+                              </svg>
+                              {evt.lieu}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -251,25 +568,65 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section style={{ padding: "5rem 1rem", background: "linear-gradient(135deg, #c59b2e 0%, #d4af5a 100%)", textAlign: "center" }}>
-          <div style={{ maxWidth: 600, margin: "0 auto" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "#1e3a8a", marginBottom: 16 }}>
-              Faites partie de notre communaute
+        {/* ——— CTA ——— */}
+        <section className="relative overflow-hidden py-20 px-4">
+          {/* Fond */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(135deg, #c59b2e 0%, #d4af5a 60%, #b8882a 100%)",
+            }}
+            aria-hidden
+          />
+          {/* Décoration */}
+          <div className="absolute inset-0 pointer-events-none opacity-10" aria-hidden>
+            <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="dots-cta" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <circle cx="20" cy="20" r="1.5" fill="#1e3a8a" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#dots-cta)" />
+            </svg>
+          </div>
+
+          <div className="relative max-w-2xl mx-auto text-center">
+            <h2
+              className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight"
+              style={{ color: "#1e3a8a" }}
+            >
+              Faites partie de notre communauté
             </h2>
-            <p style={{ color: "#1e3a8a", opacity: 0.8, marginBottom: 32, fontSize: 16, lineHeight: 1.7 }}>
-              Rejoignez la CEEC, accedez aux ressources de votre eglise, restez informe des evenements et annonces de toute la communaute.
+            <p
+              className="text-base leading-relaxed mb-10"
+              style={{ color: "rgba(30,58,138,0.78)" }}
+            >
+              Rejoignez la CEEC, accédez aux ressources de votre église, restez informé
+              des événements et annonces de toute la communauté évangélique du Congo.
             </p>
-            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" as const }}>
-              <Link href="/sign-up" style={{ padding: "14px 32px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 16, display: "inline-block" }}>
-                Creer mon compte
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                href="/sign-up"
+                className="px-8 py-3.5 rounded-lg font-bold text-base text-white transition-all duration-200 hover:brightness-110"
+                style={{ background: "#1e3a8a" }}
+              >
+                Créer mon compte
               </Link>
-              <Link href="/contact" style={{ padding: "14px 32px", borderRadius: 8, background: "rgba(30,58,138,0.1)", color: "#1e3a8a", fontWeight: 600, fontSize: 16, display: "inline-block", border: "2px solid rgba(30,58,138,0.3)" }}>
+              <Link
+                href="/contact"
+                className="px-8 py-3.5 rounded-lg font-semibold text-base transition-all duration-200 hover:bg-[rgba(30,58,138,0.15)]"
+                style={{
+                  background: "rgba(30,58,138,0.08)",
+                  color: "#1e3a8a",
+                  border: "2px solid rgba(30,58,138,0.25)",
+                }}
+              >
                 Nous contacter
               </Link>
             </div>
           </div>
         </section>
+
       </main>
       <Footer />
     </>

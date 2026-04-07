@@ -30,6 +30,8 @@ export default function Navbar() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const isHome = pathname === "/";
+
   const navLinkClass = (href: string) =>
     `px-3 py-1.5 rounded-md text-sm text-white transition-all duration-150 ${
       isActive(href)
@@ -49,7 +51,9 @@ export default function Navbar() {
       className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-md ${
         scrolled
           ? "bg-[#1e3a8a] shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
-          : "bg-transparent"
+          : isHome
+          ? "bg-transparent"
+          : "bg-[#1e3a8a]/95 shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
       }`}
     >
       <div className="max-w-[1280px] mx-auto px-4 flex items-center justify-between h-16">

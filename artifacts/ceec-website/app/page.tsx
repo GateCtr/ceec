@@ -126,9 +126,12 @@ export default async function HomePage() {
           </div>
 
           <div className="relative max-w-3xl mx-auto px-4 text-center">
-            {/* Badge */}
-            <div className="inline-block text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full mb-6 bg-[rgba(197,155,46,0.15)] border border-[rgba(197,155,46,0.35)] text-[#fcd34d]">
-              Communauté des Églises Évangéliques au Congo
+            {/* Badge animé */}
+            <div className="relative inline-block mb-6">
+              <div className="absolute inset-0 rounded-full bg-[rgba(197,155,46,0.3)] animate-ping opacity-60" />
+              <div className="relative text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full bg-[rgba(197,155,46,0.15)] border border-[rgba(197,155,46,0.45)] text-[#fcd34d]">
+                Communauté des Églises Évangéliques au Congo
+              </div>
             </div>
 
             <h1

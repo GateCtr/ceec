@@ -17,10 +17,14 @@
 | Paramètre Vercel | Valeur |
 |---|---|
 | **Framework Preset** | Next.js |
-| **Root Directory** | `artifacts/ceec-website` |
+| **Root Directory** | `artifacts/ceec-website` _(à définir dans l'interface Vercel)_ |
 | **Install Command** | `cd ../.. && pnpm install --frozen-lockfile` |
 | **Build Command** | `pnpm run prisma:generate && next build` |
 | **Output Directory** | `.next` _(par défaut)_ |
+
+> **Note** : Le **Root Directory** se configure uniquement dans l'interface Vercel (pas dans `vercel.json`).
+> Les commandes d'installation et de build sont également prédéfinies dans `artifacts/ceec-website/vercel.json`
+> et seront détectées automatiquement par Vercel une fois le Root Directory configuré.
 
 ---
 

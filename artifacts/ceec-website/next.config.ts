@@ -1,12 +1,16 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const nextConfig: NextConfig = {
   basePath: "",
-  allowedDevOrigins: [
-    process.env.REPLIT_DEV_DOMAIN || "",
-    "*.replit.dev",
-    "*.kirk.replit.dev",
-  ].filter(Boolean),
+  ...(isDev && {
+    allowedDevOrigins: [
+      process.env.REPLIT_DEV_DOMAIN || "",
+      "*.replit.dev",
+      "*.kirk.replit.dev",
+    ].filter(Boolean),
+  }),
   images: {
     remotePatterns: [
       {

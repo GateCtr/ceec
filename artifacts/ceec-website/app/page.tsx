@@ -132,8 +132,7 @@ export default async function HomePage() {
             </div>
 
             <h1
-              className="font-extrabold leading-tight mb-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
-              style={{ textShadow: "0 2px 16px rgba(0,0,0,0.3)" }}
+              className="font-extrabold leading-tight mb-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_2px_16px_rgba(0,0,0,0.3)]"
             >
               Ensemble dans la Foi,
               <br />

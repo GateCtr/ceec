@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 function FacebookIcon() {
   return (
@@ -26,13 +27,6 @@ function WhatsappIcon() {
   );
 }
 
-function CrossIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-primary">
-      <path d="M12 2v8M12 14v8M4 12h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function PinIcon() {
   return (
@@ -69,9 +63,13 @@ export default function Footer() {
           {/* Identité — 2 colonnes sur lg */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-4 no-underline">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                <CrossIcon />
-              </div>
+              <Image
+                src="/logo-ceec.png"
+                alt="Logo CEEC"
+                width={44}
+                height={44}
+                className="rounded-full flex-shrink-0"
+              />
               <div>
                 <div className="font-bold text-base text-white leading-tight">CEEC</div>
                 <div className="text-[11px] text-slate-400 leading-tight">

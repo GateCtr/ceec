@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
@@ -60,19 +61,15 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 no-underline group">
-          <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="w-5 h-5 text-primary"
-            >
-              <path
-                d="M12 2v8M12 14v8M4 12h16"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
+          <div className="flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+            <Image
+              src="/logo-ceec.png"
+              alt="Logo CEEC"
+              width={40}
+              height={40}
+              className="rounded-full"
+              priority
+            />
           </div>
           <div>
             <div className="font-bold text-base leading-tight text-white tracking-wide">

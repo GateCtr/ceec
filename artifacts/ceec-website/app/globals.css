@@ -1,22 +1,90 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary:           #1e3a8a;
-  --color-primary-dark:      #1e2d6b;
-  --color-secondary:         #c59b2e;
-  --color-secondary-light:   #d4af5a;
-  --color-gold:              #fcd34d;
-  --color-background:        #ffffff;
-  --color-foreground:        #0f172a;
-  --color-muted:             #f8fafc;
-  --color-muted-foreground:  #64748b;
-  --color-card:              #ffffff;
-  --color-card-foreground:   #0f172a;
-  --color-border:            #e2e8f0;
-  --color-surface:           #1e293b;
-  --color-accent:            #dc2626;
+  /* ══════════════════════════════════════════════════════════════
+     TYPOGRAPHIE CEEC
+     · Display : Playfair Display — serif élégant, autorité,
+       parfait pour les institutions religieuses et le français
+     · Corps    : Lato — humaniste, chaud, lisible à toutes tailles
+     Les variables sont injectées par next/font dans layout.tsx
+  ══════════════════════════════════════════════════════════════ */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans:    'Lato', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
+
+  /* ══════════════════════════════════════════════════════════════
+     PALETTE PRIMAIRE — Bleu Royal
+     Extrait des cercles d'encadrement et du fond du globe lumineux
+     #1e3a8a = H 227° S 64% L 33%
+  ══════════════════════════════════════════════════════════════ */
+  --color-primary-50:  #f0f4ff;
+  --color-primary-100: #e0e8ff;
+  --color-primary-200: #c1d0fe;
+  --color-primary-300: #93acfd;
+  --color-primary-400: #5c7df7;
+  --color-primary-500: #3458e8;
+  --color-primary-600: #2443c4;
+  --color-primary-700: #1e3a8a;   /* ← couleur principale CEEC */
+  --color-primary-800: #172d6b;
+  --color-primary-900: #0d1a40;
+
+  --color-primary:       #1e3a8a;
+  --color-primary-dark:  #1e2d6b;
+  --color-primary-light: #2979ff;
+
+  /* ══════════════════════════════════════════════════════════════
+     PALETTE SECONDAIRE — Or / Ambre
+     Extrait des continents africains illuminés dans le globe
+     #c59b2e = H 43° S 62% L 48%
+  ══════════════════════════════════════════════════════════════ */
+  --color-secondary-50:  #fdfbe8;
+  --color-secondary-100: #fef5c3;
+  --color-secondary-200: #fde98a;
+  --color-secondary-300: #fbce4d;
+  --color-secondary-400: #f9b225;   /* ← or vif du logo */
+  --color-secondary-500: #d99a18;
+  --color-secondary-600: #c59b2e;   /* ← or antique CEEC */
+  --color-secondary-700: #9a7620;
+  --color-secondary-800: #6e5315;
+  --color-secondary-900: #433209;
+
+  --color-secondary:       #c59b2e;
+  --color-secondary-light: #d4af5a;
+  --color-gold:            #fcd34d;   /* reflets chauds sur le globe */
+
+  /* ══════════════════════════════════════════════════════════════
+     PALETTE ACCENT — Rouge CEEC
+     Extrait du texte "C.E.EC" et des points décoratifs du logo
+     #c62828 = H 0° S 67% L 47%
+  ══════════════════════════════════════════════════════════════ */
+  --color-accent-50:  #fff1f1;
+  --color-accent-100: #ffe4e4;
+  --color-accent-200: #ffcaca;
+  --color-accent-300: #ff9d9d;
+  --color-accent-400: #ff6060;
+  --color-accent-500: #f03030;
+  --color-accent-600: #c62828;   /* ← rouge CEEC officiel */
+  --color-accent-700: #a61c1c;
+  --color-accent-800: #7c1212;
+  --color-accent-900: #4a0c0c;
+
+  --color-accent: #c62828;
+
+  /* ══════════════════════════════════════════════════════════════
+     SURFACES & NEUTRES
+     Muted légèrement bleuté — atmosphère du globe lumineux
+  ══════════════════════════════════════════════════════════════ */
+  --color-background:       #ffffff;
+  --color-foreground:       #0f172a;
+  --color-muted:            #f0f4ff;   /* blanc bleuté, atmosphère du logo */
+  --color-muted-foreground: #64748b;
+  --color-card:             #ffffff;
+  --color-card-foreground:  #0f172a;
+  --color-border:           #e2e8f0;
+  --color-surface:          #1e293b;
 }
 
+/* ══ Rétrocompatibilité — variables CSS classiques ══ */
 :root {
   --background:        var(--color-background);
   --foreground:        var(--color-foreground);
@@ -32,27 +100,54 @@
   --card-foreground:   var(--color-card-foreground);
 }
 
-* {
+/* ══ Reset ══ */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* ══ Base — Corps de texte ══ */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  line-height: 1.6;
+  font-family: var(--font-sans, 'Lato', system-ui, sans-serif);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ══ Titres — Playfair Display ══ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+
+h1 { font-size: clamp(2rem,   5vw, 3.5rem); }
+h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+h3 { font-size: clamp(1.25rem,3vw, 1.75rem); }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+/* ══ Liens ══ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ══ Utilitaire — Conteneur centré ══ */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* ══ Classe utilitaire — Fonte display ══ */
+.font-display {
+  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
 }

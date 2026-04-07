@@ -18,7 +18,7 @@ async function getData() {
 
 const stats = [
   { valeur: "50+", label: "Églises membres" },
-  { valeur: "26", label: "Provinces couvertes" },
+  { valeur: "26", label: "Villes couvertes" },
   { valeur: "100k+", label: "Fidèles" },
   { valeur: "1960", label: "Année de fondation" },
 ];

@@ -110,11 +110,11 @@ export default async function HomePage() {
       <main>
 
         {/* ——— HERO ——— */}
-        <section className="relative overflow-hidden text-white pt-28 pb-20 bg-[linear-gradient(135deg,#1e3a8a_0%,#1e2d6b_55%,#0f172a_100%)]">
+        <section className="relative overflow-hidden text-white pt-28 pb-20 bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-primary-dark)_55%,var(--color-foreground)_100%)]">
           {/* Blobs décoratifs */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
-            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10 bg-[#c59b2e] blur-[60px]" />
-            <div className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10 bg-[#c59b2e] blur-[50px]" />
+            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10 bg-secondary blur-[60px]" />
+            <div className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10 bg-secondary blur-[50px]" />
             <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="crosses" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -128,8 +128,8 @@ export default async function HomePage() {
           <div className="relative max-w-3xl mx-auto px-4 text-center">
             {/* Badge animé */}
             <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 rounded-full bg-[rgba(197,155,46,0.3)] animate-ping opacity-60" />
-              <div className="relative text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full bg-[rgba(197,155,46,0.15)] border border-[rgba(197,155,46,0.45)] text-[#fcd34d]">
+              <div className="absolute inset-0 rounded-full bg-secondary/30 animate-ping opacity-60" />
+              <div className="relative text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full bg-secondary/15 border border-secondary/45 text-gold">
                 Communauté des Églises Évangéliques au Congo
               </div>
             </div>
@@ -139,7 +139,7 @@ export default async function HomePage() {
             >
               Ensemble dans la Foi,
               <br />
-              <span className="text-[#fcd34d]">unis pour le Congo</span>
+              <span className="text-gold">unis pour le Congo</span>
             </h1>
 
             <p className="mx-auto mb-10 leading-relaxed text-white/80 max-w-xl text-base md:text-lg">
@@ -150,7 +150,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/paroisses"
-                className="px-8 py-3.5 rounded-lg font-bold text-base text-[#1e3a8a] bg-[#c59b2e] transition-all duration-200 hover:brightness-110"
+                className="px-8 py-3.5 rounded-lg font-bold text-base text-primary bg-secondary transition-all duration-200 hover:brightness-110"
               >
                 Nos Églises
               </Link>
@@ -173,7 +173,7 @@ export default async function HomePage() {
                     idx < stats.length - 1 ? "border-r border-white/[0.12]" : ""
                   }`}
                 >
-                  <span className="font-extrabold text-2xl md:text-3xl leading-none mb-1 text-[#fcd34d]">
+                  <span className="font-extrabold text-2xl md:text-3xl leading-none mb-1 text-gold">
                     {stat.valeur}
                   </span>
                   <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -189,10 +189,10 @@ export default async function HomePage() {
         <section className="py-20 px-4 bg-white">
           <div className="max-w-[1280px] mx-auto">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-[#c59b2e]">
+              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-secondary">
                 Nos piliers
               </p>
-              <h2 className="text-3xl font-bold mb-3 text-[#1e3a8a]">
+              <h2 className="text-3xl font-bold mb-3 text-primary">
                 Nos Missions
               </h2>
               <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
@@ -207,22 +207,22 @@ export default async function HomePage() {
                   key={mission.titre}
                   className={`group flex flex-col p-7 rounded-2xl transition-all duration-200 hover:shadow-lg border ${
                     i === 1
-                      ? "bg-[#1e3a8a] border-transparent"
-                      : "bg-[#f8fafc] border-[#e2e8f0]"
+                      ? "bg-primary border-transparent"
+                      : "bg-muted border-border"
                   }`}
                 >
                   <div
                     className={`w-14 h-14 rounded-xl flex items-center justify-center mb-5 ${
                       i === 1
-                        ? "bg-[rgba(197,155,46,0.2)] text-[#fcd34d]"
-                        : "bg-[rgba(30,58,138,0.08)] text-[#1e3a8a]"
+                        ? "bg-secondary/20 text-gold"
+                        : "bg-primary/8 text-primary"
                     }`}
                   >
                     {mission.icon}
                   </div>
                   <h3
                     className={`text-lg font-bold mb-3 ${
-                      i === 1 ? "text-white" : "text-[#0f172a]"
+                      i === 1 ? "text-white" : "text-foreground"
                     }`}
                   >
                     {mission.titre}
@@ -241,13 +241,13 @@ export default async function HomePage() {
         </section>
 
         {/* ——— VALEURS ——— */}
-        <section className="py-20 px-4 bg-[#f8fafc]">
+        <section className="py-20 px-4 bg-muted">
           <div className="max-w-[1280px] mx-auto">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-[#c59b2e]">
+              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-secondary">
                 Ce qui nous unit
               </p>
-              <h2 className="text-3xl font-bold mb-3 text-[#1e3a8a]">
+              <h2 className="text-3xl font-bold mb-3 text-primary">
                 Nos Valeurs Fondamentales
               </h2>
               <p className="text-slate-500 max-w-md mx-auto leading-relaxed">
@@ -260,12 +260,12 @@ export default async function HomePage() {
               {valeurs.map((valeur) => (
                 <div
                   key={valeur.titre}
-                  className="bg-white rounded-2xl p-7 text-center border border-[#e2e8f0] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  className="bg-white rounded-2xl p-7 text-center border border-border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-[rgba(30,58,138,0.07)] text-[#1e3a8a] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-primary/7 text-primary flex items-center justify-center mx-auto mb-4">
                     {valeur.icon}
                   </div>
-                  <h3 className="text-base font-bold mb-2 text-[#1e3a8a]">
+                  <h3 className="text-base font-bold mb-2 text-primary">
                     {valeur.titre}
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
@@ -282,25 +282,25 @@ export default async function HomePage() {
           <div className="max-w-[1280px] mx-auto">
             <div className="flex justify-between items-end mb-10 flex-wrap gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-1 text-[#c59b2e]">
+                <p className="text-xs font-bold uppercase tracking-widest mb-1 text-secondary">
                   Notre réseau
                 </p>
-                <h2 className="text-3xl font-bold text-[#1e3a8a]">Nos Églises</h2>
+                <h2 className="text-3xl font-bold text-primary">Nos Églises</h2>
                 <p className="text-slate-500 mt-1">
                   Découvrez les églises membres de la CEEC
                 </p>
               </div>
               <Link
                 href="/paroisses"
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold border-2 border-[#1e3a8a] text-[#1e3a8a] transition-all duration-200 hover:bg-[#1e3a8a] hover:text-white"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold border-2 border-primary text-primary transition-all duration-200 hover:bg-primary hover:text-white"
               >
                 Voir toutes les églises →
               </Link>
             </div>
 
             {eglisesList.length === 0 ? (
-              <div className="text-center py-16 rounded-2xl bg-[#f8fafc] border-2 border-dashed border-[#e2e8f0]">
-                <div className="w-16 h-16 rounded-full bg-[rgba(30,58,138,0.07)] text-[#1e3a8a] flex items-center justify-center mx-auto mb-4">
+              <div className="text-center py-16 rounded-2xl bg-muted border-2 border-dashed border-border">
+                <div className="w-16 h-16 rounded-full bg-primary/7 text-primary flex items-center justify-center mx-auto mb-4">
                   <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8" stroke="currentColor" strokeWidth="1.5">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" />
                     <polyline points="9 22 9 12 15 12 15 22" strokeLinecap="round" />
@@ -316,19 +316,19 @@ export default async function HomePage() {
                   <Link
                     key={eglise.id}
                     href={`/paroisses/${eglise.id}`}
-                    className="group block rounded-2xl overflow-hidden border border-[#e2e8f0] transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
+                    className="group block rounded-2xl overflow-hidden border border-border transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
                   >
                     {/* Barre couleur CEEC */}
-                    <div className="h-2 bg-[linear-gradient(90deg,#1e3a8a,#c59b2e)]" />
+                    <div className="h-2 bg-[linear-gradient(90deg,var(--color-primary),var(--color-secondary))]" />
                     {/* Initiale */}
-                    <div className="h-32 flex items-center justify-center text-6xl font-black text-white bg-[linear-gradient(135deg,#1e3a8a_0%,#1e2d6b_100%)]">
+                    <div className="h-32 flex items-center justify-center text-6xl font-black text-white bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-primary-dark)_100%)]">
                       {eglise.nom.charAt(0)}
                     </div>
                     <div className="p-5 bg-white">
-                      <h3 className="font-bold text-base text-slate-900 mb-2 group-hover:text-[#1e3a8a] transition-colors">
+                      <h3 className="font-bold text-base text-slate-900 mb-2 group-hover:text-primary transition-colors">
                         {eglise.nom}
                       </h3>
-                      <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 bg-[rgba(197,155,46,0.12)] text-[#c59b2e]">
+                      <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 bg-secondary/12 text-secondary">
                         {eglise.ville}
                       </span>
                       {eglise.pasteur && (
@@ -345,7 +345,7 @@ export default async function HomePage() {
         </section>
 
         {/* ——— ANNONCES & ÉVÉNEMENTS ——— */}
-        <section className="py-20 px-4 bg-[#f8fafc]">
+        <section className="py-20 px-4 bg-muted">
           <div className="max-w-[1280px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
@@ -353,21 +353,21 @@ export default async function HomePage() {
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-[#c59b2e]">
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-secondary">
                       Informations
                     </p>
-                    <h2 className="text-xl font-bold text-[#1e3a8a]">Annonces</h2>
+                    <h2 className="text-xl font-bold text-primary">Annonces</h2>
                   </div>
                   <Link
                     href="/annonces"
-                    className="text-sm font-semibold text-[#c59b2e] hover:text-[#1e3a8a] transition-colors"
+                    className="text-sm font-semibold text-secondary hover:text-primary transition-colors"
                   >
                     Tout voir →
                   </Link>
                 </div>
 
                 {annoncesList.length === 0 ? (
-                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-[#e2e8f0]">
+                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-border">
                     Aucune annonce pour le moment.
                   </div>
                 ) : (
@@ -375,7 +375,7 @@ export default async function HomePage() {
                     {annoncesList.map((annonce) => (
                       <div
                         key={annonce.id}
-                        className="bg-white rounded-xl p-5 border border-[#e2e8f0] transition-shadow hover:shadow-sm"
+                        className="bg-white rounded-xl p-5 border border-border transition-shadow hover:shadow-sm"
                       >
                         <div className="flex items-start gap-3">
                           <span
@@ -407,21 +407,21 @@ export default async function HomePage() {
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-[#c59b2e]">
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-secondary">
                       Agenda
                     </p>
-                    <h2 className="text-xl font-bold text-[#1e3a8a]">Événements</h2>
+                    <h2 className="text-xl font-bold text-primary">Événements</h2>
                   </div>
                   <Link
                     href="/evenements"
-                    className="text-sm font-semibold text-[#c59b2e] hover:text-[#1e3a8a] transition-colors"
+                    className="text-sm font-semibold text-secondary hover:text-primary transition-colors"
                   >
                     Tout voir →
                   </Link>
                 </div>
 
                 {evenementsList.length === 0 ? (
-                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-[#e2e8f0]">
+                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-border">
                     Aucun événement planifié pour le moment.
                   </div>
                 ) : (
@@ -429,9 +429,9 @@ export default async function HomePage() {
                     {evenementsList.map((evt) => (
                       <div
                         key={evt.id}
-                        className="bg-white rounded-xl p-5 border border-[#e2e8f0] flex gap-4 items-start transition-shadow hover:shadow-sm"
+                        className="bg-white rounded-xl p-5 border border-border flex gap-4 items-start transition-shadow hover:shadow-sm"
                       >
-                        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#1e3a8a] flex flex-col items-center justify-center text-white">
+                        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-primary flex flex-col items-center justify-center text-white">
                           <span className="text-lg font-extrabold leading-none">
                             {new Date(evt.dateDebut).getDate()}
                           </span>
@@ -463,13 +463,13 @@ export default async function HomePage() {
         </section>
 
         {/* ——— CTA ——— */}
-        <section className="relative overflow-hidden py-20 px-4 bg-[linear-gradient(135deg,#c59b2e_0%,#d4af5a_60%,#b8882a_100%)]">
+        <section className="relative overflow-hidden py-20 px-4 bg-[linear-gradient(135deg,var(--color-secondary)_0%,var(--color-secondary-light)_60%,#b8882a_100%)]">
           {/* Décoration points */}
           <div className="absolute inset-0 pointer-events-none opacity-10" aria-hidden>
             <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="dots-cta" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <circle cx="20" cy="20" r="1.5" fill="#1e3a8a" />
+                  <circle cx="20" cy="20" r="1.5" fill="var(--color-primary)" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#dots-cta)" />
@@ -477,23 +477,23 @@ export default async function HomePage() {
           </div>
 
           <div className="relative max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-[#1e3a8a]">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-primary">
               Faites partie de notre communauté
             </h2>
-            <p className="text-base leading-relaxed mb-10 text-[#1e3a8a]/80">
+            <p className="text-base leading-relaxed mb-10 text-primary/80">
               Rejoignez la CEEC, accédez aux ressources de votre église, restez informé
               des événements et annonces de toute la communauté évangélique du Congo.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/sign-up"
-                className="px-8 py-3.5 rounded-lg font-bold text-base text-white bg-[#1e3a8a] transition-all duration-200 hover:brightness-110"
+                className="px-8 py-3.5 rounded-lg font-bold text-base text-white bg-primary transition-all duration-200 hover:brightness-110"
               >
                 Créer mon compte
               </Link>
               <Link
                 href="/contact"
-                className="px-8 py-3.5 rounded-lg font-semibold text-base text-[#1e3a8a] bg-[rgba(30,58,138,0.08)] border-2 border-[rgba(30,58,138,0.25)] transition-all duration-200 hover:bg-[rgba(30,58,138,0.15)]"
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-primary bg-primary/8 border-2 border-primary/25 transition-all duration-200 hover:bg-primary/15"
               >
                 Nous contacter
               </Link>

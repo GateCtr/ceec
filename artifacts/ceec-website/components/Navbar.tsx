@@ -35,14 +35,14 @@ export default function Navbar() {
   const navLinkClass = (href: string) =>
     `px-3 py-1.5 rounded-md text-sm text-white transition-all duration-150 ${
       isActive(href)
-        ? "bg-white/[0.18] font-semibold border-b-2 border-[#c59b2e]"
+        ? "bg-white/[0.18] font-semibold border-b-2 border-secondary"
         : "font-normal hover:bg-white/10 border-b-2 border-transparent"
     }`;
 
   const mobileLinkClass = (href: string) =>
     `block px-4 py-3 rounded-lg text-sm text-white transition-colors duration-150 ${
       isActive(href)
-        ? "bg-white/[0.12] font-semibold border-l-[3px] border-[#c59b2e]"
+        ? "bg-white/[0.12] font-semibold border-l-[3px] border-secondary"
         : "font-normal border-l-[3px] border-transparent hover:bg-white/5"
     }`;
 
@@ -50,21 +50,21 @@ export default function Navbar() {
     <nav
       className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-md ${
         scrolled
-          ? "bg-[#1e3a8a] shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
+          ? "bg-primary shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
           : isHome
           ? "bg-transparent"
-          : "bg-[#1e3a8a]/95 shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
+          : "bg-primary/95 shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
       }`}
     >
       <div className="max-w-[1280px] mx-auto px-4 flex items-center justify-between h-16">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 no-underline group">
-          <div className="w-9 h-9 rounded-full bg-[#c59b2e] flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+          <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
             <svg
               viewBox="0 0 24 24"
               fill="none"
-              className="w-5 h-5 text-[#1e3a8a]"
+              className="w-5 h-5 text-primary"
             >
               <path
                 d="M12 2v8M12 14v8M4 12h16"
@@ -101,7 +101,7 @@ export default function Navbar() {
           {isSignedIn && isAdmin && (
             <Link
               href="/admin"
-              className="px-3 py-1.5 rounded-md text-sm font-semibold text-[#fcd34d] bg-[rgba(197,155,46,0.18)] transition-all duration-150 hover:bg-[rgba(197,155,46,0.28)]"
+              className="px-3 py-1.5 rounded-md text-sm font-semibold text-gold bg-secondary/[0.18] transition-all duration-150 hover:bg-secondary/[0.28]"
             >
               Admin
             </Link>
@@ -124,7 +124,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/sign-up"
-                className="px-4 py-1.5 rounded-md text-sm font-semibold text-[#1e3a8a] bg-[#c59b2e] transition-all duration-150 hover:brightness-110"
+                className="px-4 py-1.5 rounded-md text-sm font-semibold text-primary bg-secondary transition-all duration-150 hover:brightness-110"
               >
                 S&apos;inscrire
               </Link>
@@ -156,7 +156,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 bg-[#1e2d6b] ${
+        className={`md:hidden overflow-hidden transition-all duration-300 bg-primary-dark ${
           menuOpen ? "max-h-[500px] border-t border-white/10" : "max-h-0"
         }`}
       >
@@ -185,7 +185,7 @@ export default function Navbar() {
             <Link
               href="/admin"
               onClick={() => setMenuOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-semibold text-[#fcd34d]"
+              className="block px-4 py-3 rounded-lg text-sm font-semibold text-gold"
             >
               Administration
             </Link>
@@ -203,7 +203,7 @@ export default function Navbar() {
               <Link
                 href="/sign-up"
                 onClick={() => setMenuOpen(false)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center text-[#1e3a8a] bg-[#c59b2e]"
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center text-primary bg-secondary"
               >
                 S&apos;inscrire
               </Link>

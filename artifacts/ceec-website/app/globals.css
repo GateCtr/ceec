@@ -1,18 +1,35 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary:           #1e3a8a;
+  --color-primary-dark:      #1e2d6b;
+  --color-secondary:         #c59b2e;
+  --color-secondary-light:   #d4af5a;
+  --color-gold:              #fcd34d;
+  --color-background:        #ffffff;
+  --color-foreground:        #0f172a;
+  --color-muted:             #f8fafc;
+  --color-muted-foreground:  #64748b;
+  --color-card:              #ffffff;
+  --color-card-foreground:   #0f172a;
+  --color-border:            #e2e8f0;
+  --color-surface:           #1e293b;
+  --color-accent:            #dc2626;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --primary: #1e3a8a;
-  --primary-dark: #1e2d6b;
-  --secondary: #c59b2e;
-  --secondary-light: #d4af5a;
-  --accent: #dc2626;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  --background:        var(--color-background);
+  --foreground:        var(--color-foreground);
+  --primary:           var(--color-primary);
+  --primary-dark:      var(--color-primary-dark);
+  --secondary:         var(--color-secondary);
+  --secondary-light:   var(--color-secondary-light);
+  --accent:            var(--color-accent);
+  --muted:             var(--color-muted);
+  --muted-foreground:  var(--color-muted-foreground);
+  --border:            var(--color-border);
+  --card:              var(--color-card);
+  --card-foreground:   var(--color-card-foreground);
 }
 
 * {

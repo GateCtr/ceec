@@ -28,7 +28,7 @@ function WhatsappIcon() {
 
 function CrossIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-[#1e3a8a]">
+    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-primary">
       <path d="M12 2v8M12 14v8M4 12h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
   );
@@ -62,14 +62,14 @@ function PhoneIcon() {
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f172a] text-slate-400">
+    <footer className="bg-foreground text-slate-400">
       <div className="max-w-[1280px] mx-auto px-4 pt-14 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
 
           {/* Identité — 2 colonnes sur lg */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-4 no-underline">
-              <div className="w-10 h-10 rounded-full bg-[#c59b2e] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
                 <CrossIcon />
               </div>
               <div>
@@ -118,7 +118,7 @@ export default function Footer() {
 
           {/* Liens rapides */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-secondary">
               Liens rapides
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -142,7 +142,7 @@ export default function Footer() {
 
           {/* Mon espace */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-secondary">
               Mon espace
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -166,7 +166,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[#c59b2e]">
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-secondary">
               Contact
             </h4>
             <div className="flex flex-col gap-3 text-sm text-slate-400">
@@ -187,7 +187,7 @@ export default function Footer() {
         </div>
 
         {/* Barre du bas */}
-        <div className="pt-6 border-t border-[#1e293b] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="pt-6 border-t border-surface flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>
             © {new Date().getFullYear()} CEEC — Communauté des Églises Évangéliques au Congo.
             Tous droits réservés.

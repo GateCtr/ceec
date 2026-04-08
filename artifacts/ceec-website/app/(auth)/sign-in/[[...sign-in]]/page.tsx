@@ -86,8 +86,16 @@ export default function SignInPage() {
 
   return (
     <Card>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+        <img src="/ceec-emblem.svg" alt="CEEC" width={36} height={36} style={{ mixBlendMode: "multiply" }} />
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Plateforme CEEC
+          </div>
+        </div>
+      </div>
       <h2 style={s.heading}>Connexion</h2>
-      <p style={s.subtext}>Accédez à votre espace CEEC</p>
+      <p style={s.subtext}>Espace réservé aux administrateurs de la communauté</p>
       <form onSubmit={handleSubmit} style={s.form}>
         <label style={s.label}>Adresse e-mail</label>
         <input
@@ -124,6 +132,23 @@ export default function SignInPage() {
       <Link href="/sign-up" style={s.linkBtn}>
         Créer un compte
       </Link>
+
+      <div style={{
+        marginTop: 20,
+        padding: "12px 14px",
+        borderRadius: 10,
+        background: "#f0f4ff",
+        border: "1px solid #c7d2fe",
+        fontSize: 12,
+        color: "#4338ca",
+        lineHeight: 1.5,
+      }}>
+        <strong>Fidèle d&apos;une paroisse ?</strong><br />
+        Connectez-vous via le portail de votre paroisse :{" "}
+        <code style={{ fontSize: 11, background: "#e0e7ff", padding: "1px 6px", borderRadius: 4 }}>
+          votre-paroisse.ceec.cd
+        </code>
+      </div>
     </Card>
   );
 }

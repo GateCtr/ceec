@@ -88,8 +88,14 @@ export default function SignUpPage() {
 
   return (
     <Card>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+        <img src="/ceec-emblem.svg" alt="CEEC" width={36} height={36} style={{ mixBlendMode: "multiply" }} />
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Plateforme CEEC
+        </div>
+      </div>
       <h2 style={s.heading}>Créer un compte</h2>
-      <p style={s.subtext}>Rejoignez la communauté CEEC</p>
+      <p style={s.subtext}>Accès administrateurs de la communauté</p>
       <form onSubmit={handleSubmit} style={s.form}>
         <div style={{ display: "flex", gap: 10 }}>
           <div style={{ flex: 1 }}>
@@ -159,6 +165,23 @@ export default function SignUpPage() {
       <Link href="/sign-in" style={s.linkBtn}>
         Se connecter
       </Link>
+
+      <div style={{
+        marginTop: 20,
+        padding: "12px 14px",
+        borderRadius: 10,
+        background: "#f0f4ff",
+        border: "1px solid #c7d2fe",
+        fontSize: 12,
+        color: "#4338ca",
+        lineHeight: 1.5,
+      }}>
+        <strong>Vous rejoignez une paroisse ?</strong><br />
+        Inscrivez-vous via le portail de votre paroisse :{" "}
+        <code style={{ fontSize: 11, background: "#e0e7ff", padding: "1px 6px", borderRadius: 4 }}>
+          votre-paroisse.ceec.cd
+        </code>
+      </div>
 
       <div id="clerk-captcha" />
     </Card>

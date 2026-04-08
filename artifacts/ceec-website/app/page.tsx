@@ -111,7 +111,8 @@ export default async function HomePage() {
       <main>
 
         {/* ——— HERO ——— */}
-        <section className="relative overflow-hidden text-white pt-28 pb-20 min-h-[70vh] flex flex-col justify-center">
+        {/* -mt-16 tire le hero sous la navbar sticky (h-16) pour un fond continu */}
+        <section className="relative overflow-hidden text-white -mt-16 pt-44 pb-24 min-h-[80vh] flex flex-col justify-center">
           {/* Photo de l'église */}
           <Image
             src="/church-hero.png"

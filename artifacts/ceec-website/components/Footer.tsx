@@ -67,7 +67,7 @@ export default function Footer() {
                 alt="Logo CEEC"
                 width={48}
                 height={48}
-                style={{ filter: "brightness(0) invert(1)" }}
+                style={{ mixBlendMode: "screen" }}
               />
               <div>
                 <div className="font-bold text-base text-white leading-tight">CEEC</div>

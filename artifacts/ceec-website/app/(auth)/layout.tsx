@@ -44,7 +44,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             alt="Logo CEEC"
             width={52}
             height={52}
-            style={{ filter: "brightness(0) invert(1)" }}
+            style={{ mixBlendMode: "screen" }}
           />
         </div>
         <div style={{ color: "white", fontWeight: 800, fontSize: 18, letterSpacing: "0.04em" }}>

@@ -52,7 +52,8 @@ export default function Navbar() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const isHome = pathname === "/";
+  const isHeroPage =
+    pathname === "/" || pathname === "/a-propos" || pathname === "/historique";
 
   const navLinkClass = (href: string) =>
     `px-3 py-1.5 rounded-md text-sm text-white transition-all duration-150 ${
@@ -78,7 +79,7 @@ export default function Navbar() {
       className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? "bg-primary backdrop-blur-md shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
-          : isHome
+          : isHeroPage
           ? "bg-transparent"
           : "bg-primary/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
       }`}

@@ -92,12 +92,17 @@ export default function HistoriquePage() {
   return (
     <>
       <Navbar />
-      <main className="pt-16">
+      <main>
 
         {/* Hero */}
         <section style={{
           background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
-          padding: "5rem 1rem 4rem",
+          minHeight: "75vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "8rem 1rem 5rem",
           color: "white",
           position: "relative",
           overflow: "hidden",
@@ -106,6 +111,14 @@ export default function HistoriquePage() {
             position: "absolute", inset: 0, opacity: 0.04,
             backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
             backgroundSize: "28px 28px",
+          }} />
+
+          {/* Halo or */}
+          <div aria-hidden style={{
+            position: "absolute", top: "25%", left: "15%",
+            width: 500, height: 500, borderRadius: "50%",
+            background: "#c59b2e", opacity: 0.05, filter: "blur(120px)",
+            pointerEvents: "none",
           }} />
 
           <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center", position: "relative" }}>

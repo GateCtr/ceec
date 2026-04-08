@@ -48,12 +48,12 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-md ${
+      className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled
-          ? "bg-primary shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
+          ? "bg-primary backdrop-blur-md shadow-[0_2px_16px_rgba(0,0,0,0.22)]"
           : isHome
           ? "bg-transparent"
-          : "bg-primary/95 shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
+          : "bg-primary/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.15)]"
       }`}
     >
       <div className="max-w-[1280px] mx-auto px-4 flex items-center justify-between h-16">

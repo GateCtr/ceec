@@ -146,6 +146,19 @@ model UserRole {
   @@map("user_roles")
 }
 
+// ============ CONFIG COMMUNAUTÉ ============
+
+model CommunauteConfig {
+  id        Int      @id @default(autoincrement())
+  cle       String   @unique @db.VarChar(100)
+  valeur    String   @db.VarChar(255)
+  label     String   @db.VarChar(255)
+  icone     String   @default("") @db.VarChar(10)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("communaute_config")
+}
+
 model InviteToken {
   id        Int       @id @default(autoincrement())
   token     String    @unique @default(dbgenerated("gen_random_uuid()::text")) @db.VarChar(255)

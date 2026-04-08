@@ -6,24 +6,54 @@ import { prisma } from "@/lib/db";
 
 async function getData() {
   try {
-    const [eglisesList, annoncesList, evenementsList] = await Promise.all([
+    const [eglisesList, annoncesList, evenementsList, nbEglises, configEntries] = await Promise.all([
       prisma.eglise.findMany({ where: { statut: "actif" }, take: 6, orderBy: { nom: "asc" } }),
       prisma.annonce.findMany({ where: { publie: true }, orderBy: { datePublication: "desc" }, take: 3 }),
       prisma.evenement.findMany({ where: { publie: true }, orderBy: { dateDebut: "asc" }, take: 3 }),
+      prisma.eglise.count({ where: { statut: "actif" } }),
+      prisma.communauteConfig.findMany(),
     ]);
-    return { eglisesList, annoncesList, evenementsList };
+
+    const cfg = Object.fromEntries(configEntries.map((c) => [c.cle, c]));
+
+    const stats = [
+      {
+        valeur: String(nbEglises),
+        label: "Églises membres",
+        icon: "⛪",
+      },
+      {
+        valeur: cfg["nb_provinces"]?.valeur ?? "26",
+        label: cfg["nb_provinces"]?.label ?? "Provinces couvertes",
+        icon: cfg["nb_provinces"]?.icone ?? "📍",
+      },
+      {
+        valeur: cfg["nb_fideles"]?.valeur ?? "100 000+",
+        label: cfg["nb_fideles"]?.label ?? "Fidèles",
+        icon: cfg["nb_fideles"]?.icone ?? "🙏",
+      },
+      {
+        valeur: cfg["annee_fondation"]?.valeur ?? "1960",
+        label: cfg["annee_fondation"]?.label ?? "Année de fondation",
+        icon: cfg["annee_fondation"]?.icone ?? "📖",
+      },
+    ];
+
+    return { eglisesList, annoncesList, evenementsList, stats };
   } catch {
-    return { eglisesList: [], annoncesList: [], evenementsList: [] };
+    return {
+      eglisesList: [],
+      annoncesList: [],
+      evenementsList: [],
+      stats: [
+        { valeur: "0",        label: "Églises membres",    icon: "⛪" },
+        { valeur: "26",       label: "Provinces couvertes", icon: "📍" },
+        { valeur: "100 000+", label: "Fidèles",             icon: "🙏" },
+        { valeur: "1960",     label: "Année de fondation",  icon: "📖" },
+      ],
+    };
   }
 }
-
-/* ─── Données statiques ─────────────────────────────── */
-const stats = [
-  { valeur: "50+",    label: "Églises membres",    icon: "⛪" },
-  { valeur: "26",     label: "Provinces couvertes", icon: "📍" },
-  { valeur: "100 000+", label: "Fidèles",           icon: "🙏" },
-  { valeur: "1960",   label: "Année de fondation",  icon: "📖" },
-];
 
 const missions = [
   {
@@ -142,7 +172,7 @@ function SectionTitle({ children, light = false }: { children: React.ReactNode; 
    PAGE PRINCIPALE
 ═══════════════════════════════════════════════════════ */
 export default async function HomePage() {
-  const { eglisesList, annoncesList, evenementsList } = await getData();
+  const { eglisesList, annoncesList, evenementsList, stats } = await getData();
 
   return (
     <>

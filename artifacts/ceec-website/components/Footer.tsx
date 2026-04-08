@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 function FacebookIcon() {
   return (
@@ -63,12 +62,12 @@ export default function Footer() {
           {/* Identité — 2 colonnes sur lg */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-4 no-underline">
-              <Image
-                src="/logo-ceec.png"
+              <img
+                src="/ceec-emblem.svg"
                 alt="Logo CEEC"
-                width={44}
-                height={44}
-                className="rounded-full flex-shrink-0"
+                width={48}
+                height={48}
+                style={{ mixBlendMode: "screen" }}
               />
               <div>
                 <div className="font-bold text-base text-white leading-tight">CEEC</div>

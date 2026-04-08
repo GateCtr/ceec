@@ -101,7 +101,7 @@ export default function ChurchAuthLayout({
           opacity: 0.55,
         }}
       >
-        <Image src="/ceec-emblem.svg" alt="CEEC" width={16} height={16} />
+        <Image src="/ceec-emblem.svg" alt="CEEC" width={16} height={16} style={{ filter: "brightness(0) invert(1)" }} />
         <span style={{ color: "white", fontSize: 11, fontWeight: 600, letterSpacing: "0.05em" }}>
           Plateforme CEEC
         </span>

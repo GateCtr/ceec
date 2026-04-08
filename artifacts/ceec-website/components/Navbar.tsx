@@ -91,7 +91,7 @@ export default function Navbar() {
               alt="Logo CEEC"
               width={44}
               height={44}
-              style={{ mixBlendMode: "screen" }}
+              style={{ filter: "brightness(0) invert(1)" }}
             />
           </div>
           <div>

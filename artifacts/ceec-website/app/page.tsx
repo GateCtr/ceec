@@ -192,7 +192,7 @@ export default async function HomePage() {
 
             {/* Titre principal */}
             <h1 className="font-extrabold leading-[1.1] mb-6 text-4xl sm:text-5xl lg:text-7xl"
-              style={{ fontFamily: "var(--font-display)", textShadow: "0 4px 30px rgba(0,0,0,0.5)" }}>
+              style={{ fontFamily: "var(--font-display)", textShadow: "0 4px 30px rgba(0,0,0,0.5)", color: "#ffffff" }}>
               Ensemble dans la Foi,
               <br />
               <span style={{ color: "var(--color-secondary)" }}>

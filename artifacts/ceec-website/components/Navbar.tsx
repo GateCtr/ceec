@@ -2,22 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, useAuth, useUser } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
+
+type NavInfo = {
+  isSuperAdmin: boolean;
+  isChurchAdmin: boolean;
+  churchSlugs: string[];
+};
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
-  const { user } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isAdmin = (user?.publicMetadata as { role?: string })?.role === "admin";
+  const [navInfo, setNavInfo] = useState<NavInfo>({
+    isSuperAdmin: false,
+    isChurchAdmin: false,
+    churchSlugs: [],
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setNavInfo({ isSuperAdmin: false, isChurchAdmin: false, churchSlugs: [] });
+      return;
+    }
+    fetch("/api/me/nav-info")
+      .then((r) => r.json())
+      .then((data) => setNavInfo(data))
+      .catch(() => {});
+  }, [isSignedIn]);
 
   const links = [
     { href: "/", label: "Accueil" },
@@ -45,6 +65,11 @@ export default function Navbar() {
         ? "bg-white/[0.12] font-semibold border-l-[3px] border-secondary"
         : "font-normal border-l-[3px] border-transparent hover:bg-white/5"
     }`;
+
+  const churchLink =
+    navInfo.isChurchAdmin && navInfo.churchSlugs[0]
+      ? `/gestion?eglise=${navInfo.churchSlugs[0]}`
+      : null;
 
   return (
     <nav
@@ -87,18 +112,31 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {isSignedIn && (
+          {isSignedIn && !navInfo.isSuperAdmin && (
             <Link href="/dashboard" className={navLinkClass("/dashboard")}>
               Mon espace
             </Link>
           )}
 
-          {isSignedIn && isAdmin && (
+          {/* Lien gestion église */}
+          {isSignedIn && churchLink && (
+            <Link
+              href={churchLink}
+              className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
+              style={{ color: "var(--color-secondary)", background: "rgba(197,155,46,0.15)" }}
+            >
+              ⛪ Ma paroisse
+            </Link>
+          )}
+
+          {/* Lien super admin */}
+          {isSignedIn && navInfo.isSuperAdmin && (
             <Link
               href="/admin"
-              className="px-3 py-1.5 rounded-md text-sm font-semibold text-gold bg-secondary/[0.18] transition-all duration-150 hover:bg-secondary/[0.28]"
+              className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
+              style={{ color: "var(--color-secondary)", background: "rgba(197,155,46,0.15)" }}
             >
-              Admin
+              🛡 Administration
             </Link>
           )}
 
@@ -167,7 +205,7 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {isSignedIn && (
+          {isSignedIn && !navInfo.isSuperAdmin && (
             <Link
               href="/dashboard"
               onClick={() => setMenuOpen(false)}
@@ -176,13 +214,26 @@ export default function Navbar() {
               Mon espace
             </Link>
           )}
-          {isSignedIn && isAdmin && (
+
+          {isSignedIn && churchLink && (
+            <Link
+              href={churchLink}
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 rounded-lg text-sm font-semibold"
+              style={{ color: "var(--color-secondary)" }}
+            >
+              ⛪ Gérer ma paroisse
+            </Link>
+          )}
+
+          {isSignedIn && navInfo.isSuperAdmin && (
             <Link
               href="/admin"
               onClick={() => setMenuOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-semibold text-gold"
+              className="block px-4 py-3 rounded-lg text-sm font-semibold"
+              style={{ color: "var(--color-secondary)" }}
             >
-              Administration
+              🛡 Administration CEEC
             </Link>
           )}
 

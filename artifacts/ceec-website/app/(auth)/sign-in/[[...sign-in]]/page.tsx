@@ -23,7 +23,7 @@ export default function SignInPage() {
     if (signIn.status === "complete") {
       await signIn.finalize({
         navigate: ({ decorateUrl }) => {
-          const url = decorateUrl("/dashboard");
+          const url = decorateUrl("/auth/redirect");
           if (url.startsWith("http")) {
             window.location.href = url;
           } else {
@@ -42,7 +42,7 @@ export default function SignInPage() {
     if (signIn.status === "complete") {
       await signIn.finalize({
         navigate: ({ decorateUrl }) => {
-          const url = decorateUrl("/dashboard");
+          const url = decorateUrl("/auth/redirect");
           if (url.startsWith("http")) {
             window.location.href = url;
           } else {

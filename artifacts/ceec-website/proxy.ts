@@ -124,6 +124,7 @@ const isChurchAdminRoute = createRouteMatcher([
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
+  "/auth/redirect(.*)",
   "/gestion(.*)",
   "/api/membres(.*)",
 ]);

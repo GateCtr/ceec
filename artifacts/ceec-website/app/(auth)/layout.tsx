@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         padding: "2rem 1rem",
       }}
     >
+      {/* Logo CEEC */}
       <Link
         href="/"
         style={{
@@ -26,26 +28,29 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           gap: 8,
         }}
       >
-        <div
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            background: "#c59b2e",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 800,
-            fontSize: 26,
-            color: "#1e3a8a",
-          }}
-        >
-          C
+        <div style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.08)",
+          border: "2px solid rgba(197,155,46,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 8,
+        }}>
+          <Image
+            src="/ceec-emblem.svg"
+            alt="Logo CEEC"
+            width={52}
+            height={52}
+            style={{ mixBlendMode: "screen" }}
+          />
         </div>
-        <div style={{ color: "white", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>
+        <div style={{ color: "white", fontWeight: 800, fontSize: 18, letterSpacing: "0.04em" }}>
           CEEC
         </div>
-        <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, lineHeight: 1 }}>
+        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
           Communauté des Églises Évangéliques au Congo
         </div>
       </Link>

@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import { EgliseProvider, type EgliseData } from "@/lib/church-context";
 import ChurchNavbar from "@/components/church/ChurchNavbar";
 import ChurchFooter from "@/components/church/ChurchFooter";
+import ChurchAuthLayout from "@/components/church/ChurchAuthLayout";
+
+const AUTH_PATHS = ["/c/connexion", "/c/inscription"];
 
 export default async function ChurchLayout({
   children,
@@ -86,6 +89,21 @@ export default async function ChurchLayout({
 
   if (isSuspendu && !isOnSuspenduPage) {
     redirect("/c/suspendu");
+  }
+
+  // Pages d'authentification → layout centré avec logo de l'église
+  const isAuthPage = AUTH_PATHS.some(
+    (p) => churchPath === p || churchPath.endsWith(p)
+  );
+
+  if (isAuthPage) {
+    return (
+      <EgliseProvider eglise={eglise} isChurchDomain={true}>
+        <ChurchAuthLayout eglise={eglise}>
+          {children}
+        </ChurchAuthLayout>
+      </EgliseProvider>
+    );
   }
 
   return (

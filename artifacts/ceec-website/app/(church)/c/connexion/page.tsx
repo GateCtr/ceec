@@ -57,94 +57,92 @@ export default function ChurchConnexionPage() {
 
   if (signIn.status === "needs_client_trust") {
     return (
-      <div style={s.page}>
-        <Card>
-          <h2 style={s.heading}>Vérification requise</h2>
-          <p style={s.subtext}>Un code a été envoyé à votre adresse e-mail.</p>
-          <form onSubmit={handleVerify} style={s.form}>
-            <label style={s.label}>Code de vérification</label>
-            <input
-              style={s.input}
-              type="text"
-              inputMode="numeric"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="123456"
-              autoFocus
-              required
-            />
-            {errors?.fields?.code && <Err>{errors.fields.code.message}</Err>}
-            <button type="submit" style={s.btn} disabled={isLoading || !code}>
-              {isLoading ? "Vérification…" : "Vérifier"}
-            </button>
-            <button type="button" style={s.outlineBtn} onClick={() => signIn.mfa.sendEmailCode()}>
-              Renvoyer le code
-            </button>
-            <button type="button" style={s.ghostBtn} onClick={() => signIn.reset()}>
-              Recommencer
-            </button>
-          </form>
-        </Card>
-      </div>
+      <Card>
+        <h2 style={s.heading}>Vérification requise</h2>
+        <p style={s.subtext}>Un code a été envoyé à votre adresse e-mail.</p>
+        <form onSubmit={handleVerify} style={s.form}>
+          <label style={s.label}>Code de vérification</label>
+          <input
+            style={s.input}
+            type="text"
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="123456"
+            autoFocus
+            required
+          />
+          {errors?.fields?.code && <Err>{errors.fields.code.message}</Err>}
+          <button type="submit" style={s.btn} disabled={isLoading || !code}>
+            {isLoading ? "Vérification…" : "Vérifier"}
+          </button>
+          <button type="button" style={s.outlineBtn} onClick={() => signIn.mfa.sendEmailCode()}>
+            Renvoyer le code
+          </button>
+          <button type="button" style={s.ghostBtn} onClick={() => signIn.reset()}>
+            Recommencer
+          </button>
+        </form>
+      </Card>
     );
   }
 
   return (
-    <div style={s.page}>
-      <Card>
-        <h2 style={s.heading}>Connexion</h2>
-        <p style={s.subtext}>Accédez à votre espace — {egliseName}</p>
+    <Card>
+      <h2 style={s.heading}>Connexion</h2>
+      <p style={s.subtext}>Accédez à votre espace — {egliseName}</p>
 
-        <form onSubmit={handleSubmit} style={s.form}>
-          <label style={s.label}>Adresse e-mail</label>
-          <input
-            style={s.input}
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@exemple.com"
-            required
-          />
-          {errors?.fields?.identifier && <Err>{errors.fields.identifier.message}</Err>}
+      <form onSubmit={handleSubmit} style={s.form}>
+        <label style={s.label}>Adresse e-mail</label>
+        <input
+          style={s.input}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="vous@exemple.com"
+          required
+        />
+        {errors?.fields?.identifier && <Err>{errors.fields.identifier.message}</Err>}
 
-          <label style={{ ...s.label, marginTop: 14 }}>Mot de passe</label>
-          <input
-            style={s.input}
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-          {errors?.fields?.password && <Err>{errors.fields.password.message}</Err>}
-          {(errors?.fields as unknown as Record<string, { message: string }>)?.form && (
-            <Err>{(errors.fields as unknown as Record<string, { message: string }>).form.message}</Err>
-          )}
+        <label style={{ ...s.label, marginTop: 14 }}>Mot de passe</label>
+        <input
+          style={s.input}
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          required
+        />
+        {errors?.fields?.password && <Err>{errors.fields.password.message}</Err>}
+        {(errors?.fields as unknown as Record<string, { message: string }>)?.form && (
+          <Err>{(errors.fields as unknown as Record<string, { message: string }>).form.message}</Err>
+        )}
 
-          <button type="submit" style={s.btn} disabled={isLoading || !email || !password}>
-            {isLoading ? "Connexion…" : "Se connecter"}
-          </button>
-        </form>
+        <button type="submit" style={s.btn} disabled={isLoading || !email || !password}>
+          {isLoading ? "Connexion…" : "Se connecter"}
+        </button>
+      </form>
 
-        <hr style={s.divider} />
-        <p style={s.dividerText}>Pas encore de compte ?</p>
-        <a href="/c/inscription" style={s.linkBtn}>
-          Créer un compte
-        </a>
-      </Card>
-    </div>
+      <hr style={s.divider} />
+      <p style={s.dividerText}>Pas encore de compte ?</p>
+      <a href="/c/inscription" style={s.linkBtn}>
+        Créer un compte
+      </a>
+    </Card>
   );
 }
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      background: "white", borderRadius: 16, padding: "2rem",
-      width: "100%", maxWidth: 400,
-      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-      border: "1px solid #e2e8f0",
+      background: "white",
+      borderRadius: 16,
+      padding: "2rem",
+      width: "100%",
+      maxWidth: 400,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}>
       {children}
     </div>
@@ -163,14 +161,6 @@ function Err({ children }: { children: React.ReactNode }) {
 }
 
 const s = {
-  page: {
-    minHeight: "80vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2rem 1rem",
-    background: "#f8fafc",
-  } as React.CSSProperties,
   heading: { margin: "0 0 4px", fontSize: 21, fontWeight: 800, color: "#1e3a8a" } as React.CSSProperties,
   subtext: { margin: "0 0 20px", fontSize: 13, color: "#64748b" } as React.CSSProperties,
   form: { display: "flex", flexDirection: "column" as const, gap: 6 },

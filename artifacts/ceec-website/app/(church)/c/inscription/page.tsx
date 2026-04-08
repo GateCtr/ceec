@@ -68,7 +68,7 @@ export default function ChurchInscriptionPage() {
                 }),
               });
             } catch {
-              // Non-blocking: user is created, role can be assigned later
+              // Non-bloquant : l'utilisateur est créé, le rôle peut être assigné plus tard
             } finally {
               setIsRegistering(false);
             }
@@ -82,155 +82,151 @@ export default function ChurchInscriptionPage() {
 
   if (step === "done") {
     return (
-      <div style={s.page}>
-        <Card>
-          <div style={{ textAlign: "center", padding: "1rem 0" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <h2 style={s.heading}>Bienvenue !</h2>
-            <p style={{ color: "#64748b", marginTop: 8, lineHeight: 1.6 }}>
-              Votre compte a été créé avec succès. Vous êtes maintenant membre de{" "}
-              <strong style={{ color: "#1e3a8a" }}>{egliseName}</strong>.
-            </p>
-          </div>
-        </Card>
-      </div>
+      <Card maxWidth={440}>
+        <div style={{ textAlign: "center", padding: "1rem 0" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+          <h2 style={s.heading}>Bienvenue !</h2>
+          <p style={{ color: "#64748b", marginTop: 8, lineHeight: 1.6 }}>
+            Votre compte a été créé avec succès. Vous êtes maintenant membre de{" "}
+            <strong style={{ color: "#1e3a8a" }}>{egliseName}</strong>.
+          </p>
+        </div>
+      </Card>
     );
   }
 
   if (step === "verify") {
     return (
-      <div style={s.page}>
-        <Card>
-          <h2 style={s.heading}>Vérifiez votre e-mail</h2>
-          <p style={s.subtext}>
-            Un code a été envoyé à{" "}
-            <strong style={{ color: "#1e3a8a" }}>{email}</strong>
-          </p>
-          <form onSubmit={handleVerify} style={s.form}>
-            <label style={s.label}>Code de vérification</label>
-            <input
-              style={s.input}
-              type="text"
-              inputMode="numeric"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="123456"
-              autoFocus
-              required
-            />
-            {errors?.fields?.code && <Err>{errors.fields.code.message}</Err>}
-            {apiError && <Err>{apiError}</Err>}
-            <button
-              type="submit"
-              style={s.btn}
-              disabled={isLoading || isRegistering || !code}
-            >
-              {isLoading || isRegistering ? "Vérification…" : "Confirmer mon compte"}
-            </button>
-            <button
-              type="button"
-              style={s.outlineBtn}
-              onClick={() => signUp.verifications.sendEmailCode()}
-            >
-              Renvoyer le code
-            </button>
-          </form>
-        </Card>
-      </div>
+      <Card maxWidth={440}>
+        <h2 style={s.heading}>Vérifiez votre e-mail</h2>
+        <p style={s.subtext}>
+          Un code a été envoyé à{" "}
+          <strong style={{ color: "#1e3a8a" }}>{email}</strong>
+        </p>
+        <form onSubmit={handleVerify} style={s.form}>
+          <label style={s.label}>Code de vérification</label>
+          <input
+            style={s.input}
+            type="text"
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="123456"
+            autoFocus
+            required
+          />
+          {errors?.fields?.code && <Err>{errors.fields.code.message}</Err>}
+          {apiError && <Err>{apiError}</Err>}
+          <button
+            type="submit"
+            style={s.btn}
+            disabled={isLoading || isRegistering || !code}
+          >
+            {isLoading || isRegistering ? "Vérification…" : "Confirmer mon compte"}
+          </button>
+          <button
+            type="button"
+            style={s.outlineBtn}
+            onClick={() => signUp.verifications.sendEmailCode()}
+          >
+            Renvoyer le code
+          </button>
+        </form>
+      </Card>
     );
   }
 
   return (
-    <div style={s.page}>
-      <Card>
-        <h2 style={s.heading}>Rejoindre {egliseName}</h2>
-        <p style={s.subtext}>Créez votre compte pour accéder à l&apos;espace membres</p>
+    <Card maxWidth={440}>
+      <h2 style={s.heading}>Rejoindre {egliseName}</h2>
+      <p style={s.subtext}>Créez votre compte pour accéder à l&apos;espace membres</p>
 
-        <form onSubmit={handleSubmit} style={s.form}>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1 }}>
-              <label style={s.label}>Prénom</label>
-              <input
-                style={s.input}
-                type="text"
-                autoComplete="given-name"
-                value={prenom}
-                onChange={(e) => setPrenom(e.target.value)}
-                placeholder="Jean"
-                required
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={s.label}>Nom</label>
-              <input
-                style={s.input}
-                type="text"
-                autoComplete="family-name"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
-                placeholder="Dupont"
-                required
-              />
-            </div>
+      <form onSubmit={handleSubmit} style={s.form}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ flex: 1 }}>
+            <label style={s.label}>Prénom</label>
+            <input
+              style={s.input}
+              type="text"
+              autoComplete="given-name"
+              value={prenom}
+              onChange={(e) => setPrenom(e.target.value)}
+              placeholder="Jean"
+              required
+            />
           </div>
-          {errors?.fields?.firstName && <Err>{errors.fields.firstName.message}</Err>}
-          {errors?.fields?.lastName && <Err>{errors.fields.lastName.message}</Err>}
+          <div style={{ flex: 1 }}>
+            <label style={s.label}>Nom</label>
+            <input
+              style={s.input}
+              type="text"
+              autoComplete="family-name"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              placeholder="Dupont"
+              required
+            />
+          </div>
+        </div>
+        {errors?.fields?.firstName && <Err>{errors.fields.firstName.message}</Err>}
+        {errors?.fields?.lastName && <Err>{errors.fields.lastName.message}</Err>}
 
-          <label style={{ ...s.label, marginTop: 12 }}>Adresse e-mail</label>
-          <input
-            style={s.input}
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@exemple.com"
-            required
-          />
-          {errors?.fields?.emailAddress && <Err>{errors.fields.emailAddress.message}</Err>}
+        <label style={{ ...s.label, marginTop: 12 }}>Adresse e-mail</label>
+        <input
+          style={s.input}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="vous@exemple.com"
+          required
+        />
+        {errors?.fields?.emailAddress && <Err>{errors.fields.emailAddress.message}</Err>}
 
-          <label style={{ ...s.label, marginTop: 12 }}>Mot de passe</label>
-          <input
-            style={s.input}
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-          {errors?.fields?.password && <Err>{errors.fields.password.message}</Err>}
-          {(errors?.fields as unknown as Record<string, { message: string }>)?.form && (
-            <Err>{(errors.fields as unknown as Record<string, { message: string }>).form.message}</Err>
-          )}
+        <label style={{ ...s.label, marginTop: 12 }}>Mot de passe</label>
+        <input
+          style={s.input}
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          required
+        />
+        {errors?.fields?.password && <Err>{errors.fields.password.message}</Err>}
+        {(errors?.fields as unknown as Record<string, { message: string }>)?.form && (
+          <Err>{(errors.fields as unknown as Record<string, { message: string }>).form.message}</Err>
+        )}
 
-          <button
-            type="submit"
-            style={s.btn}
-            disabled={isLoading || !email || !password || !prenom || !nom}
-          >
-            {isLoading ? "Création…" : "Créer mon compte"}
-          </button>
-        </form>
+        <button
+          type="submit"
+          style={s.btn}
+          disabled={isLoading || !email || !password || !prenom || !nom}
+        >
+          {isLoading ? "Création…" : "Créer mon compte"}
+        </button>
+      </form>
 
-        <hr style={s.divider} />
-        <p style={s.dividerText}>Déjà membre ?</p>
-        <a href="/c/connexion" style={s.linkBtn}>
-          Se connecter
-        </a>
+      <hr style={s.divider} />
+      <p style={s.dividerText}>Déjà membre ?</p>
+      <a href="/c/connexion" style={s.linkBtn}>
+        Se connecter
+      </a>
 
-        <div id="clerk-captcha" />
-      </Card>
-    </div>
+      <div id="clerk-captcha" />
+    </Card>
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, maxWidth = 400 }: { children: React.ReactNode; maxWidth?: number }) {
   return (
     <div style={{
-      background: "white", borderRadius: 16, padding: "2rem",
-      width: "100%", maxWidth: 440,
-      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-      border: "1px solid #e2e8f0",
+      background: "white",
+      borderRadius: 16,
+      padding: "2rem",
+      width: "100%",
+      maxWidth,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}>
       {children}
     </div>
@@ -249,14 +245,6 @@ function Err({ children }: { children: React.ReactNode }) {
 }
 
 const s = {
-  page: {
-    minHeight: "80vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2rem 1rem",
-    background: "#f8fafc",
-  } as React.CSSProperties,
   heading: { margin: "0 0 4px", fontSize: 21, fontWeight: 800, color: "#1e3a8a" } as React.CSSProperties,
   subtext: { margin: "0 0 20px", fontSize: 13, color: "#64748b" } as React.CSSProperties,
   form: { display: "flex", flexDirection: "column" as const, gap: 6 },

@@ -18,9 +18,9 @@ async function getData() {
 }
 
 const stats = [
-  { valeur: "50+", label: "Églises membres" },
-  { valeur: "26", label: "Villes couvertes" },
-  { valeur: "100k+", label: "Fidèles" },
+  { valeur: "50+",  label: "Églises membres" },
+  { valeur: "26",   label: "Villes couvertes" },
+  { valeur: "100k+",label: "Fidèles" },
   { valeur: "1960", label: "Année de fondation" },
 ];
 
@@ -110,9 +110,10 @@ export default async function HomePage() {
       <Navbar />
       <main>
 
-        {/* ——— HERO ——— */}
+        {/* ═══════════════════════════════════════
+            HERO — Photo + overlay bleu CEEC
+        ═══════════════════════════════════════ */}
         <section className="relative overflow-hidden text-white pt-44 pb-24 min-h-screen flex flex-col justify-center">
-          {/* Photo de l'église */}
           <Image
             src="/church-hero.png"
             alt="Église de la CEEC"
@@ -120,17 +121,12 @@ export default async function HomePage() {
             className="object-cover object-center"
             priority
           />
-
-          {/* Superposition dégradée bleu CEEC */}
+          {/* Overlay dégradé */}
           <div
             className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg,rgba(30,58,138,0.88) 0%,rgba(14,23,60,0.93) 55%,rgba(8,12,28,0.97) 100%)",
-            }}
+            style={{ background: "linear-gradient(135deg,rgba(30,58,138,0.88) 0%,rgba(14,23,60,0.93) 55%,rgba(8,12,28,0.97) 100%)" }}
           />
-
-          {/* Motif croix en overlay subtil */}
+          {/* Motif croix */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
             <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -140,43 +136,44 @@ export default async function HomePage() {
               </defs>
               <rect width="100%" height="100%" fill="url(#crosses)" />
             </svg>
-            {/* Halo or en bas à droite */}
-            <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-[0.06] bg-secondary blur-[80px]" />
+            <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-[0.07]"
+              style={{ background: "var(--color-secondary)", filter: "blur(80px)" }} />
           </div>
 
+          {/* Contenu */}
           <div className="relative max-w-3xl mx-auto px-4 text-center">
-            {/* Badge animé */}
+            {/* Badge */}
             <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 rounded-full bg-secondary/30 animate-ping opacity-60" />
-              <div className="relative text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full bg-secondary/15 border border-secondary/45 text-gold">
+              <div className="absolute inset-0 rounded-full animate-ping opacity-50"
+                style={{ background: "rgba(197,155,46,0.3)" }} />
+              <div className="relative text-xs font-semibold tracking-widest uppercase px-5 py-1.5 rounded-full border"
+                style={{ background: "rgba(197,155,46,0.12)", borderColor: "rgba(197,155,46,0.4)", color: "var(--color-gold)" }}>
                 Communauté des Églises Évangéliques au Congo
               </div>
             </div>
 
-            <h1
-              className="font-extrabold leading-tight mb-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_2px_16px_rgba(0,0,0,0.3)]"
-            >
+            <h1 className="font-extrabold leading-tight mb-5 text-4xl sm:text-5xl lg:text-6xl"
+              style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
               Ensemble dans la Foi,
               <br />
-              <span className="text-gold">unis pour le Congo</span>
+              <span style={{ color: "var(--color-secondary)" }}>unis pour le Congo</span>
             </h1>
 
-            <p className="mx-auto mb-10 leading-relaxed text-white/80 max-w-xl text-base md:text-lg">
+            <p className="mx-auto mb-10 leading-relaxed max-w-xl text-base md:text-lg"
+              style={{ color: "rgba(255,255,255,0.78)" }}>
               La CEEC regroupe des dizaines d&apos;églises évangéliques à travers toutes les
               provinces du Congo, toutes unies dans la foi, la prière et le service au peuple congolais.
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                href="/paroisses"
-                className="px-8 py-3.5 rounded-lg font-bold text-base text-primary bg-secondary transition-all duration-200 hover:brightness-110"
-              >
+              <Link href="/paroisses"
+                className="px-8 py-3.5 rounded-lg font-bold text-base transition-all duration-200 hover:brightness-110"
+                style={{ background: "var(--color-secondary)", color: "var(--color-primary-900)" }}>
                 Nos Églises
               </Link>
-              <Link
-                href="/sign-up"
-                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white bg-white/[0.12] border border-white/[0.28] transition-all duration-200 hover:bg-white/25"
-              >
+              <Link href="/sign-up"
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white transition-all duration-200"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.28)" }}>
                 Rejoindre la CEEC
               </Link>
             </div>
@@ -184,18 +181,18 @@ export default async function HomePage() {
 
           {/* Bande stats */}
           <div className="relative max-w-4xl mx-auto px-4 mt-14">
-            <div className="grid grid-cols-2 md:grid-cols-4 bg-white/[0.06] border border-white/[0.12] rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-4 rounded-2xl overflow-hidden"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
               {stats.map((stat, idx) => (
-                <div
-                  key={stat.label}
-                  className={`flex flex-col items-center justify-center py-5 px-4 text-center ${
-                    idx < stats.length - 1 ? "border-r border-white/[0.12]" : ""
-                  }`}
-                >
-                  <span className="font-extrabold text-2xl md:text-3xl leading-none mb-1 text-gold">
+                <div key={stat.label}
+                  className="flex flex-col items-center justify-center py-5 px-4 text-center"
+                  style={{ borderRight: idx < stats.length - 1 ? "1px solid rgba(255,255,255,0.12)" : "none" }}>
+                  <span className="font-extrabold text-2xl md:text-3xl leading-none mb-1"
+                    style={{ color: "var(--color-secondary)" }}>
                     {stat.valeur}
                   </span>
-                  <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
+                  <span className="text-xs font-medium uppercase tracking-wide"
+                    style={{ color: "rgba(255,255,255,0.6)" }}>
                     {stat.label}
                   </span>
                 </div>
@@ -204,17 +201,28 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ——— NOS MISSIONS ——— */}
-        <section className="py-20 px-4 bg-white">
+        {/* ═══════════════════════════════════════
+            NOS MISSIONS
+        ═══════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ background: "#ffffff" }}>
           <div className="max-w-[1280px] mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-secondary">
+            {/* En-tête */}
+            <div className="text-center mb-14">
+              <p className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: "var(--color-secondary)" }}>
                 Nos piliers
               </p>
-              <h2 className="text-3xl font-bold mb-3 text-primary">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4"
+                style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
                 Nos Missions
               </h2>
-              <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
+              {/* Ligne décorative or */}
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="h-px w-16" style={{ background: "var(--color-secondary)" }} />
+                <div className="w-2 h-2 rounded-full" style={{ background: "var(--color-secondary)" }} />
+                <div className="h-px w-16" style={{ background: "var(--color-secondary)" }} />
+              </div>
+              <p className="max-w-lg mx-auto leading-relaxed" style={{ color: "#64748b" }}>
                 Trois engagements fondamentaux qui guident l&apos;action de la CEEC
                 au service de la nation congolaise.
               </p>
@@ -222,72 +230,90 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {missions.map((mission, i) => (
-                <div
-                  key={mission.titre}
-                  className={`group flex flex-col p-7 rounded-2xl transition-all duration-200 hover:shadow-lg border ${
-                    i === 1
-                      ? "bg-primary border-transparent"
-                      : "bg-muted border-border"
-                  }`}
-                >
-                  <div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center mb-5 ${
-                      i === 1
-                        ? "bg-secondary/20 text-gold"
-                        : "bg-primary/8 text-primary"
-                    }`}
-                  >
+                <div key={mission.titre}
+                  className="group flex flex-col p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+                  style={i === 1
+                    ? { background: "linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-900) 100%)", boxShadow: "0 8px 32px rgba(30,58,138,0.35)" }
+                    : { background: "var(--color-primary-50)", border: "1px solid var(--color-primary-100)" }
+                  }>
+                  {/* Icône */}
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110"
+                    style={i === 1
+                      ? { background: "rgba(197,155,46,0.2)", color: "var(--color-secondary)" }
+                      : { background: "var(--color-primary-100)", color: "var(--color-primary)" }
+                    }>
                     {mission.icon}
                   </div>
-                  <h3
-                    className={`text-lg font-bold mb-3 ${
-                      i === 1 ? "text-white" : "text-foreground"
-                    }`}
-                  >
+                  <h3 className="text-xl font-bold mb-3"
+                    style={{ color: i === 1 ? "#ffffff" : "var(--color-primary)", fontFamily: "var(--font-display)" }}>
                     {mission.titre}
                   </h3>
-                  <p
-                    className={`text-sm leading-relaxed ${
-                      i === 1 ? "text-white/70" : "text-slate-500"
-                    }`}
-                  >
+                  <p className="text-sm leading-relaxed"
+                    style={{ color: i === 1 ? "rgba(255,255,255,0.75)" : "#64748b" }}>
                     {mission.desc}
                   </p>
+                  {i === 1 && (
+                    <div className="mt-6 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+                      <span className="text-xs font-semibold uppercase tracking-widest"
+                        style={{ color: "var(--color-secondary)" }}>
+                        Notre priorité
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ——— VALEURS ——— */}
-        <section className="py-20 px-4 bg-muted">
+        {/* ═══════════════════════════════════════
+            NOS VALEURS — fond bleu clair CEEC
+        ═══════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ background: "var(--color-primary-50)" }}>
           <div className="max-w-[1280px] mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest mb-2 text-secondary">
+            <div className="text-center mb-14">
+              <p className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: "var(--color-secondary)" }}>
                 Ce qui nous unit
               </p>
-              <h2 className="text-3xl font-bold mb-3 text-primary">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4"
+                style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
                 Nos Valeurs Fondamentales
               </h2>
-              <p className="text-slate-500 max-w-md mx-auto leading-relaxed">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="h-px w-16" style={{ background: "var(--color-secondary)" }} />
+                <div className="w-2 h-2 rounded-full" style={{ background: "var(--color-secondary)" }} />
+                <div className="h-px w-16" style={{ background: "var(--color-secondary)" }} />
+              </div>
+              <p className="max-w-md mx-auto leading-relaxed" style={{ color: "#64748b" }}>
                 Ces valeurs guident chacune de nos églises et notre engagement
                 envers Dieu et la nation.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {valeurs.map((valeur) => (
-                <div
-                  key={valeur.titre}
-                  className="bg-white rounded-2xl p-7 text-center border border-border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-primary/7 text-primary flex items-center justify-center mx-auto mb-4">
+              {valeurs.map((valeur, i) => (
+                <div key={valeur.titre}
+                  className="rounded-2xl p-7 text-center transition-all duration-200 hover:-translate-y-1"
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid var(--color-primary-100)",
+                    boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+                  }}>
+                  {/* Numéro */}
+                  <div className="text-xs font-bold uppercase tracking-widest mb-3"
+                    style={{ color: "var(--color-secondary)" }}>
+                    0{i + 1}
+                  </div>
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
+                    style={{ background: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                     {valeur.icon}
                   </div>
-                  <h3 className="text-base font-bold mb-2 text-primary">
+                  <h3 className="text-base font-bold mb-2"
+                    style={{ color: "var(--color-primary)" }}>
                     {valeur.titre}
                   </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>
                     {valeur.desc}
                   </p>
                 </div>
@@ -296,62 +322,72 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ——— ÉGLISES ——— */}
-        <section className="py-20 px-4 bg-white">
+        {/* ═══════════════════════════════════════
+            NOS ÉGLISES
+        ═══════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ background: "#ffffff" }}>
           <div className="max-w-[1280px] mx-auto">
-            <div className="flex justify-between items-end mb-10 flex-wrap gap-4">
+            <div className="flex justify-between items-end mb-12 flex-wrap gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-1 text-secondary">
+                <p className="text-xs font-bold uppercase tracking-widest mb-2"
+                  style={{ color: "var(--color-secondary)" }}>
                   Notre réseau
                 </p>
-                <h2 className="text-3xl font-bold text-primary">Nos Églises</h2>
-                <p className="text-slate-500 mt-1">
+                <h2 className="text-3xl md:text-4xl font-bold"
+                  style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
+                  Nos Églises
+                </h2>
+                <p className="mt-1" style={{ color: "#64748b" }}>
                   Découvrez les églises membres de la CEEC
                 </p>
               </div>
-              <Link
-                href="/paroisses"
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold border-2 border-primary text-primary transition-all duration-200 hover:bg-primary hover:text-white"
+              <Link href="/paroisses"
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:text-white"
+                style={{ border: "2px solid var(--color-primary)", color: "var(--color-primary)" }}
               >
                 Voir toutes les églises →
               </Link>
             </div>
 
             {eglisesList.length === 0 ? (
-              <div className="text-center py-16 rounded-2xl bg-muted border-2 border-dashed border-border">
-                <div className="w-16 h-16 rounded-full bg-primary/7 text-primary flex items-center justify-center mx-auto mb-4">
+              <div className="text-center py-16 rounded-2xl"
+                style={{ background: "var(--color-primary-50)", border: "2px dashed var(--color-primary-200)" }}>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                   <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8" stroke="currentColor" strokeWidth="1.5">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" />
                     <polyline points="9 22 9 12 15 12 15 22" strokeLinecap="round" />
                   </svg>
                 </div>
-                <p className="text-slate-500 font-medium">
+                <p className="font-medium" style={{ color: "#64748b" }}>
                   Les églises seront affichées ici une fois ajoutées par les administrateurs.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {eglisesList.map((eglise) => (
-                  <Link
-                    key={eglise.id}
-                    href={`/paroisses/${eglise.id}`}
-                    className="group block rounded-2xl overflow-hidden border border-border transition-all duration-200 hover:shadow-xl hover:-translate-y-1"
-                  >
-                    {/* Barre couleur CEEC */}
-                    <div className="h-2 bg-[linear-gradient(90deg,var(--color-primary),var(--color-secondary))]" />
+                  <Link key={eglise.id} href={`/paroisses/${eglise.id}`}
+                    className="group block rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1"
+                    style={{ border: "1px solid var(--color-primary-100)", boxShadow: "0 2px 8px rgba(30,58,138,0.06)" }}>
+                    {/* Barre tricolore */}
+                    <div className="h-1.5"
+                      style={{ background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent))" }} />
                     {/* Initiale */}
-                    <div className="h-32 flex items-center justify-center text-6xl font-black text-white bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-primary-dark)_100%)]">
+                    <div className="h-32 flex items-center justify-center text-5xl font-black text-white"
+                      style={{ background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-900) 100%)" }}>
                       {eglise.nom.charAt(0)}
                     </div>
-                    <div className="p-5 bg-white">
-                      <h3 className="font-bold text-base text-slate-900 mb-2 group-hover:text-primary transition-colors">
+                    <div className="p-5" style={{ background: "#ffffff" }}>
+                      <h3 className="font-bold text-base mb-2 transition-colors"
+                        style={{ color: "var(--color-foreground)" }}>
                         {eglise.nom}
                       </h3>
-                      <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 bg-secondary/12 text-secondary">
+                      <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2"
+                        style={{ background: "var(--color-secondary-100)", color: "var(--color-secondary-800)" }}>
                         {eglise.ville}
                       </span>
                       {eglise.pasteur && (
-                        <p className="text-slate-500 text-xs mt-1">
+                        <p className="text-xs mt-1" style={{ color: "#64748b" }}>
                           Pasteur : {eglise.pasteur}
                         </p>
                       )}
@@ -363,54 +399,56 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ——— ANNONCES & ÉVÉNEMENTS ——— */}
-        <section className="py-20 px-4 bg-muted">
+        {/* ═══════════════════════════════════════
+            ANNONCES & ÉVÉNEMENTS
+        ═══════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ background: "var(--color-primary-50)" }}>
           <div className="max-w-[1280px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-              {/* Annonces */}
+              {/* ── Annonces ── */}
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-secondary">
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "var(--color-secondary)" }}>
                       Informations
                     </p>
-                    <h2 className="text-xl font-bold text-primary">Annonces</h2>
+                    <h2 className="text-xl font-bold"
+                      style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
+                      Annonces
+                    </h2>
                   </div>
-                  <Link
-                    href="/annonces"
-                    className="text-sm font-semibold text-secondary hover:text-primary transition-colors"
-                  >
+                  <Link href="/annonces" className="text-sm font-semibold transition-colors"
+                    style={{ color: "var(--color-secondary)" }}>
                     Tout voir →
                   </Link>
                 </div>
 
                 {annoncesList.length === 0 ? (
-                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-border">
+                  <div className="py-8 px-5 rounded-xl text-sm"
+                    style={{ background: "#ffffff", border: "1px dashed var(--color-primary-200)", color: "#64748b" }}>
                     Aucune annonce pour le moment.
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
                     {annoncesList.map((annonce) => (
-                      <div
-                        key={annonce.id}
-                        className="bg-white rounded-xl p-5 border border-border transition-shadow hover:shadow-sm"
-                      >
+                      <div key={annonce.id} className="rounded-xl p-5 transition-shadow hover:shadow-md"
+                        style={{ background: "#ffffff", border: "1px solid var(--color-primary-100)" }}>
                         <div className="flex items-start gap-3">
-                          <span
-                            className={`mt-0.5 flex-shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide ${
-                              annonce.priorite === "urgente"
-                                ? "bg-red-100 text-red-600"
-                                : "bg-sky-100 text-sky-700"
-                            }`}
-                          >
+                          <span className="mt-0.5 flex-shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide"
+                            style={annonce.priorite === "urgente"
+                              ? { background: "var(--color-accent-100)", color: "var(--color-accent-700)" }
+                              : { background: "var(--color-primary-100)", color: "var(--color-primary-700)" }
+                            }>
                             {annonce.priorite === "urgente" ? "Urgent" : "Info"}
                           </span>
                           <div>
-                            <h4 className="font-semibold text-slate-900 text-sm mb-1">
+                            <h4 className="font-semibold text-sm mb-1"
+                              style={{ color: "var(--color-foreground)" }}>
                               {annonce.titre}
                             </h4>
-                            <p className="text-slate-500 text-xs leading-relaxed">
+                            <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>
                               {annonce.contenu.substring(0, 110)}
                               {annonce.contenu.length > 110 ? "…" : ""}
                             </p>
@@ -422,51 +460,56 @@ export default async function HomePage() {
                 )}
               </div>
 
-              {/* Événements */}
+              {/* ── Événements ── */}
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5 text-secondary">
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "var(--color-secondary)" }}>
                       Agenda
                     </p>
-                    <h2 className="text-xl font-bold text-primary">Événements</h2>
+                    <h2 className="text-xl font-bold"
+                      style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
+                      Événements
+                    </h2>
                   </div>
-                  <Link
-                    href="/evenements"
-                    className="text-sm font-semibold text-secondary hover:text-primary transition-colors"
-                  >
+                  <Link href="/evenements" className="text-sm font-semibold transition-colors"
+                    style={{ color: "var(--color-secondary)" }}>
                     Tout voir →
                   </Link>
                 </div>
 
                 {evenementsList.length === 0 ? (
-                  <div className="py-8 px-5 rounded-xl text-sm text-slate-500 bg-white border border-dashed border-border">
+                  <div className="py-8 px-5 rounded-xl text-sm"
+                    style={{ background: "#ffffff", border: "1px dashed var(--color-primary-200)", color: "#64748b" }}>
                     Aucun événement planifié pour le moment.
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
                     {evenementsList.map((evt) => (
-                      <div
-                        key={evt.id}
-                        className="bg-white rounded-xl p-5 border border-border flex gap-4 items-start transition-shadow hover:shadow-sm"
-                      >
-                        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-primary flex flex-col items-center justify-center text-white">
+                      <div key={evt.id}
+                        className="rounded-xl p-5 flex gap-4 items-start transition-shadow hover:shadow-md"
+                        style={{ background: "#ffffff", border: "1px solid var(--color-primary-100)" }}>
+                        {/* Bloc date */}
+                        <div className="flex-shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center text-white"
+                          style={{ background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-900) 100%)" }}>
                           <span className="text-lg font-extrabold leading-none">
                             {new Date(evt.dateDebut).getDate()}
                           </span>
-                          <span className="text-[9px] uppercase opacity-70 font-semibold tracking-wide">
+                          <span className="text-[9px] uppercase opacity-75 font-semibold tracking-wide">
                             {new Date(evt.dateDebut).toLocaleString("fr-FR", { month: "short" })}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-slate-900 text-sm mb-1 leading-snug">
+                          <h4 className="font-semibold text-sm mb-1 leading-snug"
+                            style={{ color: "var(--color-foreground)" }}>
                             {evt.titre}
                           </h4>
                           {evt.lieu && (
-                            <p className="text-slate-500 text-xs flex items-center gap-1">
-                              <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                                <circle cx="12" cy="9" r="2.5"/>
+                            <p className="text-xs flex items-center gap-1" style={{ color: "#64748b" }}>
+                              <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3 flex-shrink-0" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                                <circle cx="12" cy="9" r="2.5" />
                               </svg>
                               {evt.lieu}
                             </p>
@@ -481,14 +524,24 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ——— CTA ——— */}
-        <section className="relative overflow-hidden py-20 px-4 bg-[linear-gradient(135deg,var(--color-secondary)_0%,var(--color-secondary-light)_60%,#b8882a_100%)]">
-          {/* Décoration points */}
+        {/* ═══════════════════════════════════════
+            CTA — Appel à rejoindre la CEEC
+        ═══════════════════════════════════════ */}
+        <section className="relative overflow-hidden py-24 px-4">
+          {/* Fond dégradé bleu profond */}
+          <div className="absolute inset-0"
+            style={{ background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-900) 60%, #060c1e 100%)" }} />
+          {/* Halo or */}
+          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-20 pointer-events-none"
+            style={{ background: "var(--color-secondary)", filter: "blur(80px)" }} />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-10 pointer-events-none"
+            style={{ background: "var(--color-secondary)", filter: "blur(60px)" }} />
+          {/* Motif points */}
           <div className="absolute inset-0 pointer-events-none opacity-10" aria-hidden>
             <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="dots-cta" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <circle cx="20" cy="20" r="1.5" fill="var(--color-primary)" />
+                  <circle cx="20" cy="20" r="1.5" fill="white" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#dots-cta)" />
@@ -496,24 +549,30 @@ export default async function HomePage() {
           </div>
 
           <div className="relative max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-primary">
-              Faites partie de notre communauté
+            {/* Filet or */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="h-px w-12" style={{ background: "var(--color-secondary)" }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: "var(--color-secondary)" }} />
+              <div className="h-px w-12" style={{ background: "var(--color-secondary)" }} />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-white"
+              style={{ fontFamily: "var(--font-display)" }}>
+              Faites partie de notre{" "}
+              <span style={{ color: "var(--color-secondary)" }}>communauté</span>
             </h2>
-            <p className="text-base leading-relaxed mb-10 text-primary/80">
+            <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
               Rejoignez la CEEC, accédez aux ressources de votre église, restez informé
               des événements et annonces de toute la communauté évangélique du Congo.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                href="/sign-up"
-                className="px-8 py-3.5 rounded-lg font-bold text-base text-white bg-primary transition-all duration-200 hover:brightness-110"
-              >
+              <Link href="/sign-up"
+                className="px-8 py-3.5 rounded-lg font-bold text-base transition-all duration-200 hover:brightness-110"
+                style={{ background: "var(--color-secondary)", color: "var(--color-primary-900)" }}>
                 Créer mon compte
               </Link>
-              <Link
-                href="/contact"
-                className="px-8 py-3.5 rounded-lg font-semibold text-base text-primary bg-primary/8 border-2 border-primary/25 transition-all duration-200 hover:bg-primary/15"
-              >
+              <Link href="/contact"
+                className="px-8 py-3.5 rounded-lg font-semibold text-base text-white transition-all duration-200"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)" }}>
                 Nous contacter
               </Link>
             </div>

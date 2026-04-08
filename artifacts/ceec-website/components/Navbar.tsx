@@ -41,6 +41,8 @@ export default function Navbar() {
 
   const links = [
     { href: "/", label: "Accueil" },
+    { href: "/a-propos", label: "À propos" },
+    { href: "/historique", label: "Historique" },
     { href: "/paroisses", label: "Paroisses" },
     { href: "/evenements", label: "Événements" },
     { href: "/annonces", label: "Annonces" },

@@ -120,6 +120,8 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-2.5">
               {[
+                { href: "/a-propos", label: "À propos de la CEEC" },
+                { href: "/historique", label: "Notre histoire" },
                 { href: "/paroisses", label: "Nos paroisses" },
                 { href: "/evenements", label: "Événements" },
                 { href: "/annonces", label: "Annonces" },

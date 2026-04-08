@@ -95,6 +95,8 @@ function setChurchCookie(target: NextResponse, slug: string) {
 
 const isPublicRoute = createRouteMatcher([
   "/",
+  "/a-propos(.*)",
+  "/historique(.*)",
   "/paroisses(.*)",
   "/evenements(.*)",
   "/annonces(.*)",

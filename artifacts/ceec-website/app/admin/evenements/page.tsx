@@ -1,8 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, hasAnyAdminRole } from "@/lib/auth/rbac";
 import AdminEvenementsClient from "@/components/admin/AdminEvenementsClient";
@@ -25,22 +22,16 @@ export default async function AdminEvenementsPage() {
   ]);
 
   return (
-    <>
-      <Navbar />
-      <main style={{ minHeight: "100vh", background: "#f8fafc" }}>
-        <div style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "2.5rem 1rem" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <Link href="/admin" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 12, display: "inline-block" }}>
-              ← Tableau de bord admin
-            </Link>
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800 }}>Gestion des Événements</h1>
-          </div>
-        </div>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "2rem 1rem" }}>
-          <AdminEvenementsClient initialEvenements={evenementsList} paroissesList={eglisesList} />
-        </div>
-      </main>
-      <Footer />
-    </>
+    <div style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+          Gestion des Événements
+        </h1>
+        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
+          {evenementsList.length} événement{evenementsList.length !== 1 ? "s" : ""} au total
+        </p>
+      </div>
+      <AdminEvenementsClient initialEvenements={evenementsList} paroissesList={eglisesList} />
+    </div>
   );
 }

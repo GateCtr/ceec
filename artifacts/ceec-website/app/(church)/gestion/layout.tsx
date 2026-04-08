@@ -2,9 +2,10 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin, type Permission } from "@/lib/auth/rbac";
-import GestionSidebar from "@/components/gestion/GestionSidebar";
+import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 import { EgliseProvider, type EgliseData } from "@/lib/church-context";
+import DashboardShell from "@/components/dashboard/DashboardShell";
+import type { NavItem } from "@/components/dashboard/DashboardSidebar";
 
 export default async function GestionLayout({
   children,
@@ -59,21 +60,34 @@ export default async function GestionLayout({
   const canAdmins = superAdmin || pAdmins;
   const canParametres = superAdmin || pEglise;
 
-  const navPerms = {
-    contenus: superAdmin || pContenus,
-    membres: canMembres,
-    admins: canAdmins,
-    parametres: canParametres,
-  };
+  const navItems: NavItem[] = [
+    { label: "Tableau de bord", href: "/gestion", icon: "📊", matchExact: true },
+    ...(superAdmin || pContenus ? [
+      { label: "Annonces", href: "/gestion/annonces", icon: "📢" },
+      { label: "Événements", href: "/gestion/evenements", icon: "🗓️" },
+    ] : []),
+    ...(canMembres ? [{ label: "Membres", href: "/gestion/membres", icon: "👥" }] : []),
+    ...(canAdmins ? [{ label: "Admins", href: "/gestion/admins", icon: "🔐" }] : []),
+    ...(canParametres ? [{ label: "Paramètres", href: "/gestion/parametres", icon: "⚙️" }] : []),
+  ];
+
+  const initial = eglise.nom.charAt(0).toUpperCase();
 
   return (
     <EgliseProvider eglise={eglise as EgliseData} isChurchDomain={true}>
-      <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
-        <GestionSidebar eglise={eglise as EgliseData} permissions={navPerms} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {children}
-        </div>
-      </div>
+      <DashboardShell
+        items={navItems}
+        headerTitle={eglise.nom}
+        headerSubtitle="Espace de gestion"
+        headerInitial={initial}
+        headerColor="#c59b2e"
+        contextLabel={eglise.nom}
+        backHref="/c"
+        backLabel="Site public"
+        storageKey={`ceec-gestion-sidebar-collapsed-${eglise.slug}`}
+      >
+        {children}
+      </DashboardShell>
     </EgliseProvider>
   );
 }

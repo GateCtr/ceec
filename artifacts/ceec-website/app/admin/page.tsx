@@ -1,7 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
@@ -60,61 +58,56 @@ export default async function AdminPage() {
   const { stats, eglises } = await getDashboardData();
 
   return (
-    <>
-      <Navbar />
-      <main style={{ minHeight: "100vh", background: "#f8fafc" }}>
-        <div style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "2.5rem 1rem" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ display: "inline-block", background: "rgba(197,155,46,0.2)", border: "1px solid rgba(197,155,46,0.4)", borderRadius: 100, padding: "4px 16px", fontSize: 12, color: "#fcd34d", marginBottom: 12 }}>
-              ADMINISTRATION PLATEFORME
-            </div>
-            <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: 0 }}>Tableau de bord</h1>
-            <p style={{ opacity: 0.8, marginTop: 4 }}>Vue globale de la plateforme CEEC</p>
+    <div style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+          Vue globale de la plateforme CEEC
+        </h1>
+        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
+          Statistiques et gestion centralisée de toutes les églises membres
+        </p>
+      </div>
+
+      <h2 style={{ fontWeight: 700, color: "#1e3a8a", marginBottom: 16, fontSize: 16 }}>
+        Statistiques globales
+      </h2>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 36 }}>
+        <div style={statCard}>
+          <div style={{ fontSize: 12, color: "#64748b" }}>Églises (total)</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#1e3a8a" }}>{stats.eglises.total}</div>
+          <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ ...badge, background: "#dcfce7", color: "#15803d" }}>{stats.eglises.actif} actives</span>
+            <span style={{ ...badge, background: "#fef3c7", color: "#b45309" }}>{stats.eglises.en_attente} en attente</span>
+            <span style={{ ...badge, background: "#fee2e2", color: "#b91c1c" }}>{stats.eglises.suspendu} suspendues</span>
           </div>
         </div>
-
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "2rem 1rem" }}>
-          <h2 style={{ fontWeight: 700, color: "#1e3a8a", marginBottom: 16, fontSize: 17 }}>Statistiques globales</h2>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 36 }}>
-            <div style={statCard}>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Églises (total)</div>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#1e3a8a" }}>{stats.eglises.total}</div>
-              <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ ...badge, background: "#dcfce7", color: "#15803d" }}>{stats.eglises.actif} actives</span>
-                <span style={{ ...badge, background: "#fef3c7", color: "#b45309" }}>{stats.eglises.en_attente} en attente</span>
-                <span style={{ ...badge, background: "#fee2e2", color: "#b91c1c" }}>{stats.eglises.suspendu} suspendues</span>
-              </div>
-            </div>
-            <div style={statCard}>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Membres</div>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#0891b2" }}>{stats.membres}</div>
-            </div>
-            <div style={statCard}>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Annonces</div>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#16a34a" }}>{stats.annonces}</div>
-            </div>
-            <div style={statCard}>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Événements</div>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#d97706" }}>{stats.evenements}</div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
-            <h2 style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 17, margin: 0 }}>Toutes les églises</h2>
-            <Link
-              href="/admin/eglises/nouveau"
-              style={{ padding: "8px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none" }}
-            >
-              + Ajouter une église
-            </Link>
-          </div>
-
-          <AdminDashboardClient eglises={eglises} />
+        <div style={statCard}>
+          <div style={{ fontSize: 12, color: "#64748b" }}>Membres</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#0891b2" }}>{stats.membres}</div>
         </div>
-      </main>
-      <Footer />
-    </>
+        <div style={statCard}>
+          <div style={{ fontSize: 12, color: "#64748b" }}>Annonces</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#16a34a" }}>{stats.annonces}</div>
+        </div>
+        <div style={statCard}>
+          <div style={{ fontSize: 12, color: "#64748b" }}>Événements</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#d97706" }}>{stats.evenements}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+        <h2 style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 16, margin: 0 }}>Toutes les églises</h2>
+        <Link
+          href="/admin/eglises/nouveau"
+          style={{ padding: "8px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none" }}
+        >
+          + Ajouter une église
+        </Link>
+      </div>
+
+      <AdminDashboardClient eglises={eglises} />
+    </div>
   );
 }
 

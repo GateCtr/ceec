@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
@@ -110,12 +111,28 @@ export default async function HomePage() {
       <main>
 
         {/* ——— HERO ——— */}
-        <section className="relative overflow-hidden text-white pt-28 pb-20 bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-primary-dark)_55%,var(--color-foreground)_100%)]">
-          {/* Blobs décoratifs */}
+        <section className="relative overflow-hidden text-white pt-28 pb-20 min-h-[70vh] flex flex-col justify-center">
+          {/* Photo de l'église */}
+          <Image
+            src="/church-hero.png"
+            alt="Église de la CEEC"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+
+          {/* Superposition dégradée bleu CEEC */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg,rgba(30,58,138,0.88) 0%,rgba(14,23,60,0.93) 55%,rgba(8,12,28,0.97) 100%)",
+            }}
+          />
+
+          {/* Motif croix en overlay subtil */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
-            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full opacity-10 bg-secondary blur-[60px]" />
-            <div className="absolute bottom-0 -left-20 w-64 h-64 rounded-full opacity-10 bg-secondary blur-[50px]" />
-            <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
+            <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="crosses" width="60" height="60" patternUnits="userSpaceOnUse">
                   <path d="M30 10v20M20 20h20" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
@@ -123,6 +140,8 @@ export default async function HomePage() {
               </defs>
               <rect width="100%" height="100%" fill="url(#crosses)" />
             </svg>
+            {/* Halo or en bas à droite */}
+            <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-[0.06] bg-secondary blur-[80px]" />
           </div>
 
           <div className="relative max-w-3xl mx-auto px-4 text-center">

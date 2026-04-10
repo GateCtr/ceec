@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY next dev --port ${PORT:-3000} -H 0.0.0.0",
+    "dev": "next dev --port ${PORT:-3000} -H 0.0.0.0",
     "build": "prisma generate && next build",
-    "start": "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY next start --port ${PORT:-3000} -H 0.0.0.0",
+    "start": "next start --port ${PORT:-3000} -H 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push"

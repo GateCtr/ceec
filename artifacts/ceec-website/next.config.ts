@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       process.env.REPLIT_DEV_DOMAIN || "",
       "*.replit.dev",
       "*.kirk.replit.dev",
+      "*.riker.replit.dev",
     ].filter(Boolean),
   }),
   images: {

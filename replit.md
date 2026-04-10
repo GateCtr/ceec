@@ -77,6 +77,12 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 ### Mockup Sandbox (`artifacts/mockup-sandbox/`)
 - Vite dev server for canvas component previews, port 8081
 
+## Replit Migration Notes
+
+- `pnpm.onlyBuiltDependencies` added to root `package.json` to allow Prisma, Clerk, sharp, and esbuild postinstall scripts to run (required for Prisma client generation and Clerk to work)
+- Dev/start scripts updated to use `${PORT:-3000} -H 0.0.0.0` for Replit proxy compatibility
+- Workflow "Start application" configured: `pnpm --filter @workspace/ceec-website run dev` on port 3000
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages

@@ -1,3 +1,5 @@
+import { safeUrl } from "@/lib/sanitize-url";
+
 type LiveConfig = {
   titre?: string;
   urlYoutube?: string;
@@ -100,7 +102,7 @@ export default function SectionLive({
               return (
                 <a
                   key={stream.id}
-                  href={stream.urlYoutube}
+                  href={safeUrl(stream.urlYoutube)}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: "none", display: "block" }}

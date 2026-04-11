@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { safeUrl } from "@/lib/sanitize-url";
 
 type HeroConfig = {
   titre?: string;
@@ -93,7 +94,7 @@ export default function SectionHero({
         )}
         <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
           <Link
-            href={ctaHref1}
+            href={safeUrl(ctaHref1)}
             style={{
               padding: "13px 30px", borderRadius: 10,
               background: "var(--church-accent, #c59b2e)",
@@ -104,7 +105,7 @@ export default function SectionHero({
             {ctaLabel1}
           </Link>
           <Link
-            href={ctaHref2}
+            href={safeUrl(ctaHref2)}
             style={{
               padding: "13px 30px", borderRadius: 10,
               background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)",

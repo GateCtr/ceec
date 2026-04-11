@@ -1,3 +1,5 @@
+import { safeUrl } from "@/lib/sanitize-url";
+
 type TexTeImageConfig = {
   titre?: string;
   sousTitre?: string;
@@ -61,7 +63,7 @@ export default function SectionTexteImage({ config }: { config: TexTeImageConfig
           )}
           {ctaLabel && ctaHref && (
             <a
-              href={ctaHref}
+              href={safeUrl(ctaHref)}
               style={{
                 display: "inline-block", marginTop: 24,
                 padding: "11px 26px", borderRadius: 8,

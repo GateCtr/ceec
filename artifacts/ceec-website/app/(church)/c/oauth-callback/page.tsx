@@ -26,7 +26,8 @@ function OAuthCallbackInner() {
   const searchParams = useSearchParams();
   const registered = useRef(false);
 
-  // Phase 2 : nouveau compte Google → rattacher à l'église
+  // Phase 2 : rattacher le membre à son église (sign-up ET sign-in OAuth)
+  // L'appel register-fidele est idempotent (upsert) — sans risque pour les membres existants.
   useEffect(() => {
     if (searchParams.get("post") !== "register") return;
     if (!userId || registered.current) return;
@@ -36,7 +37,7 @@ function OAuthCallbackInner() {
 
     const finish = () => {
       clearStoredSlug();
-      router.replace("/auth/redirect");
+      router.replace("/c");
     };
 
     if (!slug) {
@@ -54,14 +55,16 @@ function OAuthCallbackInner() {
   }, [userId, searchParams, router]);
 
   // Phase 1 : finaliser le handshake OAuth Clerk
+  // Les deux chemins (sign-in ET sign-up) passent par ?post=register pour garantir
+  // que le rattachement à l'église est toujours tenté.
   useEffect(() => {
     if (searchParams.get("post") === "register") return;
 
     handleRedirectCallback({
-      signInForceRedirectUrl: "/auth/redirect",
+      signInForceRedirectUrl: "/c/oauth-callback?post=register",
       signUpForceRedirectUrl: "/c/oauth-callback?post=register",
     }).catch(() => {
-      router.replace("/auth/redirect");
+      router.replace("/c");
     });
   }, [handleRedirectCallback, searchParams, router]);
 

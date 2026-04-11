@@ -9,12 +9,20 @@ import { resolveChurchBySlug } from "@/lib/db/edge";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
 
+// Chemins qui ne doivent JAMAIS être réécrits vers /c/...
+// Règle : toutes les routes /api/ générales bypass la réécriture église.
+// Seules les routes d'église spécifiques (/api/gestion, /api/eglise) sont
+// potentiellement concernées par le contexte paroissial.
 const CHURCH_REWRITE_BYPASS_PATHS = [
   "/eglise-introuvable",
   "/sign-in",
   "/sign-up",
   "/api/church",
   "/api/webhooks",
+  "/api/me",
+  "/api/admin",
+  "/api/auth",
+  "/api/setup",
 ];
 
 function extractChurchSlug(req: Request): string | null {

@@ -22,6 +22,7 @@ type Video = {
 };
 type Section = {
   id: number; type: string; ordre: number; pageId: number; pageTitre: string; pageSlug: string;
+  config?: Record<string, unknown>;
 };
 
 type Props = {
@@ -131,7 +132,7 @@ function VideoForm({ initial, onSave, onCancel, error }: { initial?: Partial<Vid
 // ─── Section form ─────────────────────────────────────────────────────────────
 
 function SectionForm({ pages, onSave, onCancel, error, initial }: {
-  pages: Page[]; initial?: Partial<Section & { config?: Record<string, string> }>;
+  pages: Page[]; initial?: Partial<Omit<Section, "config"> & { config?: Record<string, unknown> }>;
   onSave: (d: { pageId: number; type: string; config: Record<string, string> }) => void;
   onCancel: () => void; error: string | null;
 }) {

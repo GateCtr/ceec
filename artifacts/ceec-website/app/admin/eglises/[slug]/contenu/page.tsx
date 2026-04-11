@@ -136,6 +136,7 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
           pageId: s.page.id,
           pageTitre: s.page.titre,
           pageSlug: s.page.slug,
+          config: (s.config ?? {}) as Record<string, unknown>,
         }))}
       />
     </div>

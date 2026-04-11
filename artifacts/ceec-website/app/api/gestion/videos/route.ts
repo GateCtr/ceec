@@ -3,6 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 
+function isValidYoutubeUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw.trim());
+    const host = u.hostname.replace(/^www\./, "");
+    return host === "youtube.com" || host === "youtu.be";
+  } catch { return false; }
+}
+
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
   if (!h) return null;
@@ -47,6 +55,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body.titre || !body.urlYoutube) {
       return NextResponse.json({ error: "Titre et URL YouTube requis" }, { status: 400 });
+    }
+    if (!isValidYoutubeUrl(body.urlYoutube)) {
+      return NextResponse.json({ error: "URL YouTube invalide (doit être youtube.com ou youtu.be)" }, { status: 400 });
     }
 
     const video = await prisma.liveStream.create({

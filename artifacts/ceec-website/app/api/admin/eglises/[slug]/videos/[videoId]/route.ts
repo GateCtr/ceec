@@ -3,6 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import { isAdminPlatteforme } from "@/lib/auth/rbac";
 
+function isValidYoutubeUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw.trim());
+    const host = u.hostname.replace(/^www\./, "");
+    return host === "youtube.com" || host === "youtu.be";
+  } catch { return false; }
+}
+
 type Params = { params: Promise<{ slug: string; videoId: string }> };
 
 export async function PUT(req: NextRequest, { params }: Params) {
@@ -22,6 +30,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (!existing) return NextResponse.json({ error: "Vidéo introuvable" }, { status: 404 });
 
     const body = await req.json();
+    if (body.urlYoutube !== undefined && body.urlYoutube && !isValidYoutubeUrl(body.urlYoutube)) {
+      return NextResponse.json({ error: "URL YouTube invalide (doit être youtube.com ou youtu.be)" }, { status: 400 });
+    }
     const video = await prisma.liveStream.update({
       where: { id: vId },
       data: {

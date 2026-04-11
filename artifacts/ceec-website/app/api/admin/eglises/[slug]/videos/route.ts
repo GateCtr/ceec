@@ -3,6 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import { isAdminPlatteforme } from "@/lib/auth/rbac";
 
+function isValidYoutubeUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw.trim());
+    const host = u.hostname.replace(/^www\./, "");
+    return host === "youtube.com" || host === "youtu.be";
+  } catch { return false; }
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { userId } = await auth();
@@ -36,6 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     const body = await req.json();
     if (!body.titre?.trim()) return NextResponse.json({ error: "Titre requis" }, { status: 400 });
     if (!body.urlYoutube?.trim()) return NextResponse.json({ error: "URL YouTube requise" }, { status: 400 });
+    if (!isValidYoutubeUrl(body.urlYoutube)) return NextResponse.json({ error: "URL YouTube invalide (doit être youtube.com ou youtu.be)" }, { status: 400 });
 
     const video = await prisma.liveStream.create({
       data: {

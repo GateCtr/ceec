@@ -10,6 +10,29 @@ async function getEgliseId(req: NextRequest): Promise<number | null> {
   return isNaN(id) ? null : id;
 }
 
+export async function GET(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+    const egliseId = await getEgliseId(req);
+    if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
+
+    const superAdmin = await isSuperAdmin(userId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
+    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+
+    const sections = await prisma.sectionPage.findMany({
+      where: { page: { egliseId } },
+      include: { page: { select: { id: true, titre: true, slug: true } } },
+      orderBy: [{ page: { ordre: "asc" } }, { ordre: "asc" }],
+    });
+    return NextResponse.json(sections);
+  } catch {
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();

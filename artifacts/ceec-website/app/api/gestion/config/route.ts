@@ -59,11 +59,23 @@ export async function PUT(req: NextRequest) {
       ...(body.footerLinksJson !== undefined && { footerLinksJson: body.footerLinksJson ?? null }),
     };
 
-    const config = await prisma.egliseConfig.upsert({
-      where: { egliseId },
-      create: { egliseId, ...data },
-      update: data,
-    });
+    const [config] = await Promise.all([
+      prisma.egliseConfig.upsert({
+        where: { egliseId },
+        create: { egliseId, ...data },
+        update: data,
+      }),
+      ...(body.adresse !== undefined || body.telephone !== undefined || body.email !== undefined
+        ? [prisma.eglise.update({
+            where: { id: egliseId },
+            data: {
+              ...(body.adresse !== undefined && { adresse: body.adresse || null }),
+              ...(body.telephone !== undefined && { telephone: body.telephone || null }),
+              ...(body.email !== undefined && { email: body.email || null }),
+            },
+          })]
+        : []),
+    ]);
     return NextResponse.json(config);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

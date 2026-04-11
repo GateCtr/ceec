@@ -27,7 +27,9 @@ function parseLinks<T>(raw: unknown, fallback: T[]): T[] {
   try { return JSON.parse(raw as string) as T[]; } catch { return fallback; }
 }
 
-export default function GestionApparenceClient({ initialConfig }: { initialConfig: ConfigData | null }) {
+type ContactData = { adresse?: string | null; telephone?: string | null; email?: string | null };
+
+export default function GestionApparenceClient({ initialConfig, initialContact }: { initialConfig: ConfigData | null; initialContact?: ContactData }) {
   const [form, setForm] = useState({
     couleurPrimaire: initialConfig?.couleurPrimaire ?? "#1e3a8a",
     couleurAccent: initialConfig?.couleurAccent ?? "#c59b2e",
@@ -41,6 +43,11 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
     siteWeb: initialConfig?.siteWeb ?? "",
     horaires: initialConfig?.horaires ?? "",
   });
+  const [contact, setContact] = useState({
+    adresse: initialContact?.adresse ?? "",
+    telephone: initialContact?.telephone ?? "",
+    email: initialContact?.email ?? "",
+  });
   const [navLinks, setNavLinks] = useState<NavLink[]>(
     parseLinks<NavLink>(initialConfig?.navLinksJson, [])
   );
@@ -53,6 +60,11 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
 
   function updateField(key: keyof typeof form, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
+    setSuccess(false);
+  }
+
+  function updateContact(key: keyof typeof contact, value: string) {
+    setContact((c) => ({ ...c, [key]: value }));
     setSuccess(false);
   }
 
@@ -96,6 +108,7 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          ...contact,
           navLinksJson: navLinks.filter((l) => l.label && l.href),
           footerLinksJson: footerLinks.filter((l) => l.label && l.href),
         }),
@@ -211,7 +224,24 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
         </>
       )}
 
-      {section("Réseaux sociaux et contact", "",
+      {section("Coordonnées de l'église", "",
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Téléphone</label>
+            <input value={contact.telephone} onChange={(e) => updateContact("telephone", e.target.value)} placeholder="+243 XXX XXX XXX" style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }} />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Email</label>
+            <input type="email" value={contact.email} onChange={(e) => updateContact("email", e.target.value)} placeholder="contact@eglise.org" style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }} />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Adresse</label>
+            <textarea value={contact.adresse} onChange={(e) => updateContact("adresse", e.target.value)} rows={2} placeholder="Avenue de l'Église, Kinshasa…" style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box", resize: "vertical" }} />
+          </div>
+        </div>
+      )}
+
+      {section("Réseaux sociaux et horaires", "",
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {input("facebook", "Facebook (URL)", { placeholder: "https://facebook.com/..." })}

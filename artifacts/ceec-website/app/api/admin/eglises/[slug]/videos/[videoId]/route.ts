@@ -27,6 +27,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
       data: {
         ...(body.publie !== undefined && { publie: body.publie }),
         ...(body.epingle !== undefined && { epingle: body.epingle }),
+        ...(body.titre !== undefined && { titre: body.titre }),
+        ...(body.urlYoutube !== undefined && { urlYoutube: body.urlYoutube }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.estEnDirect !== undefined && { estEnDirect: body.estEnDirect }),
+        ...(body.dateStream !== undefined && { dateStream: body.dateStream ? new Date(body.dateStream) : null }),
       },
     });
     return NextResponse.json(video);

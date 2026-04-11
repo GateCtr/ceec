@@ -24,7 +24,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const body = await req.json();
     const page = await prisma.pageEglise.update({
       where: { id: pId },
-      data: { ...(body.publie !== undefined && { publie: body.publie }) },
+      data: {
+        ...(body.publie !== undefined && { publie: body.publie }),
+        ...(body.titre !== undefined && { titre: body.titre }),
+        ...(body.slug !== undefined && { slug: body.slug }),
+        ...(body.type !== undefined && { type: body.type }),
+        ...(body.ordre !== undefined && { ordre: body.ordre }),
+      },
     });
     return NextResponse.json(page);
   } catch {

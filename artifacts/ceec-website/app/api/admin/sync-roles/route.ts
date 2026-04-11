@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { isSuperAdmin, getUserRoles } from "@/lib/auth/rbac";
+import { isSuperAdmin, isAdminPlatteforme, getUserRoles } from "@/lib/auth/rbac";
 
 export async function POST() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorise" }, { status: 401 });
 
-    const superAdmin = await isSuperAdmin(userId);
-    const userRoles = await getUserRoles(userId);
+    const [superAdmin, adminPlatteforme, userRoles] = await Promise.all([
+      isSuperAdmin(userId),
+      isAdminPlatteforme(userId),
+      getUserRoles(userId),
+    ]);
 
     const churchRoles = userRoles
       .filter((ur) => ur.egliseId !== null && ur.role.scope === "church")
@@ -21,6 +24,7 @@ export async function POST() {
     await client.users.updateUserMetadata(userId, {
       publicMetadata: {
         isSuperAdmin: superAdmin,
+        isAdminPlatteforme: adminPlatteforme,
         churchRoles,
       },
     });
@@ -28,6 +32,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       isSuperAdmin: superAdmin,
+      isAdminPlatteforme: adminPlatteforme,
       churchRoles,
     });
   } catch {

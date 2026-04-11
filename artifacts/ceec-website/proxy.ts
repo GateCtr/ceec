@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import {
   isSuperAdminFromClaims,
+  isAdminPlatteformeFromClaims,
   hasAnyChurchRoleFromClaims,
   isEgliseAdminFromClaims,
 } from "@/lib/auth/rbac-edge";
@@ -245,11 +246,11 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isPlatformAdminRoute(req)) {
-    const isSuperAdmin = isSuperAdminFromClaims(claims);
-    if (!isSuperAdmin) {
+    const canAccessAdmin = isAdminPlatteformeFromClaims(claims);
+    if (!canAccessAdmin) {
       if (url.pathname.startsWith("/api/")) {
         return NextResponse.json(
-          { error: "Acces refuse - super admin requis" },
+          { error: "Acces refuse - admin plateforme requis" },
           { status: 403 }
         );
       }

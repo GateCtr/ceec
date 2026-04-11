@@ -27,6 +27,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
       data: {
         ...(body.publie !== undefined && { publie: body.publie }),
         ...(body.titre !== undefined && { titre: body.titre }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.dateDebut !== undefined && { dateDebut: new Date(body.dateDebut) }),
+        ...(body.dateFin !== undefined && { dateFin: body.dateFin ? new Date(body.dateFin) : null }),
+        ...(body.lieu !== undefined && { lieu: body.lieu }),
+        ...(body.categorie !== undefined && { categorie: body.categorie }),
+        ...(body.imageUrl !== undefined && { imageUrl: body.imageUrl }),
+        ...(body.lienInscription !== undefined && { lienInscription: body.lienInscription }),
       },
     });
     return NextResponse.json(evt);

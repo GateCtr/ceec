@@ -18,6 +18,11 @@ export function isSuperAdminFromClaims(sessionClaims: JwtSessionClaims): boolean
   return getPublicMeta(sessionClaims).isSuperAdmin === true;
 }
 
+/** Vrai si super_admin ou admin_plateforme (synchronisé via /api/admin/sync-roles) */
+export function isAdminPlatteformeFromClaims(sessionClaims: JwtSessionClaims): boolean {
+  return getPublicMeta(sessionClaims).isAdminPlatteforme === true;
+}
+
 export function getChurchRolesFromClaims(
   sessionClaims: JwtSessionClaims
 ): ChurchRoleClaim[] {

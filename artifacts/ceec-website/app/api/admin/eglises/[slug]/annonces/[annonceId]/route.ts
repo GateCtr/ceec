@@ -29,6 +29,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
         ...(body.titre !== undefined && { titre: body.titre }),
         ...(body.contenu !== undefined && { contenu: body.contenu }),
         ...(body.priorite !== undefined && { priorite: body.priorite }),
+        ...(body.categorie !== undefined && { categorie: body.categorie }),
+        ...(body.imageUrl !== undefined && { imageUrl: body.imageUrl }),
+        ...(body.datePublication !== undefined && { datePublication: new Date(body.datePublication) }),
       },
     });
     return NextResponse.json(annonce);

@@ -165,7 +165,15 @@ export default function SignInPage() {
           </div>
         )}
 
-        <button type="submit" style={s.btn} disabled={!isLoaded || isLoading || !email || !password}>
+        <button
+          type="submit"
+          style={{
+            ...s.btn,
+            opacity: (!isLoaded || isLoading) ? 0.6 : 1,
+            cursor: (!isLoaded || isLoading) ? "not-allowed" : "pointer",
+          }}
+          disabled={!isLoaded || isLoading}
+        >
           {isLoading ? "Connexion…" : "Se connecter"}
         </button>
       </form>

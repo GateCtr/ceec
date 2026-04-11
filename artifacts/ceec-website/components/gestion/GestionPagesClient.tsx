@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 type Page = {
   id: number;
@@ -14,13 +13,6 @@ type Page = {
   sectionsCount: number;
 };
 
-type FormData = {
-  titre: string;
-  slug: string;
-  type: string;
-  publie: boolean;
-};
-
 const typeLabels: Record<string, string> = {
   accueil: "Accueil",
   about: "À propos",
@@ -29,50 +21,8 @@ const typeLabels: Record<string, string> = {
   custom: "Page libre",
 };
 
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
-
-const emptyForm: FormData = { titre: "", slug: "", type: "custom", publie: false };
-
 export default function GestionPagesClient({ initialPages }: { initialPages: Page[] }) {
   const [pages, setPages] = useState<Page[]>(initialPages);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<FormData>(emptyForm);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
-  function updateField<K extends keyof FormData>(key: K, value: FormData[K]) {
-    setForm((f) => {
-      const next = { ...f, [key]: value };
-      if (key === "titre" && !f.slug) next.slug = slugify(value as string);
-      return next;
-    });
-  }
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true); setError(null);
-    try {
-      const res = await fetch("/api/gestion/pages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, slug: form.slug || slugify(form.titre) }),
-      });
-      if (!res.ok) { const d = await res.json(); setError(d.error ?? "Erreur"); return; }
-      const created = await res.json();
-      setPages((p) => [...p, { ...created, sectionsCount: 0 }]);
-      setShowForm(false);
-      setForm(emptyForm);
-    } finally { setLoading(false); }
-  }
 
   async function togglePublish(page: Page) {
     const res = await fetch(`/api/gestion/pages/${page.id}`, {
@@ -94,73 +44,26 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
-        <button
-          onClick={() => { setShowForm(!showForm); setError(null); setForm(emptyForm); }}
-          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginBottom: 20 }}>
+        <Link
+          href="/gestion/pages/nouveau"
+          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14 }}
         >
           + Créer une page
-        </button>
+        </Link>
       </div>
-
-      {showForm && (
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-          <h3 style={{ fontWeight: 700, color: "#0f172a", marginBottom: 16, fontSize: 15 }}>Nouvelle page</h3>
-          {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{error}</div>}
-          <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Titre *</label>
-                <input
-                  required value={form.titre}
-                  onChange={(e) => updateField("titre", e.target.value)}
-                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
-                  placeholder="Ex: À propos de nous"
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Slug (URL)</label>
-                <input
-                  value={form.slug}
-                  onChange={(e) => updateField("slug", slugify(e.target.value))}
-                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
-                  placeholder="a-propos"
-                />
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Type</label>
-                <select
-                  value={form.type}
-                  onChange={(e) => updateField("type", e.target.value)}
-                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
-                >
-                  {Object.entries(typeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 24 }}>
-                <input type="checkbox" id="publie" checked={form.publie} onChange={(e) => updateField("publie", e.target.checked)} />
-                <label htmlFor="publie" style={{ fontSize: 14, color: "#374151" }}>Publier immédiatement</label>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 4 }}>
-              <button type="button" onClick={() => setShowForm(false)} style={{ padding: "9px 18px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 14, cursor: "pointer" }}>
-                Annuler
-              </button>
-              <button type="submit" disabled={loading} style={{ padding: "9px 18px", borderRadius: 7, background: "#1e3a8a", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
-                {loading ? "Création…" : "Créer"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {pages.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>📄</div>
           <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune page configurée</h3>
-          <p style={{ color: "#64748b", fontSize: 14 }}>Créez votre première page personnalisée pour enrichir votre site public.</p>
+          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Créez votre première page personnalisée pour enrichir votre site public.</p>
+          <Link
+            href="/gestion/pages/nouveau"
+            style={{ padding: "10px 24px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14 }}
+          >
+            Créer une page
+          </Link>
         </div>
       ) : (
         <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>

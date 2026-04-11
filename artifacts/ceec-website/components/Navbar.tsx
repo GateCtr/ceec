@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
+import { UserMenu, UserMenuMobile } from "@/components/UserMenu";
 
 type NavInfo = {
   isSuperAdmin: boolean;
   isChurchAdmin: boolean;
   churchSlugs: string[];
+  roleLabel?: string;
+  churchName?: string;
 };
 
 export default function Navbar() {
@@ -20,6 +23,8 @@ export default function Navbar() {
     isSuperAdmin: false,
     isChurchAdmin: false,
     churchSlugs: [],
+    roleLabel: undefined,
+    churchName: undefined,
   });
 
   useEffect(() => {
@@ -69,11 +74,6 @@ export default function Navbar() {
         : "font-normal border-l-[3px] border-transparent hover:bg-white/5"
     }`;
 
-  const churchLink =
-    navInfo.isChurchAdmin && navInfo.churchSlugs[0]
-      ? `/gestion?eglise=${navInfo.churchSlugs[0]}`
-      : null;
-
   return (
     <nav
       className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
@@ -115,35 +115,11 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Lien gestion église */}
-          {isSignedIn && churchLink && (
-            <Link
-              href={churchLink}
-              className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
-              style={{ color: "var(--color-secondary)", background: "rgba(197,155,46,0.15)" }}
-            >
-              ⛪ Ma paroisse
-            </Link>
-          )}
-
-          {/* Lien super admin */}
-          {isSignedIn && navInfo.isSuperAdmin && (
-            <Link
-              href="/admin"
-              className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
-              style={{ color: "var(--color-secondary)", background: "rgba(197,155,46,0.15)" }}
-            >
-              🛡 Administration
-            </Link>
-          )}
-
           {/* Séparateur */}
           <div className="w-px h-5 mx-2 bg-white/20" />
 
           {isSignedIn ? (
-            <div className="ml-1">
-              <UserButton />
-            </div>
+            <UserMenu navInfo={navInfo} />
           ) : (
             <div className="flex items-center gap-2">
               <Link
@@ -168,26 +144,16 @@ export default function Navbar() {
           className="md:hidden flex flex-col justify-center gap-1.5 p-2 rounded-md text-white"
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >
-          <span
-            className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${
-              menuOpen ? "rotate-45 translate-y-2" : "rotate-0 translate-y-0"
-            }`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : "opacity-100"}`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${
-              menuOpen ? "-rotate-45 -translate-y-2" : "rotate-0 translate-y-0"
-            }`}
-          />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "rotate-45 translate-y-2" : "rotate-0 translate-y-0"}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : "rotate-0 translate-y-0"}`} />
         </button>
       </div>
 
       {/* Mobile menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 bg-primary-dark ${
-          menuOpen ? "max-h-[500px] border-t border-white/10" : "max-h-0"
+          menuOpen ? "max-h-[600px] border-t border-white/10" : "max-h-0"
         }`}
       >
         <div className="px-4 py-3 flex flex-col gap-1">
@@ -202,29 +168,9 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {isSignedIn && churchLink && (
-            <Link
-              href={churchLink}
-              onClick={() => setMenuOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-semibold"
-              style={{ color: "var(--color-secondary)" }}
-            >
-              ⛪ Gérer ma paroisse
-            </Link>
-          )}
-
-          {isSignedIn && navInfo.isSuperAdmin && (
-            <Link
-              href="/admin"
-              onClick={() => setMenuOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-semibold"
-              style={{ color: "var(--color-secondary)" }}
-            >
-              🛡 Administration CEEC
-            </Link>
-          )}
-
-          {!isSignedIn && (
+          {isSignedIn ? (
+            <UserMenuMobile navInfo={navInfo} onClose={() => setMenuOpen(false)} />
+          ) : (
             <div className="flex gap-2 mt-2 pt-2 border-t border-white/10">
               <Link
                 href="/sign-in"

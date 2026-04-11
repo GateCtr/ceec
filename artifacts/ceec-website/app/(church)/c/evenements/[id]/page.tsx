@@ -7,9 +7,14 @@ import { prisma } from "@/lib/db/index";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const headersList = await headers();
+  const slug = headersList.get("x-eglise-slug") ?? "";
   const { id } = await params;
   try {
-    const evt = await prisma.evenement.findUnique({ where: { id: parseInt(id, 10) }, select: { titre: true } });
+    const evt = await prisma.evenement.findFirst({
+      where: { id: parseInt(id, 10), publie: true, eglise: { slug } },
+      select: { titre: true },
+    });
     return { title: evt?.titre ?? "Événement" };
   } catch { return { title: "Événement" }; }
 }

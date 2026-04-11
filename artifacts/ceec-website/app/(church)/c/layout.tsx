@@ -111,11 +111,20 @@ export default async function ChurchLayout({ children }: { children: React.React
 
   const cssVars = `
     :root {
-      --church-primary: ${primaryColor};
-      --church-accent: ${accentColor};
-      --church-primary-dark: color-mix(in srgb, ${primaryColor} 80%, black);
+      --church-primary: ${primaryColor.replace(/[^#a-zA-Z0-9(), .%]/g, "")};
+      --church-accent: ${accentColor.replace(/[^#a-zA-Z0-9(), .%]/g, "")};
+      --church-primary-dark: color-mix(in srgb, ${primaryColor.replace(/[^#a-zA-Z0-9(), .%]/g, "")} 80%, black);
     }
   `;
+
+  // Strip dangerous CSS injection patterns (</style> breakout, JS protocol, @import)
+  const sanitizeCustomCss = (css: string) =>
+    css
+      .replace(/<\/style\s*>/gi, "")
+      .replace(/<script[\s\S]*?>/gi, "")
+      .replace(/javascript\s*:/gi, "")
+      .replace(/@import\s/gi, "/* @import */")
+      .replace(/expression\s*\(/gi, "");
 
   const socialLinks = {
     facebook: churchConfig?.facebook,
@@ -132,7 +141,7 @@ export default async function ChurchLayout({ children }: { children: React.React
       <EgliseProvider eglise={eglise} isChurchDomain={true}>
         <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         {churchConfig?.cssPersonnalise && (
-          <style dangerouslySetInnerHTML={{ __html: churchConfig.cssPersonnalise }} />
+          <style dangerouslySetInnerHTML={{ __html: sanitizeCustomCss(churchConfig.cssPersonnalise) }} />
         )}
         <ChurchAuthLayout eglise={eglise}>{children}</ChurchAuthLayout>
       </EgliseProvider>
@@ -143,7 +152,7 @@ export default async function ChurchLayout({ children }: { children: React.React
     <EgliseProvider eglise={eglise} isChurchDomain={true}>
       <style dangerouslySetInnerHTML={{ __html: cssVars }} />
       {churchConfig?.cssPersonnalise && (
-        <style dangerouslySetInnerHTML={{ __html: churchConfig.cssPersonnalise }} />
+        <style dangerouslySetInnerHTML={{ __html: sanitizeCustomCss(churchConfig.cssPersonnalise) }} />
       )}
       <ChurchNavbar
         eglise={eglise}

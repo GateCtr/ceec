@@ -9,145 +9,209 @@ function createPrisma() {
 
 const prisma = createPrisma();
 
-// ─── Permissions ────────────────────────────────────────────────────────────
+// ─── Permissions ─────────────────────────────────────────────────────────────
 
 const PERMISSIONS = [
-  // Plateforme globale
-  { nom: "gerer_plateforme",    description: "Gérer toute la plateforme CEEC (super admin)" },
-  { nom: "gerer_eglises",       description: "Créer, modifier et supprimer des paroisses" },
-  { nom: "voir_toutes_eglises", description: "Voir toutes les paroisses de la plateforme" },
-  // Membres
-  { nom: "gerer_membres",       description: "Gérer les membres d'une paroisse" },
-  { nom: "inviter_membres",     description: "Inviter de nouveaux membres dans une paroisse" },
-  { nom: "voir_membres",        description: "Consulter la liste des membres" },
-  { nom: "suspendre_membre",    description: "Suspendre / réactiver un membre" },
-  // Rôles
-  { nom: "gerer_roles",         description: "Attribuer et révoquer des rôles dans une paroisse" },
-  // Annonces
-  { nom: "gerer_annonces",      description: "Gérer toutes les annonces d'une paroisse" },
-  { nom: "creer_annonce",       description: "Créer une annonce" },
-  { nom: "voir_annonces",       description: "Consulter les annonces" },
-  // Événements
-  { nom: "gerer_evenements",    description: "Gérer tous les événements d'une paroisse" },
-  { nom: "creer_evenement",     description: "Créer un événement" },
-  { nom: "voir_evenements",     description: "Consulter les événements" },
-  // Finances
-  { nom: "gerer_finances",      description: "Gérer les finances d'une paroisse" },
-  { nom: "voir_finances",       description: "Consulter les finances" },
-  // Rapports & Config
-  { nom: "voir_rapports",       description: "Voir les statistiques et rapports" },
-  { nom: "gerer_config",        description: "Modifier la configuration de la paroisse" },
+  // ── Plateforme globale ──
+  { nom: "plateforme_gerer_config",      description: "Modifier les paramètres globaux de la plateforme" },
+  { nom: "plateforme_gerer_admins",      description: "Créer / révoquer des admins et modérateurs de plateforme" },
+  { nom: "plateforme_voir_stats",        description: "Voir les statistiques globales de la plateforme" },
+  { nom: "plateforme_gerer_eglises",     description: "Créer, modifier et supprimer des paroisses" },
+  { nom: "plateforme_suspendre_eglise",  description: "Suspendre / réactiver une paroisse" },
+  { nom: "plateforme_voir_eglises",      description: "Lister et consulter toutes les paroisses" },
+  { nom: "plateforme_moderer_contenu",   description: "Modérer le contenu entre paroisses et traiter les signalements" },
+  { nom: "plateforme_gerer_invitations", description: "Gérer les tokens d'invitation de la plateforme" },
+
+  // ── Paroisse — membres ──
+  { nom: "eglise_gerer_membres",         description: "Gérer les membres de la paroisse (modifier, supprimer)" },
+  { nom: "eglise_inviter_membres",       description: "Inviter de nouveaux membres dans la paroisse" },
+  { nom: "eglise_voir_membres",          description: "Consulter la liste des membres" },
+  { nom: "eglise_suspendre_membre",      description: "Suspendre / réactiver un membre" },
+
+  // ── Paroisse — rôles ──
+  { nom: "eglise_gerer_roles",           description: "Attribuer et révoquer des rôles dans la paroisse" },
+
+  // ── Paroisse — annonces ──
+  { nom: "eglise_gerer_annonces",        description: "Gérer toutes les annonces de la paroisse" },
+  { nom: "eglise_creer_annonce",         description: "Créer une annonce" },
+  { nom: "eglise_voir_annonces",         description: "Consulter les annonces" },
+
+  // ── Paroisse — événements ──
+  { nom: "eglise_gerer_evenements",      description: "Gérer tous les événements de la paroisse" },
+  { nom: "eglise_creer_evenement",       description: "Créer un événement" },
+  { nom: "eglise_voir_evenements",       description: "Consulter les événements" },
+
+  // ── Paroisse — finances ──
+  { nom: "eglise_gerer_finances",        description: "Saisir et gérer les données financières" },
+  { nom: "eglise_voir_finances",         description: "Consulter les données financières" },
+
+  // ── Paroisse — rapports & config ──
+  { nom: "eglise_voir_rapports",         description: "Voir les rapports et statistiques de la paroisse" },
+  { nom: "eglise_gerer_config",          description: "Modifier la configuration de la paroisse" },
 ];
 
-// ─── Rôles avec leurs permissions ──────────────────────────────────────────
+// ─── Rôles ───────────────────────────────────────────────────────────────────
 
 const ROLES: Array<{ nom: string; scope: string; permissions: string[] }> = [
+
+  // ════ Niveau plateforme ════
+
   {
     nom: "super_admin",
     scope: "global",
+    // Accès absolu : tout
     permissions: PERMISSIONS.map((p) => p.nom),
   },
   {
+    nom: "admin_plateforme",
+    scope: "global",
+    // Gestion des paroisses + stats, mais pas les paramètres système ni la gestion des autres admins
+    permissions: [
+      "plateforme_voir_stats",
+      "plateforme_gerer_eglises",
+      "plateforme_suspendre_eglise",
+      "plateforme_voir_eglises",
+      "plateforme_moderer_contenu",
+      "plateforme_gerer_invitations",
+    ],
+  },
+  {
+    nom: "moderateur_plateforme",
+    scope: "global",
+    // Modération du contenu uniquement, lecture des paroisses
+    permissions: [
+      "plateforme_voir_eglises",
+      "plateforme_moderer_contenu",
+      "plateforme_voir_stats",
+    ],
+  },
+
+  // ════ Niveau paroisse ════
+
+  {
     nom: "admin_eglise",
     scope: "eglise",
+    // Contrôle total sur la paroisse
     permissions: [
-      "gerer_membres",
-      "inviter_membres",
-      "voir_membres",
-      "suspendre_membre",
-      "gerer_roles",
-      "gerer_annonces",
-      "creer_annonce",
-      "voir_annonces",
-      "gerer_evenements",
-      "creer_evenement",
-      "voir_evenements",
-      "gerer_finances",
-      "voir_finances",
-      "voir_rapports",
-      "gerer_config",
+      "eglise_gerer_membres",
+      "eglise_inviter_membres",
+      "eglise_voir_membres",
+      "eglise_suspendre_membre",
+      "eglise_gerer_roles",
+      "eglise_gerer_annonces",
+      "eglise_creer_annonce",
+      "eglise_voir_annonces",
+      "eglise_gerer_evenements",
+      "eglise_creer_evenement",
+      "eglise_voir_evenements",
+      "eglise_gerer_finances",
+      "eglise_voir_finances",
+      "eglise_voir_rapports",
+      "eglise_gerer_config",
     ],
   },
   {
     nom: "pasteur",
     scope: "eglise",
+    // Contenu + membres + vue finances, pas de config
     permissions: [
-      "voir_membres",
-      "inviter_membres",
-      "gerer_annonces",
-      "creer_annonce",
-      "voir_annonces",
-      "gerer_evenements",
-      "creer_evenement",
-      "voir_evenements",
-      "voir_finances",
-      "voir_rapports",
+      "eglise_voir_membres",
+      "eglise_inviter_membres",
+      "eglise_gerer_annonces",
+      "eglise_creer_annonce",
+      "eglise_voir_annonces",
+      "eglise_gerer_evenements",
+      "eglise_creer_evenement",
+      "eglise_voir_evenements",
+      "eglise_voir_finances",
+      "eglise_voir_rapports",
+    ],
+  },
+  {
+    nom: "diacre",
+    scope: "eglise",
+    // Membres + événements, pas de finances
+    permissions: [
+      "eglise_voir_membres",
+      "eglise_inviter_membres",
+      "eglise_gerer_membres",
+      "eglise_creer_evenement",
+      "eglise_voir_evenements",
+      "eglise_voir_annonces",
     ],
   },
   {
     nom: "secretaire",
     scope: "eglise",
+    // Membres + annonces, pas de finances ni d'événements
     permissions: [
-      "voir_membres",
-      "inviter_membres",
-      "gerer_membres",
-      "creer_annonce",
-      "voir_annonces",
-      "creer_evenement",
-      "voir_evenements",
-      "voir_rapports",
+      "eglise_voir_membres",
+      "eglise_inviter_membres",
+      "eglise_gerer_membres",
+      "eglise_creer_annonce",
+      "eglise_voir_annonces",
+      "eglise_voir_evenements",
+      "eglise_voir_rapports",
     ],
   },
   {
     nom: "tresorier",
     scope: "eglise",
+    // Finances uniquement + lecture basique
     permissions: [
-      "voir_membres",
-      "voir_annonces",
-      "voir_evenements",
-      "gerer_finances",
-      "voir_finances",
-      "voir_rapports",
+      "eglise_voir_membres",
+      "eglise_voir_annonces",
+      "eglise_voir_evenements",
+      "eglise_gerer_finances",
+      "eglise_voir_finances",
+      "eglise_voir_rapports",
     ],
   },
   {
     nom: "fidele",
     scope: "eglise",
+    // Lecture seule
     permissions: [
-      "voir_annonces",
-      "voir_evenements",
-      "voir_membres",
+      "eglise_voir_annonces",
+      "eglise_voir_evenements",
+      "eglise_voir_membres",
     ],
   },
 ];
 
-// ─── Super admin ────────────────────────────────────────────────────────────
+// ─── Super admin initial ──────────────────────────────────────────────────────
 
 const SUPER_ADMIN_CLERK_ID = "user_3CBl2z66hYfxWguiyvxmxBd9rCt";
 
-// ─── Main ───────────────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("🌱 Seed RBAC CEEC — démarrage\n");
 
-  // 1. Permissions
-  console.log("📋 Permissions…");
+  // 1. Nettoyage des anciennes données pour éviter les conflits de noms
+  console.log("🧹 Nettoyage des anciennes permissions/rôles…");
+  await prisma.rolePermission.deleteMany();
+  await prisma.userRole.deleteMany();
+  await prisma.permission.deleteMany();
+  await prisma.role.deleteMany();
+  console.log("   ✓ Tables nettoyées");
+
+  // 2. Permissions
+  console.log("\n📋 Création des permissions…");
   for (const perm of PERMISSIONS) {
-    await prisma.permission.upsert({
-      where: { nom: perm.nom },
-      update: { description: perm.description },
-      create: perm,
-    });
+    await prisma.permission.create({ data: perm });
   }
   console.log(`   ✓ ${PERMISSIONS.length} permissions`);
 
-  // 2. Rôles + RolePermissions
-  console.log("\n🎭 Rôles…");
+  // 3. Rôles + RolePermissions
+  console.log("\n🎭 Création des rôles…");
   for (const roleDef of ROLES) {
-    const role = await prisma.role.upsert({
-      where: { nom: roleDef.nom },
-      update: { scope: roleDef.scope, permissions: roleDef.permissions },
-      create: { nom: roleDef.nom, scope: roleDef.scope, permissions: roleDef.permissions },
+    const role = await prisma.role.create({
+      data: {
+        nom: roleDef.nom,
+        scope: roleDef.scope,
+        permissions: roleDef.permissions,
+      },
     });
 
     const permRecords = await prisma.permission.findMany({
@@ -155,48 +219,39 @@ async function main() {
     });
 
     for (const perm of permRecords) {
-      await prisma.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId: role.id, permissionId: perm.id } },
-        update: {},
-        create: { roleId: role.id, permissionId: perm.id },
+      await prisma.rolePermission.create({
+        data: { roleId: role.id, permissionId: perm.id },
       });
     }
 
-    console.log(`   ✓ ${roleDef.nom.padEnd(14)} [${roleDef.scope}] → ${roleDef.permissions.length} permissions`);
+    const level = roleDef.scope === "global" ? "🌍 global " : "⛪ eglise";
+    console.log(`   ✓ ${roleDef.nom.padEnd(22)} [${level}] → ${roleDef.permissions.length} permissions`);
   }
 
-  // 3. UserRole super_admin (egliseId null → pas d'upsert, on vérifie manuellement)
+  // 4. UserRole super_admin (egliseId null → findFirst + create)
   console.log("\n👑 Assignation super_admin…");
   const superAdminRole = await prisma.role.findUnique({ where: { nom: "super_admin" } });
   if (superAdminRole) {
     const existing = await prisma.userRole.findFirst({
-      where: {
-        clerkUserId: SUPER_ADMIN_CLERK_ID,
-        roleId: superAdminRole.id,
-        egliseId: null,
-      },
+      where: { clerkUserId: SUPER_ADMIN_CLERK_ID, roleId: superAdminRole.id, egliseId: null },
     });
     if (!existing) {
       await prisma.userRole.create({
-        data: {
-          clerkUserId: SUPER_ADMIN_CLERK_ID,
-          roleId: superAdminRole.id,
-          egliseId: null,
-        },
+        data: { clerkUserId: SUPER_ADMIN_CLERK_ID, roleId: superAdminRole.id, egliseId: null },
       });
     }
     console.log(`   ✓ ${SUPER_ADMIN_CLERK_ID} → super_admin (global)`);
   }
 
-  // 4. Résumé
+  // 5. Résumé
   const stats = {
-    permissions:      await prisma.permission.count(),
-    roles:            await prisma.role.count(),
-    rolePermissions:  await prisma.rolePermission.count(),
-    userRoles:        await prisma.userRole.count(),
+    permissions:     await prisma.permission.count(),
+    roles:           await prisma.role.count(),
+    rolePermissions: await prisma.rolePermission.count(),
+    userRoles:       await prisma.userRole.count(),
   };
 
-  console.log("\n📊 Résumé :");
+  console.log("\n📊 Résumé final :");
   console.log(`   permissions      : ${stats.permissions}`);
   console.log(`   roles            : ${stats.roles}`);
   console.log(`   role_permissions : ${stats.rolePermissions}`);

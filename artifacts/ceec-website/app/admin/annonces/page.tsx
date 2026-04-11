@@ -14,7 +14,7 @@ export const metadata = { title: "Gestion des Annonces | CEEC Admin" };
 export default async function AdminAnnoncesPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/dashboard");
+  if (!await isAdminUser(userId)) redirect("/sign-in");
 
   const [annoncesList, eglisesList] = await Promise.all([
     prisma.annonce.findMany({ orderBy: { datePublication: "desc" } }),

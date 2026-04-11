@@ -125,12 +125,10 @@ const isPlatformAdminRoute = createRouteMatcher([
 ]);
 
 const isChurchAdminRoute = createRouteMatcher([
-  "/dashboard/eglise/:egliseId/admin(.*)",
   "/api/eglise/:egliseId/admin(.*)",
 ]);
 
 const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
   "/auth/redirect(.*)",
   "/gestion(.*)",
   "/api/membres(.*)",
@@ -245,23 +243,16 @@ export default clerkMiddleware(async (auth, req) => {
           { status: 403 }
         );
       }
-      return NextResponse.redirect(
-        new URL("/dashboard?error=acces-refuse", req.url)
-      );
+      return NextResponse.redirect(new URL("/sign-in", req.url));
     }
   }
 
   if (isChurchAdminRoute(req)) {
     const egliseId = extractEgliseId(url.pathname);
     if (!egliseId || !isEgliseAdminFromClaims(claims, egliseId)) {
-      if (url.pathname.startsWith("/api/")) {
-        return NextResponse.json(
-          { error: "Acces refuse - admin eglise requis" },
-          { status: 403 }
-        );
-      }
-      return NextResponse.redirect(
-        new URL("/dashboard?error=acces-refuse", req.url)
+      return NextResponse.json(
+        { error: "Acces refuse - admin eglise requis" },
+        { status: 403 }
       );
     }
   }

@@ -14,7 +14,7 @@ export const metadata = { title: "Gestion des Membres | CEEC Admin" };
 export default async function AdminMembresPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/dashboard");
+  if (!await isAdminUser(userId)) redirect("/sign-in");
 
   const [membresList, eglisesList] = await Promise.all([
     prisma.membre.findMany({

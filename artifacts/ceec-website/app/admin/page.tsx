@@ -53,7 +53,7 @@ async function getDashboardData() {
 export default async function AdminPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isSuperAdmin(userId)) redirect("/dashboard?error=acces-refuse");
+  if (!await isSuperAdmin(userId)) redirect("/sign-in");
 
   const { stats, eglises } = await getDashboardData();
 

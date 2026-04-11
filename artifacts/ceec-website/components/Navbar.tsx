@@ -115,12 +115,6 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {isSignedIn && !navInfo.isSuperAdmin && (
-            <Link href="/dashboard" className={navLinkClass("/dashboard")}>
-              Mon espace
-            </Link>
-          )}
-
           {/* Lien gestion église */}
           {isSignedIn && churchLink && (
             <Link
@@ -207,16 +201,6 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-
-          {isSignedIn && !navInfo.isSuperAdmin && (
-            <Link
-              href="/dashboard"
-              onClick={() => setMenuOpen(false)}
-              className={mobileLinkClass("/dashboard")}
-            >
-              Mon espace
-            </Link>
-          )}
 
           {isSignedIn && churchLink && (
             <Link

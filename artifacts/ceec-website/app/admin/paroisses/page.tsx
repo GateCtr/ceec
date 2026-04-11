@@ -14,7 +14,7 @@ export const metadata = { title: "Paroisses | CEEC Admin" };
 export default async function AdminParoissesPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/dashboard");
+  if (!await isAdminUser(userId)) redirect("/sign-in");
 
   const eglisesList = await prisma.eglise.findMany({ orderBy: { nom: "asc" } });
 

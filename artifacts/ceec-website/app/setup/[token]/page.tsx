@@ -128,7 +128,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
 
       setStep("done");
       setTimeout(() => {
-        const target = data.redirectUrl ?? (data.slug ? `/gestion?eglise=${data.slug}` : "/dashboard");
+        const target = data.redirectUrl ?? (data.slug ? `/gestion?eglise=${data.slug}` : "/auth/redirect");
         if (target.startsWith("http")) {
           window.location.href = target;
         } else {

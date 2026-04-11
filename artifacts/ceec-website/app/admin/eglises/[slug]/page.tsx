@@ -16,7 +16,7 @@ const statutLabels: Record<string, { label: string; color: string; bg: string }>
 export default async function AdminEgliseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isSuperAdmin(userId)) redirect("/dashboard?error=acces-refuse");
+  if (!await isSuperAdmin(userId)) redirect("/sign-in");
 
   const { slug } = await params;
 

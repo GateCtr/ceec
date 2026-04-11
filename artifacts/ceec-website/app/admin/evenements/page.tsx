@@ -14,7 +14,7 @@ export const metadata = { title: "Gestion des Événements | CEEC Admin" };
 export default async function AdminEvenementsPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/dashboard");
+  if (!await isAdminUser(userId)) redirect("/sign-in");
 
   const [evenementsList, eglisesList] = await Promise.all([
     prisma.evenement.findMany({ orderBy: { dateDebut: "asc" } }),

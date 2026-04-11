@@ -148,8 +148,6 @@ export default function Footer() {
               {[
                 { href: "/sign-in", label: "Se connecter" },
                 { href: "/sign-up", label: "Créer un compte" },
-                { href: "/dashboard", label: "Mon tableau de bord" },
-                { href: "/dashboard/profile", label: "Mon profil" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

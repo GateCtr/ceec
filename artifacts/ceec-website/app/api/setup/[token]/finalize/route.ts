@@ -113,7 +113,7 @@ export async function POST(
     ]);
 
     const slug = invite.eglise.slug;
-    const redirectUrl = slug ? buildRedirectUrl(slug) : "/dashboard";
+    const redirectUrl = slug ? buildRedirectUrl(slug) : "/auth/redirect";
 
     return NextResponse.json({
       success: true,

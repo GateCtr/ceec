@@ -32,10 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      localization={frFR}
-    >
+    <ClerkProvider localization={frFR}>
       <html lang="fr" className={`${playfairDisplay.variable} ${lato.variable}`}>
         <head>
           <meta name="theme-color" content="#1e3a8a" />

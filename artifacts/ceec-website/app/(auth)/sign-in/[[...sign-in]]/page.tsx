@@ -1,7 +1,6 @@
 "use client";
 
 import { useSignIn } from "@clerk/nextjs";
-import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -16,13 +15,11 @@ export default function SignInPage() {
   const [step, setStep] = useState<"password" | "mfa">("password");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [debug, setDebug] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setDebug(`isLoaded=${isLoaded}, signIn=${signIn ? "ok" : "null"}`);
-    if (!isLoaded || !signIn) {
-      setError("Clerk n'est pas encore chargé. Attendez et réessayez.");
+    if (!signIn) {
+      setError(`Le service d'authentification n'est pas disponible (isLoaded=${isLoaded}). Rechargez la page.`);
       return;
     }
 
@@ -39,19 +36,23 @@ export default function SignInPage() {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         router.push("/auth/redirect");
-      } else if (
-        result.status === "needs_second_factor" ||
-        result.status === "needs_new_password"
-      ) {
-        await signIn.prepareFirstFactor({ strategy: "email_code", emailAddressId: result.supportedFirstFactors?.find(f => f.strategy === "email_code")?.emailAddressId ?? "" });
+      } else if (result.status === "needs_second_factor") {
+        const emailFactor = result.supportedSecondFactors?.find(
+          (f) => f.strategy === "email_code"
+        );
+        if (emailFactor) {
+          await signIn.prepareSecondFactor({ strategy: "email_code" });
+        }
         setStep("mfa");
       } else {
-        setError("Connexion incomplète. Veuillez réessayer.");
+        setError(`Connexion incomplète (status: ${result.status}).`);
       }
-    } catch (err) {
-      if (isClerkAPIResponseError(err)) {
-        const msg = err.errors[0]?.longMessage ?? err.errors[0]?.message ?? "Erreur de connexion.";
-        setError(msg);
+    } catch (err: unknown) {
+      const clerkErr = err as { errors?: Array<{ longMessage?: string; message?: string }> };
+      if (clerkErr?.errors?.length) {
+        setError(clerkErr.errors[0].longMessage ?? clerkErr.errors[0].message ?? "Erreur de connexion.");
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError("Une erreur inattendue s'est produite.");
       }
@@ -62,13 +63,13 @@ export default function SignInPage() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || !signIn) return;
+    if (!signIn) return;
 
     setError(null);
     setIsLoading(true);
 
     try {
-      const result = await signIn.attemptFirstFactor({
+      const result = await signIn.attemptSecondFactor({
         strategy: "email_code",
         code,
       });
@@ -79,9 +80,10 @@ export default function SignInPage() {
       } else {
         setError("Code invalide ou expiré.");
       }
-    } catch (err) {
-      if (isClerkAPIResponseError(err)) {
-        setError(err.errors[0]?.longMessage ?? err.errors[0]?.message ?? "Code invalide.");
+    } catch (err: unknown) {
+      const clerkErr = err as { errors?: Array<{ longMessage?: string; message?: string }> };
+      if (clerkErr?.errors?.length) {
+        setError(clerkErr.errors[0].longMessage ?? clerkErr.errors[0].message ?? "Code invalide.");
       } else {
         setError("Une erreur inattendue s'est produite.");
       }
@@ -108,7 +110,7 @@ export default function SignInPage() {
             autoFocus
           />
           {error && <Err>{error}</Err>}
-          <button type="submit" style={s.btn} disabled={isLoading || !code}>
+          <button type="submit" style={s.btn} disabled={isLoading}>
             {isLoading ? "Vérification…" : "Vérifier"}
           </button>
           <button
@@ -159,21 +161,8 @@ export default function SignInPage() {
         />
 
         {error && <Err>{error}</Err>}
-        {debug && (
-          <div style={{ fontSize: 11, color: "#6b7280", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 8px", fontFamily: "monospace" }}>
-            {debug}
-          </div>
-        )}
 
-        <button
-          type="submit"
-          style={{
-            ...s.btn,
-            opacity: (!isLoaded || isLoading) ? 0.6 : 1,
-            cursor: (!isLoaded || isLoading) ? "not-allowed" : "pointer",
-          }}
-          disabled={!isLoaded || isLoading}
-        >
+        <button type="submit" style={{ ...s.btn, opacity: isLoading ? 0.7 : 1 }} disabled={isLoading}>
           {isLoading ? "Connexion…" : "Se connecter"}
         </button>
       </form>

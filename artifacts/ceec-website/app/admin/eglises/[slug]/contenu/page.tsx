@@ -26,7 +26,7 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
   });
   if (!eglise) notFound();
 
-  const [pages, annonces, evenements, videos] = await Promise.all([
+  const [pages, annonces, evenements, videos, sections] = await Promise.all([
     prisma.pageEglise.findMany({
       where: { egliseId: eglise.id },
       orderBy: { ordre: "asc" },
@@ -35,17 +35,22 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
     prisma.annonce.findMany({
       where: { egliseId: eglise.id },
       orderBy: { datePublication: "desc" },
-      take: 50,
+      take: 100,
     }),
     prisma.evenement.findMany({
       where: { egliseId: eglise.id },
       orderBy: { dateDebut: "asc" },
-      take: 50,
+      take: 100,
     }),
     prisma.liveStream.findMany({
       where: { egliseId: eglise.id },
       orderBy: [{ epingle: "desc" }, { createdAt: "desc" }],
-      take: 20,
+      take: 50,
+    }),
+    prisma.sectionPage.findMany({
+      where: { page: { egliseId: eglise.id } },
+      include: { page: { select: { id: true, titre: true, slug: true } } },
+      orderBy: [{ page: { ordre: "asc" } }, { ordre: "asc" }],
     }),
   ]);
 
@@ -67,9 +72,10 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14, marginBottom: 32 }}>
         {[
           { label: "Pages", count: pages.length, color: "#1e3a8a", bg: "#eff6ff", icon: "📄" },
+          { label: "Sections", count: sections.length, color: "#0369a1", bg: "#f0f9ff", icon: "🧩" },
           { label: "Annonces", count: annonces.length, color: "#15803d", bg: "#f0fdf4", icon: "📢" },
           { label: "Événements", count: evenements.length, color: "#b45309", bg: "#fef3c7", icon: "🗓️" },
           { label: "Vidéos", count: videos.length, color: "#7c3aed", bg: "#f5f3ff", icon: "▶️" },
@@ -95,18 +101,24 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
         initialAnnonces={annonces.map((a) => ({
           id: a.id,
           titre: a.titre,
+          contenu: a.contenu,
           priorite: a.priorite,
           publie: a.publie,
           datePublication: a.datePublication.toISOString(),
           categorie: a.categorie,
+          imageUrl: a.imageUrl ?? null,
         }))}
         initialEvenements={evenements.map((e) => ({
           id: e.id,
           titre: e.titre,
+          description: e.description ?? null,
           publie: e.publie,
           dateDebut: e.dateDebut.toISOString(),
+          dateFin: e.dateFin ? e.dateFin.toISOString() : null,
           lieu: e.lieu,
           categorie: e.categorie,
+          imageUrl: e.imageUrl ?? null,
+          lienInscription: e.lienInscription ?? null,
         }))}
         initialVideos={videos.map((v) => ({
           id: v.id,
@@ -116,6 +128,14 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
           epingle: v.epingle,
           estEnDirect: v.estEnDirect,
           createdAt: v.createdAt.toISOString(),
+        }))}
+        initialSections={sections.map((s) => ({
+          id: s.id,
+          type: s.type,
+          ordre: s.ordre,
+          pageId: s.page.id,
+          pageTitre: s.page.titre,
+          pageSlug: s.page.slug,
         }))}
       />
     </div>

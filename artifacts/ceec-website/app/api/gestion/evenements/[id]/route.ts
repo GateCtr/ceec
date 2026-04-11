@@ -41,6 +41,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         lieu: body.lieu ?? null,
         publie: body.publie,
         imageUrl: body.imageUrl ?? null,
+        categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
+        lienInscription: body.lienInscription !== undefined ? (body.lienInscription || null) : undefined,
       },
     });
     return NextResponse.json(evt);

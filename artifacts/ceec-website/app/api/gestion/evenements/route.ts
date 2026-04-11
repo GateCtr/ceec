@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
         egliseId,
         publie: body.publie ?? true,
         imageUrl: body.imageUrl ?? null,
+        categorie: body.categorie ?? null,
+        lienInscription: body.lienInscription ?? null,
       },
     });
     return NextResponse.json(evt, { status: 201 });

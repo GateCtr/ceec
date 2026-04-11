@@ -13,15 +13,19 @@ const prioriteLabels: Record<string, { label: string; bg: string; color: string 
   basse: { label: "Basse", bg: "#f1f5f9", color: "#64748b" },
 };
 
+const CATEGORIES = ["", "Culte", "Formation", "Prière", "Mission", "Social", "Jeunesse", "Femmes", "Hommes", "Autre"];
+
 type FormData = {
   titre: string;
   contenu: string;
   priorite: string;
   publie: boolean;
   dateExpiration: string;
+  imageUrl: string;
+  categorie: string;
 };
 
-const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "" };
+const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", categorie: "" };
 
 export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
   const [annonces, setAnnonces] = useState<Annonce[]>(initialAnnonces);
@@ -46,6 +50,8 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
       priorite: a.priorite,
       publie: a.publie,
       dateExpiration: a.dateExpiration ? new Date(a.dateExpiration).toISOString().slice(0, 10) : "",
+      imageUrl: a.imageUrl ?? "",
+      categorie: a.categorie ?? "",
     });
     setShowForm(true);
     setError(null);
@@ -59,6 +65,8 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
       const body = {
         ...form,
         dateExpiration: form.dateExpiration || null,
+        imageUrl: form.imageUrl || null,
+        categorie: form.categorie || null,
       };
       let res;
       if (editing) {
@@ -113,7 +121,7 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
       {showForm && (
         <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
           <h2 style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#0f172a" }}>
-            {editing ? "Modifier l'annonce" : "Nouvelle annonce"}
+            {editing ? "Modifier l&apos;annonce" : "Nouvelle annonce"}
           </h2>
           {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "8px 12px", borderRadius: 6, marginBottom: 12, fontSize: 13 }}>{error}</div>}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -125,8 +133,14 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
               <label style={s.label}>Contenu *</label>
               <textarea style={{ ...s.input, minHeight: 120, resize: "vertical" }} value={form.contenu} onChange={(e) => setForm({ ...form, contenu: e.target.value })} required />
             </div>
-            <div style={{ display: "flex", gap: 16 }}>
-              <div style={{ flex: 1 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={s.label}>Catégorie</label>
+                <select style={s.input} value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c || "— Aucune —"}</option>)}
+                </select>
+              </div>
+              <div>
                 <label style={s.label}>Priorité</label>
                 <select style={s.input} value={form.priorite} onChange={(e) => setForm({ ...form, priorite: e.target.value })}>
                   <option value="basse">Basse</option>
@@ -134,14 +148,27 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
                   <option value="haute">Haute</option>
                 </select>
               </div>
+            </div>
+            <div>
+              <label style={s.label}>Image (URL)</label>
+              <input style={s.input} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
+              {form.imageUrl && (
+                <div style={{ marginTop: 8, borderRadius: 8, overflow: "hidden", maxWidth: 240, maxHeight: 120, background: "#f1f5f9" }}>
+                  <img src={form.imageUrl} alt="Aperçu" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={s.label}>Date d&apos;expiration</label>
                 <input type="date" style={s.input} value={form.dateExpiration} onChange={(e) => setForm({ ...form, dateExpiration: e.target.value })} />
               </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <input type="checkbox" id="publie" checked={form.publie} onChange={(e) => setForm({ ...form, publie: e.target.checked })} />
-              <label htmlFor="publie" style={{ fontSize: 14, color: "#374151" }}>Publier immédiatement</label>
+              <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+                  <input type="checkbox" checked={form.publie} onChange={(e) => setForm({ ...form, publie: e.target.checked })} />
+                  Publier immédiatement
+                </label>
+              </div>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button type="button" onClick={() => setShowForm(false)} style={s.cancelBtn}>Annuler</button>
@@ -162,23 +189,33 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {annonces.map((a) => {
             const pr = prioriteLabels[a.priorite] ?? prioriteLabels.normale;
+            const imageUrl = a.imageUrl;
+            const categorie = a.categorie;
             return (
-              <div key={a.id} style={{ background: "white", borderRadius: 12, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{a.titre}</span>
-                    <span style={{ ...s.badge, background: pr.bg, color: pr.color }}>{pr.label}</span>
-                    {!a.publie && <span style={{ ...s.badge, background: "#f1f5f9", color: "#64748b" }}>Brouillon</span>}
+              <div key={a.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", overflow: "hidden" }}>
+                {imageUrl && (
+                  <div style={{ width: 100, flexShrink: 0, background: "#f1f5f9" }}>
+                    <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                   </div>
-                  <p style={{ color: "#64748b", fontSize: 13, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{a.contenu}</p>
-                  <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
-                    {new Date(a.datePublication).toLocaleDateString("fr-FR")}
-                    {a.dateExpiration && <> — expire le {new Date(a.dateExpiration).toLocaleDateString("fr-FR")}</>}
+                )}
+                <div style={{ flex: 1, padding: "1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{a.titre}</span>
+                      <span style={{ ...s.badge, background: pr.bg, color: pr.color }}>{pr.label}</span>
+                      {categorie && <span style={{ ...s.badge, background: "#f0fdf4", color: "#15803d" }}>{categorie}</span>}
+                      {!a.publie && <span style={{ ...s.badge, background: "#f1f5f9", color: "#64748b" }}>Brouillon</span>}
+                    </div>
+                    <p style={{ color: "#64748b", fontSize: 13, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{a.contenu}</p>
+                    <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
+                      {new Date(a.datePublication).toLocaleDateString("fr-FR")}
+                      {a.dateExpiration && <> — expire le {new Date(a.dateExpiration).toLocaleDateString("fr-FR")}</>}
+                    </div>
                   </div>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                  <button onClick={() => openEdit(a)} style={s.editBtn}>Modifier</button>
-                  <button onClick={() => handleDelete(a.id)} style={s.deleteBtn}>Supprimer</button>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => openEdit(a)} style={s.editBtn}>Modifier</button>
+                    <button onClick={() => handleDelete(a.id)} style={s.deleteBtn}>Supprimer</button>
+                  </div>
                 </div>
               </div>
             );

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/index";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -8,6 +8,16 @@ async function getEgliseId(req: NextRequest): Promise<number | null> {
   if (!h) return null;
   const id = parseInt(h, 10);
   return isNaN(id) ? null : id;
+}
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
 }
 
 export async function GET(req: NextRequest) {
@@ -19,14 +29,15 @@ export async function GET(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_voir_annonces", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
-    const annonces = await prisma.annonce.findMany({
+    const pages = await prisma.pageEglise.findMany({
       where: { egliseId },
-      orderBy: { datePublication: "desc" },
+      orderBy: { ordre: "asc" },
+      include: { _count: { select: { sections: true } } },
     });
-    return NextResponse.json(annonces);
+    return NextResponse.json(pages);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
@@ -41,37 +52,32 @@ export async function POST(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();
+    if (!body.titre) return NextResponse.json({ error: "Titre requis" }, { status: 400 });
 
-    if (!body.titre || !body.contenu) {
-      return NextResponse.json({ error: "Titre et contenu requis" }, { status: 400 });
-    }
+    const slug = body.slug || slugify(body.titre);
 
-    const VALID_PRIORITES = ["basse", "normale", "haute", "urgente"];
-    const priorite = body.priorite ?? "normale";
-    if (!VALID_PRIORITES.includes(priorite)) {
-      return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
-    }
+    // Check uniqueness within eglise
+    const existing = await prisma.pageEglise.findFirst({ where: { egliseId, slug } });
+    if (existing) return NextResponse.json({ error: "Ce slug est déjà utilisé" }, { status: 409 });
 
-    const membre = await prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId } });
+    // Get next ordre
+    const maxOrdre = await prisma.pageEglise.aggregate({ where: { egliseId }, _max: { ordre: true } });
 
-    const annonce = await prisma.annonce.create({
+    const page = await prisma.pageEglise.create({
       data: {
-        titre: body.titre,
-        contenu: body.contenu,
         egliseId,
-        auteurId: membre?.id ?? null,
-        priorite,
-        publie: typeof body.publie === "boolean" ? body.publie : true,
-        dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
-        imageUrl: body.imageUrl ?? null,
-        categorie: body.categorie ?? null,
+        titre: body.titre,
+        slug,
+        type: body.type ?? "custom",
+        publie: body.publie ?? false,
+        ordre: (maxOrdre._max.ordre ?? 0) + 1,
       },
     });
-    return NextResponse.json(annonce, { status: 201 });
+    return NextResponse.json(page, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

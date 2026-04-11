@@ -10,95 +10,132 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5 (api-server artifact)
-- **Database**: PostgreSQL + **Prisma 7** (`prisma` + `@prisma/adapter-pg`)
-- **Build**: esbuild (CJS bundle for api-server)
+- **Database**: PostgreSQL via Neon + **Prisma 7** (`prisma` + `@prisma/adapter-pg`)
 
 ## Artifacts
 
 ### CEEC Website (`artifacts/ceec-website/`)
-- **Framework**: Next.js 16 (App Router)
-- **Auth**: Clerk v7 (`@clerk/nextjs@^7.0.8`, `@clerk/localizations@^4`) — **custom auth pages** using `useSignIn`/`useSignUp` hooks (Core v3 API: `signIn.password()`, `signIn.finalize()`, `signUp.verifications.sendEmailCode()`)
-- **ORM**: Prisma 7.6.0 with `@prisma/adapter-pg` (PrismaPg adapter)
-- **Prisma client import**: `import { prisma } from "@/lib/db"` (NOT `db`)
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Auth**: Clerk v7 (`@clerk/nextjs@^7.0.12`) — platform auth (`/sign-in`) for global admins, church-level auth (`/c/connexion`) for members
+- **ORM**: Prisma 7 with `@prisma/adapter-pg` (PrismaPg adapter)
+- **Prisma client import**: `import { prisma } from "@/lib/db/index"` (wraps PrismaClient with PrismaPg adapter)
 - **Prisma config**: `prisma.config.ts` with `defineConfig({ datasourceUrl: process.env.DATABASE_URL })`
 - **Schema**: `prisma/schema.prisma` (no `url` in datasource block — Prisma 7 breaking change)
-- **Type imports**: `import type { Paroisse, Membre, Annonce, Evenement } from "@prisma/client"`
+- **Type imports**: `import type { Annonce, Evenement, PageEglise, SectionPage, ... } from "@prisma/client"`
 - **Styling**: Inline styles (no Tailwind class usage, uses Tailwind as base reset)
 - **Language**: French (localization via Clerk `frFR`)
 - **Port**: 3000 (dev workflow: `artifacts/ceec-website: CEEC Website`)
 - **Proxy/Middleware**: `proxy.ts` at root (renamed from `middleware.ts` for Next.js 16 compatibility)
-- **Clerk v7 notes**: `SignedIn`/`SignedOut` removed — use `useAuth()` hook (`isSignedIn`) instead; `UserButton` still available; `afterSignOutUrl` prop removed from `UserButton`
+- **Middleware**: `middleware.ts` at church root for x-eglise-id/x-eglise-slug header injection
 
-#### Pages
-- `/` — Home (hero, valeurs, paroisses, annonces, events sections)
-- `/paroisses` — All paroisses list
-- `/paroisses/[id]` — Paroisse detail
-- `/evenements` — All events list (public)
-- `/annonces` — All announcements (public)
-- `/contact` — Contact page with form
-- `/sign-in` — Clerk sign-in
-- `/sign-up` — Clerk sign-up
-- `/dashboard` — Fidèle private dashboard
-- `/dashboard/profile` — Profile creation/edit form
-- `/admin` — Admin dashboard (admin role required)
-- `/admin/paroisses` — Manage paroisses (CRUD)
-- `/admin/membres` — View all members
-- `/admin/annonces` — Publish announcements
-- `/admin/evenements` — Manage events
+#### Route Groups
+- `(platform)` — Top-level public site + platform auth
+- `(church)` — Church-specific pages under `/c/`, gestion dashboard under `/gestion/`
+- `admin` — Super-admin dashboard at `/admin/`
 
-#### API Routes
-- `GET/POST /api/paroisses` — Public list + admin create
-- `GET/PUT/DELETE /api/paroisses/[id]` — Get/update/delete paroisse
-- `GET /api/annonces` — Public announcements (publie=true)
-- `POST /api/annonces` — Admin create announcement
-- `GET/PUT/DELETE /api/annonces/[id]` — Get/update/delete annonce
-- `GET /api/evenements` — Public events (publie=true)
-- `POST /api/evenements` — Admin create event
-- `GET/PUT/DELETE /api/evenements/[id]` — Get/update/delete evenement
-- `GET /api/membres` — Admin: list all members (with paroisse)
-- `GET/PUT/DELETE /api/membres/[id]` — Admin CRUD on a member
-- `POST /api/membres/profile` — Create member profile
-- `PUT /api/membres/profile` — Update own member profile
+#### Church Public Pages (`/c/[slug]/...`)
+- `/c` — Church home with dynamic DB sections via SectionRenderer
+- `/c/[pageSlug]` — Custom pages from DB (404 if not found or unpublished)
+- `/c/annonces` — Enriched annonces: image, categorie, priority badges, pagination (12/page)
+- `/c/annonces/[id]` — Annonce detail with sidebar
+- `/c/evenements` — Enriched evenements: image, categorie, tabs (upcoming/past), pagination
+- `/c/evenements/[id]` — Evenement detail with sidebar + registration link
+- `/c/connexion`, `/c/inscription` — Church-level auth pages
+
+#### Church Gestion Dashboard (`/gestion/`)
+- `/gestion` — Dashboard home (stats)
+- `/gestion/annonces` — CRUD with image, categorie, priorité
+- `/gestion/evenements` — CRUD with image, categorie, lieu, lien inscription
+- `/gestion/membres` — Member management
+- `/gestion/admins` — Admin/role management
+- `/gestion/parametres` — Church settings (basic info)
+- `/gestion/pages` — Page manager (create/publish/delete custom pages)
+- `/gestion/pages/[id]` — Section editor (add/reorder/configure sections)
+- `/gestion/apparence` — Branding editor (colors, favicon, CSS, social links)
+- `/gestion/videos` — YouTube live/replay management
+
+#### Admin Dashboard (`/admin/`)
+- `/admin` — Stats + church list
+- `/admin/eglises` — Church management
+- `/admin/eglises/[slug]` — Church detail + "Superviser le contenu" button
+- `/admin/eglises/[slug]/contenu` — Read-only content supervision (pages, annonces, evenements, videos)
+- `/admin/eglises/nouveau` — Create new church
+
+#### API Routes — Gestion
+All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC permission checks:
+- `GET/POST /api/gestion/annonces` — Annonces CRUD (permission: `eglise_creer_annonce`)
+- `PUT/DELETE /api/gestion/annonces/[id]`
+- `GET/POST /api/gestion/evenements`
+- `PUT/DELETE /api/gestion/evenements/[id]`
+- `GET/POST /api/gestion/membres`
+- `PUT/DELETE /api/gestion/membres/[id]`
+- `GET/POST /api/gestion/pages` — PageEglise CRUD (permission: `eglise_gerer_config`)
+- `GET/PUT/DELETE /api/gestion/pages/[id]`
+- `POST /api/gestion/sections` — SectionPage CRUD (permission: `eglise_gerer_config`)
+- `PUT/DELETE /api/gestion/sections/[id]`
+- `GET/PUT /api/gestion/config` — EgliseConfig upsert
+- `GET/POST /api/gestion/videos` — LiveStream CRUD (permission: `eglise_gerer_annonces`)
+- `PUT/DELETE /api/gestion/videos/[id]`
+
+#### RBAC System (`lib/auth/rbac.ts`)
+- 9 roles: `super_admin`, `admin_eglise`, `moderateur`, `secretaire`, `tresorier`, `diacre`, `ancien`, `responsable_dept`, `fidele`
+- 24 permissions including: `eglise_gerer_config`, `eglise_gerer_annonces`, `eglise_creer_annonce`, `eglise_voir_annonces`, `eglise_gerer_evenements`, `eglise_creer_evenement`, `eglise_gerer_membres`, `eglise_gerer_roles`
+- `isSuperAdmin(userId)` — checks by Clerk userId against DB
+- `hasPermission(userId, permission, egliseId)` — checks UserRole table
 
 #### DB Schema (Prisma models)
-- `Paroisse` — Church parishes
-- `Membre` — Member/user profiles (linked to Clerk userId via `clerkUserId`)
-- `Annonce` — Announcements
-- `Evenement` — Events
+- `Eglise` — Church registry (nom, slug, sousDomaine, statut, ville, etc.)
+- `EgliseConfig` — Branding (couleurPrimaire, couleurAccent, faviconUrl, cssPersonnalise, social links, horaires)
+- `PageEglise` — Custom pages (titre, slug, type, publie, ordre)
+- `SectionPage` — Page sections (type, config JSON, ordre) — 8 types: hero, texte_image, live, annonces, evenements, contact, departements, galerie
+- `LiveStream` — YouTube videos (urlYoutube, estEnDirect, epingle, publie)
+- `Membre` — Church member profile (clerkUserId, nom, prenom, email, role, statut)
+- `UserRole` — RBAC join table (clerkUserId, roleId, egliseId)
+- `Role` — Role registry (nom)
+- `Annonce` — Announcements (titre, contenu, imageUrl, categorie, priorite, publie, dateExpiration)
+- `Evenement` — Events (titre, description, imageUrl, categorie, lienInscription, dateDebut, dateFin, lieu, publie)
 
-#### Roles
-- `fidele` — Standard member (default)
-- `admin` — Admin with full CRUD access (checked via DB `membres.role`)
+#### Key Components
+- `components/church/SectionRenderer.tsx` — Dispatches to 8 section type components
+- `components/church/sections/` — SectionHero, SectionTexteImage, SectionLive, SectionAnnoncesRecentes, SectionEvenementsAVenir, SectionContact, SectionDepartements, SectionGalerie
+- `components/church/ChurchNavbar.tsx` — Responsive hamburger nav with custom pages
+- `components/church/ChurchFooter.tsx` — SVG social icons, contact info
+- `components/gestion/GestionPagesClient.tsx` — Page manager
+- `components/gestion/GestionPageDetailClient.tsx` — Section editor with up/down reorder
+- `components/gestion/GestionApparenceClient.tsx` — Branding editor with color picker
+- `components/gestion/GestionVideosClient.tsx` — YouTube live manager with thumbnails
+- `components/gestion/GestionAnnoncesClient.tsx` — Annonces CRUD (image, categorie, priorite)
+- `components/gestion/GestionEvenementsClient.tsx` — Evenements CRUD (image, categorie, lienInscription)
+- `lib/sanitize-url.ts` — `safeUrl()` for config-sourced URLs (social links, CTAs, YouTube)
+
+#### Security
+- `safeUrl()` from `lib/sanitize-url.ts` applied to all config-sourced URLs
+- CSS var values whitelisted against injection
+- `cssPersonnalise` sanitized against `</style>`, `<script>`, `javascript:`, `@import`, `expression()`
+- All gestion API routes check `isSuperAdmin` OR church-level `hasPermission`
 
 ### API Server (`artifacts/api-server/`)
-- Express 5 API, port 8080
+- Express 5 API, port 8080 (not currently used)
 
 ### Mockup Sandbox (`artifacts/mockup-sandbox/`)
 - Vite dev server for canvas component previews, port 8081
 
 ## Replit Migration Notes
 
-- `pnpm.onlyBuiltDependencies` added to root `package.json` to allow Prisma, Clerk, sharp, and esbuild postinstall scripts to run (required for Prisma client generation and Clerk to work)
+- `pnpm.onlyBuiltDependencies` added to root `package.json` to allow Prisma, Clerk, sharp, and esbuild postinstall scripts to run
 - Dev/start scripts updated to use `${PORT:-3000} -H 0.0.0.0` for Replit proxy compatibility
-- Workflow "Start application" configured: `pnpm --filter @workspace/ceec-website run dev` on port 3000
+- `server.allowedHosts: true` in Vite configs
 
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/ceec-website exec prisma db push --url="$DATABASE_URL"` — push CEEC DB schema changes
+- `pnpm --filter @workspace/ceec-website exec prisma db push` — push CEEC DB schema changes
 - `pnpm --filter @workspace/ceec-website exec prisma generate` — regenerate Prisma client
 
 ## Environment Variables
 
-- `DATABASE_URL` — PostgreSQL connection string (Replit built-in)
+- `DATABASE_URL` — PostgreSQL connection string (Neon)
 - `CLERK_SECRET_KEY` — Clerk secret (server-side)
-- `CLERK_PUBLISHABLE_KEY` — Clerk publishable key (forwarded as NEXT_PUBLIC at runtime)
-- `NEXT_PUBLIC_CLERK_SIGN_IN_URL` — /sign-in
-- `NEXT_PUBLIC_CLERK_SIGN_UP_URL` — /sign-up
-- `NEXT_PUBLIC_CLERK_FALLBACK_REDIRECT_URL` — /dashboard
-- `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` — /dashboard
-- `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` — /dashboard
-
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — Clerk publishable key
+- `CLERK_WEBHOOK_SECRET` — Webhook secret for Clerk events
+- `NEXT_PUBLIC_CLERK_SIGN_IN_URL` — /sign-in (platform)

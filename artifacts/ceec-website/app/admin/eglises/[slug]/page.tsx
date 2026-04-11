@@ -66,6 +66,14 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
             {eglise.pasteur && <span>👤 {eglise.pasteur}</span>}
           </div>
         </div>
+        {eglise.slug && (
+          <Link
+            href={`/admin/eglises/${eglise.slug}/contenu`}
+            style={{ padding: "9px 18px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            📄 Superviser le contenu
+          </Link>
+        )}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 32 }}>

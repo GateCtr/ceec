@@ -66,6 +66,11 @@ export default async function GestionLayout({
       { label: "Annonces", href: "/gestion/annonces", icon: "📢" },
       { label: "Événements", href: "/gestion/evenements", icon: "🗓️" },
     ] : []),
+    ...(canParametres ? [
+      { label: "Pages", href: "/gestion/pages", icon: "📄" },
+      { label: "Vidéos", href: "/gestion/videos", icon: "▶️" },
+      { label: "Apparence", href: "/gestion/apparence", icon: "🎨" },
+    ] : []),
     ...(canMembres ? [{ label: "Membres", href: "/gestion/membres", icon: "👥" }] : []),
     ...(canAdmins ? [{ label: "Admins", href: "/gestion/admins", icon: "🔐" }] : []),
     ...(canParametres ? [{ label: "Paramètres", href: "/gestion/parametres", icon: "⚙️" }] : []),

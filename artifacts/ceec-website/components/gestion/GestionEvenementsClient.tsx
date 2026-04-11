@@ -7,6 +7,8 @@ interface Props {
   initialEvenements: Evenement[];
 }
 
+const CATEGORIES_EVT = ["", "Culte", "Conférence", "Retraite", "Formation", "Mission", "Social", "Jeunesse", "Femmes", "Hommes", "Concert", "Autre"];
+
 type FormData = {
   titre: string;
   description: string;
@@ -14,9 +16,15 @@ type FormData = {
   dateFin: string;
   lieu: string;
   publie: boolean;
+  imageUrl: string;
+  categorie: string;
+  lienInscription: string;
 };
 
-const emptyForm: FormData = { titre: "", description: "", dateDebut: "", dateFin: "", lieu: "", publie: true };
+const emptyForm: FormData = {
+  titre: "", description: "", dateDebut: "", dateFin: "", lieu: "", publie: true,
+  imageUrl: "", categorie: "", lienInscription: "",
+};
 
 export default function GestionEvenementsClient({ initialEvenements }: Props) {
   const [evenements, setEvenements] = useState<Evenement[]>(initialEvenements);
@@ -47,6 +55,9 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
       dateFin: toDateInput(e.dateFin),
       lieu: e.lieu ?? "",
       publie: e.publie,
+      imageUrl: e.imageUrl ?? "",
+      categorie: e.categorie ?? "",
+      lienInscription: e.lienInscription ?? "",
     });
     setShowForm(true);
     setError(null);
@@ -62,6 +73,9 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
         dateFin: form.dateFin || null,
         description: form.description || null,
         lieu: form.lieu || null,
+        imageUrl: form.imageUrl || null,
+        categorie: form.categorie || null,
+        lienInscription: form.lienInscription || null,
       };
       let res;
       if (editing) {
@@ -113,7 +127,7 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
       {showForm && (
         <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
           <h2 style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#0f172a" }}>
-            {editing ? "Modifier l'événement" : "Nouvel événement"}
+            {editing ? "Modifier l\u2019événement" : "Nouvel événement"}
           </h2>
           {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "8px 12px", borderRadius: 6, marginBottom: 12, fontSize: 13 }}>{error}</div>}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -125,19 +139,40 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
               <label style={s.label}>Description</label>
               <textarea style={{ ...s.input, minHeight: 90, resize: "vertical" }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div style={{ display: "flex", gap: 16 }}>
-              <div style={{ flex: 1 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={s.label}>Catégorie</label>
+                <select style={s.input} value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}>
+                  {CATEGORIES_EVT.map((c) => <option key={c} value={c}>{c || "— Aucune —"}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={s.label}>Lieu</label>
+                <input style={s.input} value={form.lieu} onChange={(e) => setForm({ ...form, lieu: e.target.value })} placeholder="Ex: Salle principale, Kinshasa" />
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
                 <label style={s.label}>Date de début *</label>
                 <input type="datetime-local" style={s.input} value={form.dateDebut} onChange={(e) => setForm({ ...form, dateDebut: e.target.value })} required />
               </div>
-              <div style={{ flex: 1 }}>
+              <div>
                 <label style={s.label}>Date de fin</label>
                 <input type="datetime-local" style={s.input} value={form.dateFin} onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
               </div>
             </div>
             <div>
-              <label style={s.label}>Lieu</label>
-              <input style={s.input} value={form.lieu} onChange={(e) => setForm({ ...form, lieu: e.target.value })} placeholder="Ex: Salle principale, Kinshasa" />
+              <label style={s.label}>Image (URL)</label>
+              <input style={s.input} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
+              {form.imageUrl && (
+                <div style={{ marginTop: 8, borderRadius: 8, overflow: "hidden", maxWidth: 240, maxHeight: 120, background: "#f1f5f9" }}>
+                  <img src={form.imageUrl} alt="Aperçu" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                </div>
+              )}
+            </div>
+            <div>
+              <label style={s.label}>Lien d&apos;inscription (URL externe)</label>
+              <input style={s.input} value={form.lienInscription} onChange={(e) => setForm({ ...form, lienInscription: e.target.value })} placeholder="https://forms.google.com/..." />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input type="checkbox" id="publie-evt" checked={form.publie} onChange={(e) => setForm({ ...form, publie: e.target.checked })} />
@@ -163,22 +198,35 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
           {evenements.map((e) => {
             const past = isPast(e.dateDebut);
             return (
-              <div key={e.id} style={{ background: "white", borderRadius: 12, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, opacity: past ? 0.7 : 1 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{e.titre}</span>
-                    {past && <span style={{ ...s.badge, background: "#f1f5f9", color: "#94a3b8" }}>Passé</span>}
-                    {!e.publie && <span style={{ ...s.badge, background: "#f1f5f9", color: "#64748b" }}>Brouillon</span>}
+              <div key={e.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", overflow: "hidden", opacity: past ? 0.75 : 1 }}>
+                {e.imageUrl && (
+                  <div style={{ width: 100, flexShrink: 0, background: "#f1f5f9" }}>
+                    <img src={e.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                   </div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
-                    📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    {e.lieu && <> — 📍 {e.lieu}</>}
+                )}
+                <div style={{ flex: 1, padding: "1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{e.titre}</span>
+                      {e.categorie && <span style={{ ...s.badge, background: "#eff6ff", color: "#1e40af" }}>{e.categorie}</span>}
+                      {past && <span style={{ ...s.badge, background: "#f1f5f9", color: "#94a3b8" }}>Passé</span>}
+                      {!e.publie && <span style={{ ...s.badge, background: "#f1f5f9", color: "#64748b" }}>Brouillon</span>}
+                    </div>
+                    <div style={{ fontSize: 13, color: "#64748b" }}>
+                      📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      {e.lieu && <> — 📍 {e.lieu}</>}
+                    </div>
+                    {e.description && <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{e.description}</p>}
+                    {e.lienInscription && (
+                      <div style={{ marginTop: 4, fontSize: 12, color: "#1e3a8a" }}>
+                        🔗 Lien d&apos;inscription configuré
+                      </div>
+                    )}
                   </div>
-                  {e.description && <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{e.description}</p>}
-                </div>
-                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                  <button onClick={() => openEdit(e)} style={s.editBtn}>Modifier</button>
-                  <button onClick={() => handleDelete(e.id)} style={s.deleteBtn}>Supprimer</button>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => openEdit(e)} style={s.editBtn}>Modifier</button>
+                    <button onClick={() => handleDelete(e.id)} style={s.deleteBtn}>Supprimer</button>
+                  </div>
                 </div>
               </div>
             );

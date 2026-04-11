@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
+import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 
 export const metadata = {
@@ -91,7 +91,7 @@ const pionniers = [
 export default function HistoriquePage() {
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main>
 
         {/* Hero */}

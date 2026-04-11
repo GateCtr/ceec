@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
+import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
 
@@ -21,7 +21,7 @@ export default async function ParoissesPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main>
         <section style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "4rem 1rem", textAlign: "center" }}>
           <div style={{ maxWidth: 600, margin: "0 auto" }}>

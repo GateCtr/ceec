@@ -6,26 +6,31 @@ import { useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { UserMenu, UserMenuMobile } from "@/components/UserMenu";
 
-type NavInfo = {
+export type NavInfo = {
   isSuperAdmin: boolean;
   isChurchAdmin: boolean;
   churchSlugs: string[];
-  roleLabel?: string;
-  churchName?: string;
+  roleLabel: string;
+  churchName: string | null;
 };
 
-export default function Navbar() {
+const EMPTY_NAV: NavInfo = {
+  isSuperAdmin: false,
+  isChurchAdmin: false,
+  churchSlugs: [],
+  roleLabel: "",
+  churchName: null,
+};
+
+type Props = { initialNavInfo?: NavInfo };
+
+export default function Navbar({ initialNavInfo }: Props) {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [navInfo, setNavInfo] = useState<NavInfo>({
-    isSuperAdmin: false,
-    isChurchAdmin: false,
-    churchSlugs: [],
-    roleLabel: undefined,
-    churchName: undefined,
-  });
+  // Initialise avec les données serveur si disponibles
+  const [navInfo, setNavInfo] = useState<NavInfo>(initialNavInfo ?? EMPTY_NAV);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -33,15 +38,9 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Réinitialise quand l'utilisateur se déconnecte
   useEffect(() => {
-    if (!isSignedIn) {
-      setNavInfo({ isSuperAdmin: false, isChurchAdmin: false, churchSlugs: [] });
-      return;
-    }
-    fetch("/api/me/nav-info")
-      .then((r) => r.json())
-      .then((data) => setNavInfo(data))
-      .catch(() => {});
+    if (!isSignedIn) setNavInfo(EMPTY_NAV);
   }, [isSignedIn]);
 
   const links = [
@@ -98,12 +97,8 @@ export default function Navbar() {
             />
           </div>
           <div>
-            <div className="font-bold text-base leading-tight text-white tracking-wide">
-              CEEC
-            </div>
-            <div className="text-[11px] leading-tight text-white/70">
-              Communauté Évangélique au Congo
-            </div>
+            <div className="font-bold text-base leading-tight text-white tracking-wide">CEEC</div>
+            <div className="text-[11px] leading-tight text-white/70">Communauté Évangélique au Congo</div>
           </div>
         </Link>
 
@@ -115,23 +110,16 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Séparateur */}
           <div className="w-px h-5 mx-2 bg-white/20" />
 
           {isSignedIn ? (
             <UserMenu navInfo={navInfo} />
           ) : (
             <div className="flex items-center gap-2">
-              <Link
-                href="/sign-in"
-                className="px-4 py-1.5 rounded-md text-sm font-medium text-white bg-white/[0.12] transition-all duration-150 hover:bg-white/20"
-              >
+              <Link href="/sign-in" className="px-4 py-1.5 rounded-md text-sm font-medium text-white bg-white/[0.12] transition-all duration-150 hover:bg-white/20">
                 Connexion
               </Link>
-              <Link
-                href="/sign-up"
-                className="px-4 py-1.5 rounded-md text-sm font-semibold text-primary bg-secondary transition-all duration-150 hover:brightness-110"
-              >
+              <Link href="/sign-up" className="px-4 py-1.5 rounded-md text-sm font-semibold text-primary bg-secondary transition-all duration-150 hover:brightness-110">
                 S&apos;inscrire
               </Link>
             </div>
@@ -144,26 +132,17 @@ export default function Navbar() {
           className="md:hidden flex flex-col justify-center gap-1.5 p-2 rounded-md text-white"
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >
-          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "rotate-45 translate-y-2" : "rotate-0 translate-y-0"}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
           <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
-          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : "rotate-0 translate-y-0"}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
       {/* Mobile menu */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 bg-primary-dark ${
-          menuOpen ? "max-h-[600px] border-t border-white/10" : "max-h-0"
-        }`}
-      >
+      <div className={`md:hidden overflow-hidden transition-all duration-300 bg-primary-dark ${menuOpen ? "max-h-[600px] border-t border-white/10" : "max-h-0"}`}>
         <div className="px-4 py-3 flex flex-col gap-1">
           {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className={mobileLinkClass(link.href)}
-            >
+            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className={mobileLinkClass(link.href)}>
               {link.label}
             </Link>
           ))}
@@ -172,18 +151,10 @@ export default function Navbar() {
             <UserMenuMobile navInfo={navInfo} onClose={() => setMenuOpen(false)} />
           ) : (
             <div className="flex gap-2 mt-2 pt-2 border-t border-white/10">
-              <Link
-                href="/sign-in"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-white/[0.12]"
-              >
+              <Link href="/sign-in" onClick={() => setMenuOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-white/[0.12]">
                 Connexion
               </Link>
-              <Link
-                href="/sign-up"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center text-primary bg-secondary"
-              >
+              <Link href="/sign-up" onClick={() => setMenuOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center text-primary bg-secondary">
                 S&apos;inscrire
               </Link>
             </div>

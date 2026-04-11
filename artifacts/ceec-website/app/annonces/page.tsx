@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
 
@@ -28,7 +28,7 @@ export default async function AnnoncesPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main>
         <section style={{
           background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",

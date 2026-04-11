@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
+import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
 
@@ -98,7 +98,7 @@ export default async function AProposPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main>
 
         {/* Hero */}

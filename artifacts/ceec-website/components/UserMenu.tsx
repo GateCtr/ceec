@@ -3,14 +3,7 @@
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRef, useState, useEffect, CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-
-type NavInfo = {
-  isSuperAdmin: boolean;
-  isChurchAdmin: boolean;
-  churchSlugs: string[];
-  roleLabel?: string;
-  churchName?: string;
-};
+import type { NavInfo } from "./Navbar";
 
 type Props = { navInfo: NavInfo };
 
@@ -50,10 +43,9 @@ export function UserMenu({ navInfo }: Props) {
     user.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() ||
     "?";
 
-  const roleLabel = navInfo.isSuperAdmin
-    ? "Super Administrateur CEEC"
-    : navInfo.roleLabel ||
-      (navInfo.isChurchAdmin ? "Personnel d'église" : "Fidèle");
+  const roleLabel = navInfo.roleLabel ||
+    (navInfo.isSuperAdmin ? "Super Administrateur CEEC" :
+     navInfo.isChurchAdmin ? "Personnel d'église" : "Fidèle");
 
   const roleBadge = ROLE_COLORS[roleLabel] ?? ROLE_COLORS.default;
 
@@ -195,9 +187,9 @@ export function UserMenuMobile({ navInfo, onClose }: Props & { onClose: () => vo
     user.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() ||
     "?";
 
-  const roleLabel = navInfo.isSuperAdmin
-    ? "Super Administrateur CEEC"
-    : navInfo.roleLabel || (navInfo.isChurchAdmin ? "Personnel d'église" : "Fidèle");
+  const roleLabel = navInfo.roleLabel ||
+    (navInfo.isSuperAdmin ? "Super Administrateur CEEC" :
+     navInfo.isChurchAdmin ? "Personnel d'église" : "Fidèle");
 
   const churchLink =
     navInfo.isChurchAdmin && navInfo.churchSlugs[0]

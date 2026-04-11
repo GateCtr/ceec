@@ -125,6 +125,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/setup(.*)",
   "/api/church(.*)",
   "/api/webhooks/(.*)",
+  // Routes qui gèrent leur propre auth en interne
+  "/api/me(.*)",
 ]);
 
 const isPlatformAdminRoute = createRouteMatcher([

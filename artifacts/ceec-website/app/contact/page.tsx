@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
 
@@ -10,7 +10,7 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main>
         <section style={{
           background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",

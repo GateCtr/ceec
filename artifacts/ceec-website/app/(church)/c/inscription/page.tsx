@@ -49,6 +49,7 @@ export default function ChurchInscriptionPage() {
         strategy: "oauth_google",
         redirectUrl: "/c/oauth-callback",
         redirectUrlComplete: "/c/oauth-callback",
+        unsafeMetadata: eglise?.slug ? { pendingEgliseSlug: eglise.slug } : undefined,
       });
     } catch (err: unknown) {
       setErrorMsg((err as Error)?.message ?? "Erreur lors de la connexion Google.");

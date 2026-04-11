@@ -141,6 +141,25 @@ function extractEgliseId(pathname: string): number | null {
 export default clerkMiddleware(async (auth, req) => {
   const url = req.nextUrl;
 
+  // Guard : les callbacks OAuth church (/c/oauth-callback) nécessitent soit un
+  // cookie d'église actif, soit une session Clerk existante. Sinon redirect /sign-up.
+  if (
+    url.pathname === "/c/oauth-callback" ||
+    url.pathname.startsWith("/c/oauth-callback/")
+  ) {
+    const cookieSlug = req.headers
+      .get("cookie")
+      ?.split("; ")
+      .find((c) => c.startsWith("ceec_church_slug="))
+      ?.split("=")[1];
+
+    const { userId } = await auth();
+
+    if (!cookieSlug && !userId) {
+      return NextResponse.redirect(new URL("/sign-up", req.url));
+    }
+  }
+
   const churchSlug = extractChurchSlug(req);
 
   const isChurchNativePrefix =

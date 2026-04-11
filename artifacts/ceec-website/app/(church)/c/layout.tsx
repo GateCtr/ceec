@@ -6,7 +6,7 @@ import ChurchNavbar from "@/components/church/ChurchNavbar";
 import ChurchFooter from "@/components/church/ChurchFooter";
 import ChurchAuthLayout from "@/components/church/ChurchAuthLayout";
 
-const AUTH_PATHS = ["/c/connexion", "/c/inscription"];
+const AUTH_PATHS = ["/c/connexion", "/c/inscription", "/c/oauth-callback"];
 
 export default async function ChurchLayout({
   children,

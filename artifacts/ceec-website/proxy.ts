@@ -13,7 +13,8 @@ const CHURCH_REWRITE_BYPASS_PATHS = [
   "/eglise-introuvable",
   "/sign-in",
   "/sign-up",
-  "/api/church/resolve",
+  "/api/church",
+  "/api/webhooks",
 ];
 
 function extractChurchSlug(req: Request): string | null {

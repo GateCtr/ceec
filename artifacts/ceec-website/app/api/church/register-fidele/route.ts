@@ -10,8 +10,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
+    const body = await req.json().catch(() => ({}));
+
+    // Résolution du slug : 1) corps de la requête, 2) header middleware, 3) cookie
     const headersList = await headers();
-    const slug = headersList.get("x-eglise-slug");
+    const slugFromHeader = headersList.get("x-eglise-slug");
+    const slugFromCookie = req.cookies.get("ceec_church_slug")?.value;
+    const slug: string | undefined =
+      body.egliseSlug || slugFromHeader || slugFromCookie;
 
     if (!slug) {
       return NextResponse.json(
@@ -33,7 +39,6 @@ export async function POST(req: NextRequest) {
     }
 
     const egliseId = eglise.id;
-    const body = await req.json();
 
     const fideleRole = await prisma.role.findFirst({
       where: { nom: "fidele" },

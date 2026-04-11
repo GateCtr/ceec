@@ -10,6 +10,7 @@ type ClerkUserEvent = {
     primary_email_address_id: string;
     first_name: string | null;
     last_name: string | null;
+    unsafe_metadata?: Record<string, unknown>;
   };
 };
 
@@ -59,6 +60,66 @@ export async function POST(req: NextRequest) {
       const nom = data.last_name ?? "";
       const prenom = data.first_name ?? "";
 
+      // Vérifier si un slug d'église est présent dans les métadonnées non sûres
+      // (stocké lors du flow OAuth Google depuis /c/inscription ou /c/connexion)
+      const pendingSlug =
+        typeof data.unsafe_metadata?.pendingEgliseSlug === "string"
+          ? data.unsafe_metadata.pendingEgliseSlug
+          : null;
+
+      if (pendingSlug) {
+        // Attacher directement le nouveau membre à son église
+        const eglise = await prisma.eglise.findUnique({
+          where: { slug: pendingSlug },
+          select: { id: true, statut: true },
+        });
+
+        if (eglise && eglise.statut === "actif") {
+          const fideleRole = await prisma.role.findFirst({
+            where: { nom: "fidele" },
+          });
+
+          await prisma.$transaction(async (tx) => {
+            await tx.membre.upsert({
+              where: {
+                membre_clerk_eglise_unique: { clerkUserId: data.id, egliseId: eglise.id },
+              },
+              update: {},
+              create: {
+                clerkUserId: data.id,
+                email,
+                nom,
+                prenom,
+                egliseId: eglise.id,
+                role: "fidele",
+                statut: "actif",
+              },
+            });
+
+            if (fideleRole) {
+              await tx.userRole.upsert({
+                where: {
+                  user_role_unique: {
+                    clerkUserId: data.id,
+                    roleId: fideleRole.id,
+                    egliseId: eglise.id,
+                  },
+                },
+                update: {},
+                create: {
+                  clerkUserId: data.id,
+                  roleId: fideleRole.id,
+                  egliseId: eglise.id,
+                },
+              });
+            }
+          });
+
+          return NextResponse.json({ received: true });
+        }
+      }
+
+      // Pas de slug d'église → créer un membre non rattaché
       const existing = await prisma.membre.findFirst({
         where: { clerkUserId: data.id, egliseId: null },
       });

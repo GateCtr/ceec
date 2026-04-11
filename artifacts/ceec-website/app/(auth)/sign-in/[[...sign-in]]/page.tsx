@@ -1,59 +1,91 @@
 "use client";
 
 import { useSignIn } from "@clerk/nextjs";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React, { useState } from "react";
 
 export default function SignInPage() {
-  const { signIn, errors, fetchStatus } = useSignIn();
+  const { isLoaded, signIn, setActive } = useSignIn();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-
-  const isLoading = fetchStatus === "fetching";
+  const [step, setStep] = useState<"password" | "mfa">("password");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await signIn.password({ emailAddress: email, password });
-    if (error) return;
+    if (!isLoaded || !signIn) return;
 
-    if (signIn.status === "complete") {
-      await signIn.finalize({
-        navigate: ({ decorateUrl }) => {
-          const url = decorateUrl("/auth/redirect");
-          if (url.startsWith("http")) {
-            window.location.href = url;
-          } else {
-            router.push(url);
-          }
-        },
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const result = await signIn.create({
+        strategy: "password",
+        identifier: email,
+        password,
       });
-    } else if (signIn.status === "needs_client_trust") {
-      await signIn.mfa.sendEmailCode();
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        router.push("/auth/redirect");
+      } else if (
+        result.status === "needs_second_factor" ||
+        result.status === "needs_new_password"
+      ) {
+        await signIn.prepareFirstFactor({ strategy: "email_code", emailAddressId: result.supportedFirstFactors?.find(f => f.strategy === "email_code")?.emailAddressId ?? "" });
+        setStep("mfa");
+      } else {
+        setError("Connexion incomplète. Veuillez réessayer.");
+      }
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) {
+        const msg = err.errors[0]?.longMessage ?? err.errors[0]?.message ?? "Erreur de connexion.";
+        setError(msg);
+      } else {
+        setError("Une erreur inattendue s'est produite.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signIn.mfa.verifyEmailCode({ code });
-    if (signIn.status === "complete") {
-      await signIn.finalize({
-        navigate: ({ decorateUrl }) => {
-          const url = decorateUrl("/auth/redirect");
-          if (url.startsWith("http")) {
-            window.location.href = url;
-          } else {
-            router.push(url);
-          }
-        },
+    if (!isLoaded || !signIn) return;
+
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const result = await signIn.attemptFirstFactor({
+        strategy: "email_code",
+        code,
       });
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        router.push("/auth/redirect");
+      } else {
+        setError("Code invalide ou expiré.");
+      }
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) {
+        setError(err.errors[0]?.longMessage ?? err.errors[0]?.message ?? "Code invalide.");
+      } else {
+        setError("Une erreur inattendue s'est produite.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (signIn.status === "needs_client_trust") {
+  if (step === "mfa") {
     return (
       <Card>
         <h2 style={s.heading}>Vérification requise</h2>
@@ -68,15 +100,17 @@ export default function SignInPage() {
             onChange={(e) => setCode(e.target.value)}
             placeholder="123456"
             required
+            autoFocus
           />
-          {errors?.fields?.code && <Err>{errors.fields.code.message}</Err>}
+          {error && <Err>{error}</Err>}
           <button type="submit" style={s.btn} disabled={isLoading || !code}>
             {isLoading ? "Vérification…" : "Vérifier"}
           </button>
-          <button type="button" style={s.outlineBtn} onClick={() => signIn.mfa.sendEmailCode()}>
-            Renvoyer le code
-          </button>
-          <button type="button" style={s.ghostBtn} onClick={() => signIn.reset()}>
+          <button
+            type="button"
+            style={s.ghostBtn}
+            onClick={() => { setStep("password"); setError(null); setCode(""); }}
+          >
             Recommencer
           </button>
         </form>
@@ -107,7 +141,6 @@ export default function SignInPage() {
           placeholder="vous@exemple.com"
           required
         />
-        {errors?.fields?.identifier && <Err>{errors.fields.identifier.message}</Err>}
 
         <label style={{ ...s.label, marginTop: 14 }}>Mot de passe</label>
         <input
@@ -119,10 +152,10 @@ export default function SignInPage() {
           placeholder="••••••••"
           required
         />
-        {errors?.fields?.password && <Err>{errors.fields.password.message}</Err>}
-        {(errors?.fields as any)?.form && <Err>{(errors.fields as any).form.message}</Err>}
 
-        <button type="submit" style={s.btn} disabled={isLoading || !email || !password}>
+        {error && <Err>{error}</Err>}
+
+        <button type="submit" style={s.btn} disabled={!isLoaded || isLoading || !email || !password}>
           {isLoading ? "Connexion…" : "Se connecter"}
         </button>
       </form>
@@ -155,16 +188,14 @@ export default function SignInPage() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: 16,
-        padding: "2rem",
-        width: "100%",
-        maxWidth: 400,
-        boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-      }}
-    >
+    <div style={{
+      background: "white",
+      borderRadius: 16,
+      padding: "2rem",
+      width: "100%",
+      maxWidth: 400,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+    }}>
       {children}
     </div>
   );
@@ -201,18 +232,6 @@ const s = {
     color: "white",
     fontWeight: 700,
     fontSize: 15,
-    cursor: "pointer",
-    width: "100%",
-  } as React.CSSProperties,
-  outlineBtn: {
-    marginTop: 10,
-    padding: "10px 0",
-    borderRadius: 8,
-    border: "1.5px solid #e2e8f0",
-    background: "white",
-    color: "#1e3a8a",
-    fontWeight: 600,
-    fontSize: 14,
     cursor: "pointer",
     width: "100%",
   } as React.CSSProperties,

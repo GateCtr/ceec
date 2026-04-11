@@ -29,7 +29,8 @@ export default async function ChurchAnnoncesPage({
   if (!eglise) notFound();
 
   const { page: pageStr, categorie } = await searchParams;
-  const currentPage = Math.max(1, parseInt(pageStr ?? "1", 10));
+  const parsedPage = Number.parseInt(pageStr ?? "1", 10);
+  const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const where = {

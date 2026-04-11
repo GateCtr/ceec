@@ -94,6 +94,14 @@ export async function isPlatformAdmin(clerkUserId: string): Promise<boolean> {
   return userRoles.some((ur) => PLATFORM_ROLES.has(ur.role.nom));
 }
 
+/** Vrai si l'utilisateur est super_admin ou admin_plateforme (SANS moderateur_plateforme) */
+export async function isAdminPlatteforme(clerkUserId: string): Promise<boolean> {
+  const userRoles = await getUserRoles(clerkUserId);
+  return userRoles.some(
+    (ur) => ur.role.nom === ROLES.SUPER_ADMIN || ur.role.nom === ROLES.ADMIN_PLATEFORME
+  );
+}
+
 /**
  * Vrai si l'utilisateur a un rôle d'encadrement dans cette église
  * (admin_eglise, pasteur, diacre, secretaire, tresorier — tout sauf fidele).

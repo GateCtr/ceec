@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
-import { isPlatformAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 
 type Params = { params: Promise<{ slug: string; evtId: string }> };
 
@@ -9,7 +9,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    if (!await isPlatformAdmin(userId)) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    if (!await isAdminPlatteforme(userId)) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { slug, evtId } = await params;
     const eId = parseInt(evtId, 10);
@@ -39,7 +39,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    if (!await isPlatformAdmin(userId)) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    if (!await isAdminPlatteforme(userId)) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { slug, evtId } = await params;
     const eId = parseInt(evtId, 10);

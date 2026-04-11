@@ -56,6 +56,9 @@ model EgliseConfig {
   // Footer extras
   siteWeb          String?  @map("site_web") @db.VarChar(255)
   horaires         String?  @db.Text
+  // Navigation & footer links
+  navLinksJson     Json?    @map("nav_links_json")
+  footerLinksJson  Json?    @map("footer_links_json")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
 

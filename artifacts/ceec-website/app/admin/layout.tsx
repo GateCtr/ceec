@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { isPlatformAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import type { NavItem } from "@/components/dashboard/DashboardSidebar";
 
@@ -20,7 +20,7 @@ export default async function AdminLayout({
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!(await isPlatformAdmin(userId))) redirect("/sign-in");
+  if (!(await isAdminPlatteforme(userId))) redirect("/sign-in");
 
   return (
     <DashboardShell

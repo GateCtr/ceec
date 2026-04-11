@@ -55,6 +55,8 @@ export async function PUT(req: NextRequest) {
       ...(body.whatsapp !== undefined && { whatsapp: body.whatsapp || null }),
       ...(body.siteWeb !== undefined && { siteWeb: body.siteWeb || null }),
       ...(body.horaires !== undefined && { horaires: body.horaires || null }),
+      ...(body.navLinksJson !== undefined && { navLinksJson: body.navLinksJson ?? null }),
+      ...(body.footerLinksJson !== undefined && { footerLinksJson: body.footerLinksJson ?? null }),
     };
 
     const config = await prisma.egliseConfig.upsert({

@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db/index";
-import { isPlatformAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import AdminContenuClient from "@/components/admin/AdminContenuClient";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function AdminEgliseContenuPage({ params }: Props) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isPlatformAdmin(userId)) redirect("/sign-in");
+  if (!await isAdminPlatteforme(userId)) redirect("/sign-in");
 
   const { slug } = await params;
 
@@ -108,42 +108,16 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
           lieu: e.lieu,
           categorie: e.categorie,
         }))}
+        initialVideos={videos.map((v) => ({
+          id: v.id,
+          titre: v.titre,
+          urlYoutube: v.urlYoutube,
+          publie: v.publie,
+          epingle: v.epingle,
+          estEnDirect: v.estEnDirect,
+          createdAt: v.createdAt.toISOString(),
+        }))}
       />
-
-      {/* Vidéos — read-only overview */}
-      {videos.length > 0 && (
-        <section style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a", marginBottom: 14 }}>
-            Vidéos YouTube ({videos.length})
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
-            {videos.map((v) => {
-              let ytId: string | null = null;
-              try {
-                const u = new URL(v.urlYoutube);
-                ytId = u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
-              } catch { /* ignore */ }
-              return (
-                <div key={v.id} style={{ background: "white", borderRadius: 10, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-                  {ytId && (
-                    <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
-                      <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt={v.titre} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                  )}
-                  <div style={{ padding: "10px 12px" }}>
-                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 6 }}>
-                      {v.epingle && <span style={{ fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309", padding: "2px 7px", borderRadius: 99 }}>📌 Épinglé</span>}
-                      {v.estEnDirect && <span style={{ fontSize: 10, fontWeight: 700, background: "#fee2e2", color: "#b91c1c", padding: "2px 7px", borderRadius: 99 }}>🔴 Direct</span>}
-                      {!v.publie && <span style={{ fontSize: 10, fontWeight: 700, background: "#f1f5f9", color: "#64748b", padding: "2px 7px", borderRadius: 99 }}>Brouillon</span>}
-                    </div>
-                    <div style={{ fontWeight: 600, fontSize: 12, color: "#0f172a" }}>{v.titre}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

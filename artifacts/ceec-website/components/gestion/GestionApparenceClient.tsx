@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 
+type NavLink = { label: string; href: string; externe?: boolean };
+type FooterLink = { label: string; href: string };
+
 type ConfigData = {
   couleurPrimaire?: string | null;
   couleurAccent?: string | null;
@@ -14,7 +17,15 @@ type ConfigData = {
   whatsapp?: string | null;
   siteWeb?: string | null;
   horaires?: string | null;
+  navLinksJson?: unknown;
+  footerLinksJson?: unknown;
 };
+
+function parseLinks<T>(raw: unknown, fallback: T[]): T[] {
+  if (!raw) return fallback;
+  if (Array.isArray(raw)) return raw as T[];
+  try { return JSON.parse(raw as string) as T[]; } catch { return fallback; }
+}
 
 export default function GestionApparenceClient({ initialConfig }: { initialConfig: ConfigData | null }) {
   const [form, setForm] = useState({
@@ -30,6 +41,12 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
     siteWeb: initialConfig?.siteWeb ?? "",
     horaires: initialConfig?.horaires ?? "",
   });
+  const [navLinks, setNavLinks] = useState<NavLink[]>(
+    parseLinks<NavLink>(initialConfig?.navLinksJson, [])
+  );
+  const [footerLinks, setFooterLinks] = useState<FooterLink[]>(
+    parseLinks<FooterLink>(initialConfig?.footerLinksJson, [])
+  );
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +56,37 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
     setSuccess(false);
   }
 
+  // --- Nav links helpers ---
+  function addNavLink() {
+    setNavLinks((l) => [...l, { label: "", href: "", externe: false }]);
+  }
+  function updateNavLink(i: number, field: keyof NavLink, value: string | boolean) {
+    setNavLinks((l) => l.map((x, idx) => idx === i ? { ...x, [field]: value } : x));
+  }
+  function removeNavLink(i: number) {
+    setNavLinks((l) => l.filter((_, idx) => idx !== i));
+  }
+  function moveNavLink(i: number, dir: -1 | 1) {
+    setNavLinks((l) => {
+      const next = [...l];
+      const j = i + dir;
+      if (j < 0 || j >= next.length) return l;
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  }
+
+  // --- Footer links helpers ---
+  function addFooterLink() {
+    setFooterLinks((l) => [...l, { label: "", href: "" }]);
+  }
+  function updateFooterLink(i: number, field: keyof FooterLink, value: string) {
+    setFooterLinks((l) => l.map((x, idx) => idx === i ? { ...x, [field]: value } : x));
+  }
+  function removeFooterLink(i: number) {
+    setFooterLinks((l) => l.filter((_, idx) => idx !== i));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(null); setSuccess(false);
@@ -46,7 +94,11 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
       const res = await fetch("/api/gestion/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          navLinksJson: navLinks.filter((l) => l.label && l.href),
+          footerLinksJson: footerLinks.filter((l) => l.label && l.href),
+        }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Erreur"); return; }
       setSuccess(true);
@@ -65,11 +117,12 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
     </div>
   );
 
-  const section = (title: string, children: React.ReactNode) => (
+  const section = (title: string, desc: string, children: React.ReactNode) => (
     <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 20 }}>
-      <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: 15, marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #f1f5f9" }}>
+      <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: 15, marginBottom: 4, paddingBottom: 12, borderBottom: "1px solid #f1f5f9" }}>
         {title}
       </h3>
+      {desc && <p style={{ fontSize: 13, color: "#64748b", marginBottom: 14 }}>{desc}</p>}
       {children}
     </div>
   );
@@ -87,61 +140,78 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
         </div>
       )}
 
-      {section("Couleurs et identité visuelle",
+      {section("Couleurs et identité visuelle", "",
         <>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Couleur principale</label>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  type="color"
-                  value={form.couleurPrimaire}
-                  onChange={(e) => updateField("couleurPrimaire", e.target.value)}
-                  style={{ width: 44, height: 38, border: "1px solid #d1d5db", borderRadius: 7, cursor: "pointer", padding: 2 }}
-                />
-                <input
-                  value={form.couleurPrimaire}
-                  onChange={(e) => updateField("couleurPrimaire", e.target.value)}
-                  placeholder="#1e3a8a"
-                  style={{ flex: 1, padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14 }}
-                />
+                <input type="color" value={form.couleurPrimaire} onChange={(e) => updateField("couleurPrimaire", e.target.value)} style={{ width: 44, height: 38, border: "1px solid #d1d5db", borderRadius: 7, cursor: "pointer", padding: 2 }} />
+                <input value={form.couleurPrimaire} onChange={(e) => updateField("couleurPrimaire", e.target.value)} placeholder="#1e3a8a" style={{ flex: 1, padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14 }} />
               </div>
             </div>
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Couleur accent</label>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  type="color"
-                  value={form.couleurAccent}
-                  onChange={(e) => updateField("couleurAccent", e.target.value)}
-                  style={{ width: 44, height: 38, border: "1px solid #d1d5db", borderRadius: 7, cursor: "pointer", padding: 2 }}
-                />
-                <input
-                  value={form.couleurAccent}
-                  onChange={(e) => updateField("couleurAccent", e.target.value)}
-                  placeholder="#c59b2e"
-                  style={{ flex: 1, padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14 }}
-                />
+                <input type="color" value={form.couleurAccent} onChange={(e) => updateField("couleurAccent", e.target.value)} style={{ width: 44, height: 38, border: "1px solid #d1d5db", borderRadius: 7, cursor: "pointer", padding: 2 }} />
+                <input value={form.couleurAccent} onChange={(e) => updateField("couleurAccent", e.target.value)} placeholder="#c59b2e" style={{ flex: 1, padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14 }} />
               </div>
             </div>
           </div>
-          {/* Color preview */}
           <div style={{ display: "flex", gap: 12, marginBottom: 16, padding: "12px 16px", background: "#f8fafc", borderRadius: 10, alignItems: "center" }}>
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: form.couleurPrimaire }} />
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: form.couleurAccent }} />
             <div style={{ fontSize: 13, color: "#64748b" }}>Aperçu de vos couleurs</div>
-            <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurPrimaire, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>
-              Bouton
-            </div>
-            <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurAccent, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>
-              Accent
-            </div>
+            <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurPrimaire, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>Bouton</div>
+            <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurAccent, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>Accent</div>
           </div>
           {input("faviconUrl", "URL du favicon (icône dans l'onglet)", { placeholder: "https://..." })}
         </>
       )}
 
-      {section("Réseaux sociaux et contact",
+      {section("Liens de navigation personnalisés", "Ajoutez des liens supplémentaires dans la barre de navigation de votre site public (après les liens standards).",
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+            {navLinks.map((link, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "#f8fafc", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <button type="button" onClick={() => moveNavLink(i, -1)} disabled={i === 0} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8", padding: "0 4px", lineHeight: 1 }}>▲</button>
+                  <button type="button" onClick={() => moveNavLink(i, 1)} disabled={i === navLinks.length - 1} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8", padding: "0 4px", lineHeight: 1 }}>▼</button>
+                </div>
+                <input value={link.label} onChange={(e) => updateNavLink(i, "label", e.target.value)} placeholder="Libellé (ex: Dons)" style={{ flex: 1, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
+                <input value={link.href} onChange={(e) => updateNavLink(i, "href", e.target.value)} placeholder="URL (/c/dons ou https://...)" style={{ flex: 2, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
+                <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#64748b", flexShrink: 0, cursor: "pointer" }}>
+                  <input type="checkbox" checked={!!link.externe} onChange={(e) => updateNavLink(i, "externe", e.target.checked)} />
+                  Ext.
+                </label>
+                <button type="button" onClick={() => removeNavLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer", flexShrink: 0 }}>✕</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={addNavLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600 }}>
+            + Ajouter un lien de navigation
+          </button>
+        </>
+      )}
+
+      {section("Liens du pied de page", "Liens additionnels affichés dans le footer de votre site (ex: FAQ, Dons, Politique de confidentialité).",
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+            {footerLinks.map((link, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "#f8fafc", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                <input value={link.label} onChange={(e) => updateFooterLink(i, "label", e.target.value)} placeholder="Libellé (ex: FAQ)" style={{ flex: 1, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
+                <input value={link.href} onChange={(e) => updateFooterLink(i, "href", e.target.value)} placeholder="URL (/c/faq ou https://...)" style={{ flex: 2, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
+                <button type="button" onClick={() => removeFooterLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer", flexShrink: 0 }}>✕</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={addFooterLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600 }}>
+            + Ajouter un lien de pied de page
+          </button>
+        </>
+      )}
+
+      {section("Réseaux sociaux et contact", "",
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {input("facebook", "Facebook (URL)", { placeholder: "https://facebook.com/..." })}
@@ -164,7 +234,7 @@ export default function GestionApparenceClient({ initialConfig }: { initialConfi
         </div>
       )}
 
-      {section("CSS personnalisé (avancé)",
+      {section("CSS personnalisé (avancé)", "",
         <>
           <p style={{ color: "#64748b", fontSize: 13, marginBottom: 10 }}>
             CSS supplémentaire injecté sur tout votre site public. Utilisez des variables <code>--church-primary</code> et <code>--church-accent</code>.

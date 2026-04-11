@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, isEgliseStaff } from "@/lib/auth/rbac";
 import { EgliseProvider, type EgliseData } from "@/lib/church-context";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import type { NavItem } from "@/components/dashboard/DashboardSidebar";
@@ -27,8 +27,8 @@ export default async function GestionLayout({
   if (!userId) redirect("/c/connexion");
 
   const superAdmin = await isSuperAdmin(userId);
-  const canManageContenu = superAdmin || await hasPermission(userId, "contenus:manage", egliseId);
-  if (!canManageContenu) {
+  const staff = superAdmin || await isEgliseStaff(userId, egliseId);
+  if (!staff) {
     redirect("/c?error=acces-refuse");
   }
 
@@ -42,10 +42,10 @@ export default async function GestionLayout({
       },
     }),
     Promise.all([
-      hasPermission(userId, "contenus:manage", egliseId),
-      hasPermission(userId, "membres:manage", egliseId),
-      hasPermission(userId, "admins:manage", egliseId),
-      hasPermission(userId, "eglise:manage", egliseId),
+      hasPermission(userId, "eglise_creer_annonce", egliseId),
+      hasPermission(userId, "eglise_gerer_membres", egliseId),
+      hasPermission(userId, "eglise_gerer_roles", egliseId),
+      hasPermission(userId, "eglise_gerer_config", egliseId),
     ]),
   ]);
 

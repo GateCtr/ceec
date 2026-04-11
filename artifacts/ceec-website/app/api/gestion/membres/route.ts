@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "membres:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_voir_membres", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const membres = await prisma.membre.findMany({

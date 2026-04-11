@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "membres:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_membres", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { id } = await params;
@@ -32,7 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const VALID_STATUTS = ["actif", "inactif", "suspendu"];
-    const VALID_ROLES_GESTION = ["fidele", "moderateur"];
+    const VALID_ROLES_GESTION = ["fidele", "diacre", "secretaire"];
 
     const data: Record<string, unknown> = {};
     if (body.statut !== undefined) {
@@ -43,7 +43,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
     if (body.role !== undefined) {
       if (!VALID_ROLES_GESTION.includes(body.role)) {
-        return NextResponse.json({ error: "Rôle invalide — seuls fidele et moderateur sont modifiables depuis la gestion des membres" }, { status: 400 });
+        return NextResponse.json({
+          error: "Rôle invalide — utilisez la page Admins pour les rôles supérieurs",
+        }, { status: 400 });
       }
       data.role = body.role;
     }

@@ -17,7 +17,7 @@ export default async function GestionParametresPage() {
   if (!userId) redirect("/c/connexion");
 
   const superAdmin = await isSuperAdmin(userId);
-  const allowed = superAdmin || await hasPermission(userId, "eglise:manage", egliseId);
+  const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
   if (!allowed) redirect("/gestion?error=acces-refuse");
 
   const eglise = await prisma.eglise.findUnique({

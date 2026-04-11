@@ -1,17 +1,22 @@
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { isSuperAdmin, getUserRoles, ROLES } from "@/lib/auth/rbac";
+import {
+  isSuperAdmin,
+  isPlatformAdmin,
+  getUserRoles,
+  ROLES,
+  CHURCH_ADMIN_ROLES,
+  CHURCH_STAFF_ROLES,
+} from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
 
 function buildChurchUrl(slug: string, path: string, isLocalDev: boolean): string {
   if (isLocalDev) {
-    // En dev : le middleware lit ?eglise=slug et redirige vers /c ou injecte les headers /gestion
     return path === "/c" ? `/?eglise=${slug}` : `${path}?eglise=${slug}`;
   }
-  // En production : vrai sous-domaine
   return `https://${slug}.${ROOT_DOMAIN}${path}`;
 }
 
@@ -27,22 +32,36 @@ export default async function AuthRedirectPage() {
     host.includes(".replit.dev") ||
     host.includes(".kirk.replit.dev");
 
-  // 1. Super admin plateforme → tableau de bord admin CEEC
+  // 1. Super admin → tableau de bord admin CEEC
   const superAdmin = await isSuperAdmin(userId);
   if (superAdmin) redirect("/admin");
 
-  // 2. Admin ou modérateur d'église → espace gestion de la paroisse
+  // 2. Admin ou modérateur plateforme → tableau de bord admin
+  const platformAdmin = await isPlatformAdmin(userId);
+  if (platformAdmin) redirect("/admin");
+
+  // 3. Admin d'église ou pasteur → espace gestion de la paroisse
   const userRoles = await getUserRoles(userId);
-  const adminRole = userRoles.find(
-    (ur) =>
-      ur.eglise?.slug &&
-      (ur.role.nom === ROLES.ADMIN_EGLISE || ur.role.nom === ROLES.MODERATEUR)
+
+  const churchAdminRole = userRoles.find(
+    (ur) => ur.eglise?.slug && CHURCH_ADMIN_ROLES.has(ur.role.nom)
   );
-  if (adminRole?.eglise?.slug) {
-    redirect(buildChurchUrl(adminRole.eglise.slug, "/gestion", isLocalDev));
+  if (churchAdminRole?.eglise?.slug) {
+    redirect(buildChurchUrl(churchAdminRole.eglise.slug, "/gestion", isLocalDev));
   }
 
-  // 3. Fidèle rattaché à une église → espace membre de sa paroisse (/c)
+  // 4. Diacre, secrétaire, trésorier → espace membre de leur paroisse
+  const churchStaffRole = userRoles.find(
+    (ur) =>
+      ur.eglise?.slug &&
+      CHURCH_STAFF_ROLES.has(ur.role.nom) &&
+      !CHURCH_ADMIN_ROLES.has(ur.role.nom)
+  );
+  if (churchStaffRole?.eglise?.slug) {
+    redirect(buildChurchUrl(churchStaffRole.eglise.slug, "/c", isLocalDev));
+  }
+
+  // 5. Fidèle rattaché à une église → espace membre de sa paroisse
   const membre = await prisma.membre.findFirst({
     where: { clerkUserId: userId, statut: "actif" },
     include: { eglise: true },
@@ -51,6 +70,6 @@ export default async function AuthRedirectPage() {
     redirect(buildChurchUrl(membre.eglise.slug, "/c", isLocalDev));
   }
 
-  // 4. Aucun rattachement → tableau de bord plateforme (choisir sa paroisse)
-  redirect("/dashboard");
+  // 6. Fidèle sans rattachement → choisir sa paroisse
+  redirect("/sign-up");
 }

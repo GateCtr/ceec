@@ -16,10 +16,12 @@ async function getPageData(userId: string) {
       getUserRoles(userId),
     ]);
 
+    const CHURCH_STAFF = new Set<string>([
+      ROLES.ADMIN_EGLISE, ROLES.PASTEUR, ROLES.DIACRE,
+      ROLES.SECRETAIRE, ROLES.TRESORIER,
+    ]);
     const churchAdminRoles = userRoles.filter(
-      (ur) =>
-        ur.eglise?.slug &&
-        (ur.role.nom === ROLES.ADMIN_EGLISE || ur.role.nom === ROLES.MODERATEUR)
+      (ur) => ur.eglise?.slug && CHURCH_STAFF.has(ur.role.nom)
     );
 
     return { memberData, superAdmin, churchAdminRoles };
@@ -38,7 +40,12 @@ export default async function DashboardPage() {
   const roleLabel = superAdmin
     ? "Super Administrateur CEEC"
     : churchAdminRoles.length > 0
-    ? churchAdminRoles[0].role.nom === ROLES.MODERATEUR ? "Modérateur" : "Administrateur d'église"
+    ? churchAdminRoles[0].role.nom === ROLES.ADMIN_EGLISE ? "Administrateur d'église"
+      : churchAdminRoles[0].role.nom === ROLES.PASTEUR ? "Pasteur"
+      : churchAdminRoles[0].role.nom === ROLES.DIACRE ? "Diacre"
+      : churchAdminRoles[0].role.nom === ROLES.SECRETAIRE ? "Secrétaire"
+      : churchAdminRoles[0].role.nom === ROLES.TRESORIER ? "Trésorier"
+      : "Personnel d'église"
     : memberData?.role === "admin"
     ? "Administrateur"
     : "Fidèle";
@@ -139,7 +146,7 @@ export default async function DashboardPage() {
                         Gérer {ur.eglise!.nom}
                       </div>
                       <div style={{ color: "#64748b", fontSize: 13 }}>
-                        {ur.eglise!.ville} · {ur.role.nom === ROLES.MODERATEUR ? "Modérateur" : "Admin"}
+                        {ur.eglise!.ville} · {ur.role.nom}
                       </div>
                     </div>
                   </div>

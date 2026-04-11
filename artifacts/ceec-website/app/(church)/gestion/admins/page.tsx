@@ -17,16 +17,16 @@ export default async function GestionAdminsPage() {
   if (!userId) redirect("/c/connexion");
 
   const superAdmin = await isSuperAdmin(userId);
-  const allowed = superAdmin || await hasPermission(userId, "admins:manage", egliseId);
+  const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_roles", egliseId);
   if (!allowed) redirect("/gestion?error=acces-refuse");
 
-  const adminRoles = ["admin_eglise", "moderateur"];
+  const churchStaffRoles = ["admin_eglise", "pasteur", "diacre", "secretaire", "tresorier"];
 
   const [userRoles, pendingInvites] = await Promise.all([
     prisma.userRole.findMany({
       where: {
         egliseId,
-        role: { nom: { in: adminRoles } },
+        role: { nom: { in: churchStaffRoles } },
       },
       include: { role: true },
       orderBy: { createdAt: "desc" },
@@ -47,7 +47,7 @@ export default async function GestionAdminsPage() {
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Admins de l&apos;église</h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
-          Gérez les accès administrateurs et modérateurs
+          Gérez les accès administrateurs et membres du personnel
         </p>
       </div>
       <GestionAdminsClient
@@ -61,7 +61,7 @@ export default async function GestionAdminsPage() {
           id: inv.id,
           email: inv.email,
           token: inv.token,
-          roleNom: inv.role?.nom ?? "moderateur",
+          roleNom: inv.role?.nom ?? "fidele",
           expiresAt: inv.expiresAt.toISOString(),
         }))}
         currentUserId={userId}

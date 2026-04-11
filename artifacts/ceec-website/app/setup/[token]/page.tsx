@@ -68,9 +68,17 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
       firstName: prenom,
       lastName: nom,
     });
-    if (error) return;
+    if (error) {
+      setApiError(error.message || "Erreur lors de la création du compte.");
+      return;
+    }
 
-    await signUp.verifications.sendEmailCode();
+    const { error: codeErr } = await signUp.verifications.sendEmailCode();
+    if (codeErr) {
+      setApiError(codeErr.message || "Impossible d'envoyer le code de vérification.");
+      return;
+    }
+
     setStep("verify");
   };
 
@@ -79,24 +87,34 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
     if (!signUp) return;
     setApiError("");
 
-    await signUp.verifications.verifyEmailCode({ code });
-
-    if (signUp.status === "complete") {
-      await signUp.finalize({
-        navigate: async () => {
-          setStep("confirm");
-        },
-      });
-    } else {
-      setApiError("Vérification incomplète. Veuillez réessayer.");
+    const { error: verifyErr } = await signUp.verifications.verifyEmailCode({ code });
+    if (verifyErr) {
+      setApiError(verifyErr.message || "Code incorrect ou expiré. Veuillez réessayer.");
+      return;
     }
+
+    if (signUp.status !== "complete") {
+      setApiError("Vérification incomplète. Veuillez réessayer.");
+      return;
+    }
+
+    setStep("confirm");
   };
 
   const handleFinalize = async () => {
+    if (!signUp) return;
     setFinalizing(true);
     setApiError("");
 
     try {
+      // Crée la session Clerk d'abord (nécessaire pour l'API)
+      const { error: finalErr } = await signUp.finalize();
+      if (finalErr) {
+        setApiError(finalErr.message || "Erreur lors de la création de la session.");
+        return;
+      }
+
+      // Assigne les rôles via l'API (utilise la session active)
       const res = await fetch(`/api/setup/${token}/finalize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

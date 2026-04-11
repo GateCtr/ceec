@@ -10,7 +10,7 @@ function parseId(id: string) {
 
 async function canModifyEglise(userId: string, egliseId: number): Promise<boolean> {
   if (await isSuperAdmin(userId)) return true;
-  return hasPermission(userId, "eglise:manage", egliseId);
+  return hasPermission(userId, "plateforme_gerer_eglises", egliseId);
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

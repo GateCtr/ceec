@@ -23,13 +23,13 @@ export async function GET() {
 
     const managedEglises: number[] = [];
     for (const eglise of userEglises) {
-      if (await hasPermission(userId, "membres:manage", eglise.id)) {
+      if (await hasPermission(userId, "eglise_gerer_membres", eglise.id)) {
         managedEglises.push(eglise.id);
       }
     }
 
     if (managedEglises.length === 0) {
-      return NextResponse.json({ error: "Acces refuse - permission membres:manage requise" }, { status: 403 });
+      return NextResponse.json({ error: "Acces refuse - permission eglise_gerer_membres requise" }, { status: 403 });
     }
 
     const membres = await prisma.membre.findMany({

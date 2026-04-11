@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "contenus:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_evenements", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { id } = await params;
@@ -58,7 +58,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "contenus:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_evenements", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { id } = await params;

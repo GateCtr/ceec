@@ -1,40 +1,80 @@
 import { prisma } from "@/lib/db";
 
+// ─── Permission names — aligned with prisma/seed.ts ──────────────────────────
+
 export type Permission =
-  | "platform:manage"
-  | "eglise:manage"
-  | "eglise:suspend"
-  | "membres:manage"
-  | "contenus:manage"
-  | "admins:manage";
+  // Plateforme globale
+  | "plateforme_gerer_config"
+  | "plateforme_gerer_admins"
+  | "plateforme_voir_stats"
+  | "plateforme_gerer_eglises"
+  | "plateforme_suspendre_eglise"
+  | "plateforme_voir_eglises"
+  | "plateforme_moderer_contenu"
+  | "plateforme_gerer_invitations"
+  // Paroisse — membres
+  | "eglise_gerer_membres"
+  | "eglise_inviter_membres"
+  | "eglise_voir_membres"
+  | "eglise_suspendre_membre"
+  // Paroisse — rôles
+  | "eglise_gerer_roles"
+  // Paroisse — annonces
+  | "eglise_gerer_annonces"
+  | "eglise_creer_annonce"
+  | "eglise_voir_annonces"
+  // Paroisse — événements
+  | "eglise_gerer_evenements"
+  | "eglise_creer_evenement"
+  | "eglise_voir_evenements"
+  // Paroisse — finances
+  | "eglise_gerer_finances"
+  | "eglise_voir_finances"
+  // Paroisse — rapports & config
+  | "eglise_voir_rapports"
+  | "eglise_gerer_config";
+
+// ─── Role constants ───────────────────────────────────────────────────────────
 
 export const ROLES = {
-  SUPER_ADMIN: "super_admin",
-  ADMIN_EGLISE: "admin_eglise",
-  MODERATEUR: "moderateur",
-  FIDELE: "fidele",
+  // Plateforme
+  SUPER_ADMIN:           "super_admin",
+  ADMIN_PLATEFORME:      "admin_plateforme",
+  MODERATEUR_PLATEFORME: "moderateur_plateforme",
+  // Paroisse
+  ADMIN_EGLISE:          "admin_eglise",
+  PASTEUR:               "pasteur",
+  DIACRE:                "diacre",
+  SECRETAIRE:            "secretaire",
+  TRESORIER:             "tresorier",
+  FIDELE:                "fidele",
 } as const;
 
-export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-  super_admin: [
-    "platform:manage",
-    "eglise:manage",
-    "eglise:suspend",
-    "membres:manage",
-    "contenus:manage",
-    "admins:manage",
-  ],
-  admin_eglise: [
-    "eglise:manage",
-    "membres:manage",
-    "contenus:manage",
-    "admins:manage",
-  ],
-  moderateur: [
-    "contenus:manage",
-  ],
-  fidele: [],
-};
+export type RoleNom = (typeof ROLES)[keyof typeof ROLES];
+
+/** Rôles qui donnent accès au niveau plateforme (scope global) */
+export const PLATFORM_ROLES = new Set<string>([
+  ROLES.SUPER_ADMIN,
+  ROLES.ADMIN_PLATEFORME,
+  ROLES.MODERATEUR_PLATEFORME,
+]);
+
+/** Rôles church qui ont accès à l'interface de gestion (non-fidèle) */
+export const CHURCH_STAFF_ROLES = new Set<string>([
+  ROLES.ADMIN_EGLISE,
+  ROLES.PASTEUR,
+  ROLES.DIACRE,
+  ROLES.SECRETAIRE,
+  ROLES.TRESORIER,
+]);
+
+/** Rôles church avec accès complet à /gestion (admin + pasteur) */
+export const CHURCH_ADMIN_ROLES = new Set<string>([
+  ROLES.ADMIN_EGLISE,
+  ROLES.PASTEUR,
+]);
+
+// ─── DB helpers ───────────────────────────────────────────────────────────────
 
 export async function getUserRoles(clerkUserId: string) {
   return prisma.userRole.findMany({
@@ -48,18 +88,35 @@ export async function isSuperAdmin(clerkUserId: string): Promise<boolean> {
   return userRoles.some((ur) => ur.role.nom === ROLES.SUPER_ADMIN);
 }
 
+/** Vrai si l'utilisateur a un rôle de niveau plateforme (super_admin, admin_plateforme, moderateur_plateforme) */
+export async function isPlatformAdmin(clerkUserId: string): Promise<boolean> {
+  const userRoles = await getUserRoles(clerkUserId);
+  return userRoles.some((ur) => PLATFORM_ROLES.has(ur.role.nom));
+}
+
+/** Vrai si l'utilisateur est admin ou pasteur d'une église spécifique */
 export async function isEgliseAdmin(
   clerkUserId: string,
   egliseId: number
 ): Promise<boolean> {
   const userRoles = await getUserRoles(clerkUserId);
   return userRoles.some(
-    (ur) =>
-      ur.egliseId === egliseId &&
-      (ur.role.nom === ROLES.ADMIN_EGLISE || ur.role.nom === ROLES.MODERATEUR)
+    (ur) => ur.egliseId === egliseId && CHURCH_ADMIN_ROLES.has(ur.role.nom)
   );
 }
 
+/** Vrai si l'utilisateur a un rôle non-fidèle dans cette église (accès à /gestion) */
+export async function isEgliseStaff(
+  clerkUserId: string,
+  egliseId: number
+): Promise<boolean> {
+  const userRoles = await getUserRoles(clerkUserId);
+  return userRoles.some(
+    (ur) => ur.egliseId === egliseId && CHURCH_STAFF_ROLES.has(ur.role.nom)
+  );
+}
+
+/** Vérifie une permission spécifique pour un utilisateur, optionnellement sur une église donnée */
 export async function hasPermission(
   clerkUserId: string,
   permission: Permission,
@@ -70,15 +127,20 @@ export async function hasPermission(
   return userRoles.some((ur) => {
     const rolePerms: string[] = ur.role.permissions;
     if (!rolePerms.includes(permission)) return false;
-    if (ur.role.scope === "platform") return true;
+    // Les rôles globaux (scope "global") s'appliquent partout
+    if (ur.role.scope === "global") return true;
+    // Les rôles d'église s'appliquent à l'église spécifiée
     if (egliseId !== undefined && ur.egliseId === egliseId) return true;
     return false;
   });
 }
 
+/** Vrai si l'utilisateur a un quelconque rôle non-fidèle */
 export async function hasAnyAdminRole(clerkUserId: string): Promise<boolean> {
   const userRoles = await getUserRoles(clerkUserId);
-  return userRoles.some((ur) => ur.role.nom !== ROLES.FIDELE);
+  return userRoles.some(
+    (ur) => ur.role.nom !== ROLES.FIDELE
+  );
 }
 
 export async function getEgliseBySlug(slug: string) {
@@ -109,10 +171,12 @@ export async function canManageContent(
 ): Promise<boolean> {
   if (await isSuperAdmin(clerkUserId)) return true;
   if (egliseId !== undefined) {
-    return hasPermission(clerkUserId, "contenus:manage", egliseId);
+    return hasPermission(clerkUserId, "eglise_gerer_annonces", egliseId);
   }
   const userRoles = await getUserRoles(clerkUserId);
-  return userRoles.some((ur) => ur.role.permissions.includes("contenus:manage"));
+  return userRoles.some((ur) =>
+    (ur.role.permissions as string[]).includes("eglise_gerer_annonces")
+  );
 }
 
 export async function canManageMembres(
@@ -121,8 +185,10 @@ export async function canManageMembres(
 ): Promise<boolean> {
   if (await isSuperAdmin(clerkUserId)) return true;
   if (egliseId !== undefined) {
-    return hasPermission(clerkUserId, "membres:manage", egliseId);
+    return hasPermission(clerkUserId, "eglise_gerer_membres", egliseId);
   }
   const userRoles = await getUserRoles(clerkUserId);
-  return userRoles.some((ur) => ur.role.permissions.includes("membres:manage"));
+  return userRoles.some((ur) =>
+    (ur.role.permissions as string[]).includes("eglise_gerer_membres")
+  );
 }

@@ -20,14 +20,14 @@ export async function POST(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "admins:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_roles", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();
     const { email, roleNom } = body;
     if (!email || !roleNom) return NextResponse.json({ error: "Email et rôle requis" }, { status: 400 });
 
-    const allowedRoles = ["moderateur", "admin_eglise"];
+    const allowedRoles = ["admin_eglise", "pasteur", "diacre", "secretaire", "tresorier"];
     if (!allowedRoles.includes(roleNom)) {
       return NextResponse.json({ error: "Rôle invalide" }, { status: 400 });
     }

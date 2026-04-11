@@ -17,7 +17,7 @@ export default async function GestionMembresPage() {
   if (!userId) redirect("/c/connexion");
 
   const superAdmin = await isSuperAdmin(userId);
-  const allowed = superAdmin || await hasPermission(userId, "membres:manage", egliseId);
+  const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_membres", egliseId);
   if (!allowed) redirect("/gestion?error=acces-refuse");
 
   const membres = await prisma.membre.findMany({

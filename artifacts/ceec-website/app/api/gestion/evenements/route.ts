@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "contenus:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_voir_evenements", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const evenements = await prisma.evenement.findMany({
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "contenus:manage", egliseId);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();

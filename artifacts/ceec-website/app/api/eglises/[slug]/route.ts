@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sl
     if (!eglise) return NextResponse.json({ error: "Église introuvable" }, { status: 404 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise:manage", eglise.id);
+    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", eglise.id);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();

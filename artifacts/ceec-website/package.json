@@ -8,7 +8,11 @@
     "start": "next start --port ${PORT:-3000} -H 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^4.4.0",
@@ -33,6 +37,7 @@
     "lucide-react": "catalog:",
     "prisma": "^7.6.0",
     "tailwindcss": "catalog:",
+    "tsx": "catalog:",
     "typescript": "~5.9.2"
   }
 }

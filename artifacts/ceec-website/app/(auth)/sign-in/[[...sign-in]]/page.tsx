@@ -16,10 +16,15 @@ export default function SignInPage() {
   const [step, setStep] = useState<"password" | "mfa">("password");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [debug, setDebug] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || !signIn) return;
+    setDebug(`isLoaded=${isLoaded}, signIn=${signIn ? "ok" : "null"}`);
+    if (!isLoaded || !signIn) {
+      setError("Clerk n'est pas encore chargé. Attendez et réessayez.");
+      return;
+    }
 
     setError(null);
     setIsLoading(true);
@@ -154,6 +159,11 @@ export default function SignInPage() {
         />
 
         {error && <Err>{error}</Err>}
+        {debug && (
+          <div style={{ fontSize: 11, color: "#6b7280", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 8px", fontFamily: "monospace" }}>
+            {debug}
+          </div>
+        )}
 
         <button type="submit" style={s.btn} disabled={!isLoaded || isLoading || !email || !password}>
           {isLoading ? "Connexion…" : "Se connecter"}

@@ -29,8 +29,91 @@ model Eglise {
   evenements   Evenement[]
   userRoles    UserRole[]
   inviteTokens InviteToken[]
+  config       EgliseConfig?
+  pages        PageEglise[]
+  liveStreams   LiveStream[]
 
   @@map("paroisses")
+}
+
+// ============ CHURCH SITE CONFIG ============
+
+model EgliseConfig {
+  id               Int      @id @default(autoincrement())
+  egliseId         Int      @unique @map("eglise_id")
+  eglise           Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
+  // Branding
+  couleurPrimaire  String   @default("#1e3a8a") @map("couleur_primaire") @db.VarChar(20)
+  couleurAccent    String   @default("#c59b2e") @map("couleur_accent") @db.VarChar(20)
+  faviconUrl       String?  @map("favicon_url") @db.Text
+  cssPersonnalise  String?  @map("css_personnalise") @db.Text
+  // Social media
+  facebook         String?  @db.VarChar(255)
+  youtube          String?  @db.VarChar(255)
+  instagram        String?  @db.VarChar(255)
+  twitter          String?  @db.VarChar(255)
+  whatsapp         String?  @db.VarChar(50)
+  // Footer extras
+  siteWeb          String?  @map("site_web") @db.VarChar(255)
+  horaires         String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("eglise_configs")
+}
+
+// ============ CHURCH PAGES ============
+
+model PageEglise {
+  id        Int          @id @default(autoincrement())
+  egliseId  Int          @map("eglise_id")
+  eglise    Eglise       @relation(fields: [egliseId], references: [id], onDelete: Cascade)
+  titre     String       @db.VarChar(255)
+  slug      String       @db.VarChar(100)
+  type      String       @default("custom") @db.VarChar(30)
+  publie    Boolean      @default(false)
+  ordre     Int          @default(0)
+  sections  SectionPage[]
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([egliseId, slug])
+  @@index([egliseId, publie, ordre])
+  @@map("eglise_pages")
+}
+
+model SectionPage {
+  id       Int        @id @default(autoincrement())
+  pageId   Int        @map("page_id")
+  page     PageEglise @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type     String     @db.VarChar(50)
+  ordre    Int        @default(0)
+  config   Json       @default("{}")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@index([pageId, ordre])
+  @@map("eglise_sections")
+}
+
+// ============ LIVE STREAMING ============
+
+model LiveStream {
+  id          Int      @id @default(autoincrement())
+  egliseId    Int      @map("eglise_id")
+  eglise      Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
+  titre       String   @db.VarChar(255)
+  urlYoutube  String   @map("url_youtube") @db.VarChar(500)
+  description String?  @db.Text
+  dateStream  DateTime? @map("date_stream")
+  estEnDirect Boolean  @default(false) @map("est_en_direct")
+  epingle     Boolean  @default(false)
+  publie      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([egliseId, publie, epingle])
+  @@map("live_streams")
 }
 
 // ============ USER / MEMBRE ============
@@ -71,6 +154,8 @@ model Annonce {
   dateExpiration  DateTime? @map("date_expiration")
   priorite        String    @default("normale") @db.VarChar(20)
   publie          Boolean   @default(true)
+  imageUrl        String?   @map("image_url") @db.Text
+  categorie       String?   @db.VarChar(100)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
@@ -87,6 +172,8 @@ model Evenement {
   egliseId    Int?      @map("paroisse_id")
   eglise      Eglise?   @relation(fields: [egliseId], references: [id])
   imageUrl    String?   @map("image_url") @db.Text
+  categorie   String?   @db.VarChar(100)
+  lienInscription String? @map("lien_inscription") @db.VarChar(500)
   publie      Boolean   @default(true)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")

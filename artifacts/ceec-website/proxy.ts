@@ -112,6 +112,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/public(.*)",
   "/api/setup(.*)",
   "/api/church(.*)",
+  "/api/webhooks/(.*)",
 ]);
 
 const isPlatformAdminRoute = createRouteMatcher([

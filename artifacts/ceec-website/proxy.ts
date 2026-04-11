@@ -27,11 +27,14 @@ function extractChurchSlug(req: Request): string | null {
     host.includes(".kirk.replit.dev");
 
   if (!isLocalDev) {
-    const parts = host.split(".");
-    const rootParts = ROOT_DOMAIN.split(".");
-    if (parts.length > rootParts.length) {
-      const sub = parts[0];
-      if (sub && sub !== "www") return sub;
+    // Extraire le sous-domaine UNIQUEMENT si l'hôte est un vrai sous-domaine de ROOT_DOMAIN.
+    // Ex: "eglise1.ceec.cd"       → "eglise1"   ✓
+    //     "ceec.cd"               → null         ✓ (domaine racine, pas de sous-domaine)
+    //     "ceec-site.vercel.app"  → null         ✓ (domaine tiers, jamais un slug)
+    //     "ceec-site.replit.app"  → null         ✓ (domaine Replit production)
+    if (host.endsWith("." + ROOT_DOMAIN)) {
+      const sub = host.slice(0, -(ROOT_DOMAIN.length + 1));
+      if (sub && sub !== "www" && !sub.includes(".")) return sub;
     }
   }
 

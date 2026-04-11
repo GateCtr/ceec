@@ -5,8 +5,6 @@ import {
   isSuperAdmin,
   isPlatformAdmin,
   getUserRoles,
-  ROLES,
-  CHURCH_ADMIN_ROLES,
   CHURCH_STAFF_ROLES,
 } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db";
@@ -40,28 +38,18 @@ export default async function AuthRedirectPage() {
   const platformAdmin = await isPlatformAdmin(userId);
   if (platformAdmin) redirect("/admin");
 
-  // 3. Admin d'église ou pasteur → espace gestion de la paroisse
+  // 3. Tout membre du personnel d'église (admin, pasteur, diacre, secrétaire, trésorier)
+  //    → espace gestion de la paroisse (contenu différent des fidèles)
   const userRoles = await getUserRoles(userId);
 
-  const churchAdminRole = userRoles.find(
-    (ur) => ur.eglise?.slug && CHURCH_ADMIN_ROLES.has(ur.role.nom)
-  );
-  if (churchAdminRole?.eglise?.slug) {
-    redirect(buildChurchUrl(churchAdminRole.eglise.slug, "/gestion", isLocalDev));
-  }
-
-  // 4. Diacre, secrétaire, trésorier → espace membre de leur paroisse
   const churchStaffRole = userRoles.find(
-    (ur) =>
-      ur.eglise?.slug &&
-      CHURCH_STAFF_ROLES.has(ur.role.nom) &&
-      !CHURCH_ADMIN_ROLES.has(ur.role.nom)
+    (ur) => ur.eglise?.slug && CHURCH_STAFF_ROLES.has(ur.role.nom)
   );
   if (churchStaffRole?.eglise?.slug) {
-    redirect(buildChurchUrl(churchStaffRole.eglise.slug, "/c", isLocalDev));
+    redirect(buildChurchUrl(churchStaffRole.eglise.slug, "/gestion", isLocalDev));
   }
 
-  // 5. Fidèle rattaché à une église → espace membre de sa paroisse
+  // 4. Fidèle rattaché à une église → espace membre de sa paroisse
   const membre = await prisma.membre.findFirst({
     where: { clerkUserId: userId, statut: "actif" },
     include: { eglise: true },
@@ -70,6 +58,6 @@ export default async function AuthRedirectPage() {
     redirect(buildChurchUrl(membre.eglise.slug, "/c", isLocalDev));
   }
 
-  // 6. Fidèle sans rattachement → choisir sa paroisse
+  // 5. Fidèle sans rattachement → choisir sa paroisse
   redirect("/sign-up");
 }

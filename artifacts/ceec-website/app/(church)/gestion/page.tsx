@@ -3,8 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 
-export const metadata = { title: "Gestion | Espace Admin" };
+export const metadata = { title: "Tableau de bord | Gestion" };
 
 export default async function GestionDashboardPage() {
   const headersList = await headers();
@@ -15,107 +16,204 @@ export default async function GestionDashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/c/connexion");
 
-  const now = new Date();
-  const [membresCount, annoncesCount, evenementsCount, recentAnnonces, prochainEvenements] =
-    await Promise.all([
-      prisma.membre.count({ where: { egliseId, statut: "actif" } }),
-      prisma.annonce.count({ where: { egliseId, publie: true } }),
-      prisma.evenement.count({ where: { egliseId, publie: true, dateDebut: { gte: now } } }),
-      prisma.annonce.findMany({
-        where: { egliseId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        select: { id: true, titre: true, publie: true, createdAt: true },
-      }),
-      prisma.evenement.findMany({
-        where: { egliseId, dateDebut: { gte: new Date() } },
-        orderBy: { dateDebut: "asc" },
-        take: 3,
-        select: { id: true, titre: true, dateDebut: true, lieu: true },
-      }),
-    ]);
+  const superAdmin = await isSuperAdmin(userId);
+  const canContenus = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
+  const canMembres = superAdmin || await hasPermission(userId, "eglise_gerer_membres", egliseId);
+  const canPages = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
 
-  const stats = [
-    { label: "Membres actifs", count: membresCount, icon: "👥", color: "#1e3a8a", href: "/gestion/membres" },
-    { label: "Annonces publiées", count: annoncesCount, icon: "📢", color: "#0891b2", href: "/gestion/annonces" },
-    { label: "Événements à venir", count: evenementsCount, icon: "🗓️", color: "#c59b2e", href: "/gestion/evenements" },
+  const now = new Date();
+  const [
+    membresCount,
+    annoncesCount,
+    evenementsCount,
+    pagesCount,
+    recentAnnonces,
+    prochainEvenements,
+  ] = await Promise.all([
+    canMembres ? prisma.membre.count({ where: { egliseId, statut: "actif" } }) : Promise.resolve(null),
+    canContenus ? prisma.annonce.count({ where: { egliseId, publie: true } }) : Promise.resolve(null),
+    canContenus ? prisma.evenement.count({ where: { egliseId, publie: true, dateDebut: { gte: now } } }) : Promise.resolve(null),
+    canPages ? prisma.pageEglise.count({ where: { egliseId, publie: true } }) : Promise.resolve(null),
+    canContenus
+      ? prisma.annonce.findMany({
+          where: { egliseId },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: { id: true, titre: true, publie: true, createdAt: true },
+        })
+      : Promise.resolve([]),
+    canContenus
+      ? prisma.evenement.findMany({
+          where: { egliseId, dateDebut: { gte: now } },
+          orderBy: { dateDebut: "asc" },
+          take: 3,
+          select: { id: true, titre: true, dateDebut: true, lieu: true },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  type StatCard = {
+    label: string;
+    count: number;
+    icon: string;
+    color: string;
+    href: string;
+  };
+
+  const stats: StatCard[] = [
+    ...(canMembres && membresCount !== null
+      ? [{ label: "Membres actifs", count: membresCount, icon: "👥", color: "#1e3a8a", href: "/gestion/membres" }]
+      : []),
+    ...(canContenus && annoncesCount !== null
+      ? [{ label: "Annonces publiées", count: annoncesCount, icon: "📢", color: "#0891b2", href: "/gestion/annonces" }]
+      : []),
+    ...(canContenus && evenementsCount !== null
+      ? [{ label: "Événements à venir", count: evenementsCount, icon: "🗓️", color: "#c59b2e", href: "/gestion/evenements" }]
+      : []),
+    ...(canPages && pagesCount !== null
+      ? [{ label: "Pages publiées", count: pagesCount, icon: "📄", color: "#7c3aed", href: "/gestion/pages" }]
+      : []),
   ];
+
+  const quickActions = [
+    ...(canContenus ? [
+      { label: "Créer une annonce", href: "/gestion/annonces?action=nouveau", color: "#0891b2", bg: "#eff6ff" },
+      { label: "Ajouter un événement", href: "/gestion/evenements?action=nouveau", color: "#c59b2e", bg: "#fffbeb" },
+    ] : []),
+    ...(canMembres ? [
+      { label: "Gérer les membres", href: "/gestion/membres", color: "#1e3a8a", bg: "#f0f9ff" },
+    ] : []),
+    ...(canPages ? [
+      { label: "Modifier les pages", href: "/gestion/pages", color: "#7c3aed", bg: "#faf5ff" },
+      { label: "Paramètres du site", href: "/gestion/apparence", color: "#64748b", bg: "#f8fafc" },
+    ] : []),
+  ].slice(0, 4);
 
   return (
     <div style={{ padding: "2rem", maxWidth: 1000 }}>
+      {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Tableau de bord</h1>
-        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Vue d&apos;ensemble de votre espace de gestion</p>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+          Tableau de bord
+        </h1>
+        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
+          Vue d&apos;ensemble de votre espace de gestion
+        </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 36 }}>
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} style={{ textDecoration: "none" }}>
-            <div style={{
-              background: "white", borderRadius: 14, padding: "1.5rem",
-              border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-              cursor: "pointer",
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6 }}>{s.label}</div>
-                  <div style={{ fontSize: 36, fontWeight: 800, color: s.color }}>{s.count}</div>
-                </div>
-                <span style={{ fontSize: 28 }}>{s.icon}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h2 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: 0 }}>Annonces récentes</h2>
-            <Link href="/gestion/annonces" style={{ fontSize: 13, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>Voir tout →</Link>
-          </div>
-          {recentAnnonces.length === 0 ? (
-            <p style={{ color: "#94a3b8", fontSize: 14 }}>Aucune annonce pour l&apos;instant.</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {recentAnnonces.map((a) => (
-                <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
-                  <span style={{ fontSize: 14, color: "#0f172a", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.titre}</span>
-                  <span style={{
-                    fontSize: 11, padding: "2px 8px", borderRadius: 100, marginLeft: 8, flexShrink: 0,
-                    background: a.publie ? "#dcfce7" : "#f1f5f9",
-                    color: a.publie ? "#15803d" : "#64748b",
-                    fontWeight: 600,
-                  }}>
-                    {a.publie ? "Publiée" : "Brouillon"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h2 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: 0 }}>Prochains événements</h2>
-            <Link href="/gestion/evenements" style={{ fontSize: 13, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>Voir tout →</Link>
-          </div>
-          {prochainEvenements.length === 0 ? (
-            <p style={{ color: "#94a3b8", fontSize: 14 }}>Aucun événement à venir.</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {prochainEvenements.map((e) => (
-                <div key={e.id} style={{ padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{e.titre}</div>
-                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                    📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                    {e.lieu && <> — 📍 {e.lieu}</>}
+      {/* Stat cards */}
+      {stats.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 36 }}>
+          {stats.map((s) => (
+            <Link key={s.label} href={s.href} style={{ textDecoration: "none" }}>
+              <div style={{
+                background: "white", borderRadius: 14, padding: "1.5rem",
+                border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                cursor: "pointer", transition: "box-shadow 0.15s",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, fontWeight: 500 }}>{s.label}</div>
+                    <div style={{ fontSize: 40, fontWeight: 900, color: s.color, lineHeight: 1.1 }}>
+                      {s.count.toLocaleString("fr-FR")}
+                    </div>
                   </div>
+                  <span style={{ fontSize: 26, opacity: 0.6 }}>{s.icon}</span>
                 </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Main grid: recent content + quick actions */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        {/* Recent annonces */}
+        {canContenus && (
+          <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>Annonces récentes</h2>
+              <Link href="/gestion/annonces" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
+                Voir tout →
+              </Link>
+            </div>
+            {recentAnnonces.length === 0 ? (
+              <p style={{ color: "#94a3b8", fontSize: 14 }}>Aucune annonce pour l&apos;instant.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {recentAnnonces.map((a) => (
+                  <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
+                    <span style={{ fontSize: 13, color: "#0f172a", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>
+                      {a.titre}
+                    </span>
+                    <span style={{
+                      fontSize: 11, padding: "2px 8px", borderRadius: 100, flexShrink: 0,
+                      background: a.publie ? "#dcfce7" : "#f1f5f9",
+                      color: a.publie ? "#15803d" : "#64748b",
+                      fontWeight: 600,
+                    }}>
+                      {a.publie ? "Publiée" : "Brouillon"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Upcoming events */}
+        {canContenus && (
+          <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>Prochains événements</h2>
+              <Link href="/gestion/evenements" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
+                Voir tout →
+              </Link>
+            </div>
+            {prochainEvenements.length === 0 ? (
+              <p style={{ color: "#94a3b8", fontSize: 14 }}>Aucun événement à venir.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {prochainEvenements.map((e) => (
+                  <div key={e.id} style={{ padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>{e.titre}</div>
+                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 3 }}>
+                      📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      {e.lieu && <> — 📍 {e.lieu}</>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Quick actions */}
+        {quickActions.length > 0 && (
+          <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", gridColumn: canContenus ? "1 / -1" : "auto" }}>
+            <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: "0 0 16px" }}>
+              Actions rapides
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+              {quickActions.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "14px 16px", borderRadius: 10,
+                    background: action.bg, color: action.color,
+                    fontSize: 13, fontWeight: 700, textDecoration: "none",
+                    border: `1.5px solid ${action.color}22`,
+                    textAlign: "center",
+                  }}
+                >
+                  {action.label}
+                </Link>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

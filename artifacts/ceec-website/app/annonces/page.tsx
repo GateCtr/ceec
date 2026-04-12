@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 async function getAnnonces() {
   try {
     return await prisma.annonce.findMany({
-      where: { publie: true },
+      where: { statutContenu: "publie" as const },
       orderBy: { datePublication: "desc" },
     });
   } catch {

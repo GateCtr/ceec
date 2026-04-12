@@ -13,7 +13,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const numId = parseId(id);
     if (!numId) return NextResponse.json({ error: "Identifiant invalide" }, { status: 400 });
-    const evt = await prisma.evenement.findUnique({ where: { id: numId } });
+    const evt = await prisma.evenement.findUnique({
+      where: { id: numId, statutContenu: "publie" as const },
+    });
     if (!evt) return NextResponse.json({ error: "Non trouve" }, { status: 404 });
     return NextResponse.json(evt);
   } catch {
@@ -46,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
+    const publie = body.publie ?? existing.publie;
     const updated = await prisma.evenement.update({
       where: { id: numId },
       data: {
@@ -55,7 +58,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         dateFin: body.dateFin ? new Date(body.dateFin) : null,
         lieu: body.lieu ?? null,
         egliseId: targetEgliseId,
-        publie: body.publie ?? existing.publie,
+        publie,
+        statutContenu: publie ? "publie" as const : "brouillon" as const,
         imageUrl: body.imageUrl ?? null,
       },
     });

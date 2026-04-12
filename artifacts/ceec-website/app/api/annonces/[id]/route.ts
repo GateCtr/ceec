@@ -13,7 +13,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const numId = parseId(id);
     if (!numId) return NextResponse.json({ error: "Identifiant invalide" }, { status: 400 });
-    const annonce = await prisma.annonce.findUnique({ where: { id: numId } });
+    const annonce = await prisma.annonce.findUnique({
+      where: { id: numId, statutContenu: "publie" as const },
+    });
     if (!annonce) return NextResponse.json({ error: "Non trouve" }, { status: 404 });
     return NextResponse.json(annonce);
   } catch {
@@ -46,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
+    const publie = body.publie ?? existing.publie;
     const updated = await prisma.annonce.update({
       where: { id: numId },
       data: {
@@ -53,7 +56,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         contenu: body.contenu,
         egliseId: targetEgliseId,
         priorite: body.priorite ?? existing.priorite,
-        publie: body.publie ?? existing.publie,
+        publie,
+        statutContenu: publie ? "publie" as const : "brouillon" as const,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
       },
     });

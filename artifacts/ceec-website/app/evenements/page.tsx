@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 async function getEvenements() {
   try {
     return await prisma.evenement.findMany({
-      where: { publie: true },
+      where: { statutContenu: "publie" as const },
       orderBy: { dateDebut: "asc" },
     });
   } catch {

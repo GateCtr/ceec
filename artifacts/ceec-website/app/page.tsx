@@ -8,8 +8,8 @@ async function getData() {
   try {
     const [eglisesList, annoncesList, evenementsList, nbEglises, configEntries] = await Promise.all([
       prisma.eglise.findMany({ where: { statut: "actif" }, take: 6, orderBy: { nom: "asc" } }),
-      prisma.annonce.findMany({ where: { publie: true, egliseId: null }, orderBy: { datePublication: "desc" }, take: 3 }),
-      prisma.evenement.findMany({ where: { publie: true, egliseId: null }, orderBy: { dateDebut: "asc" }, take: 3 }),
+      prisma.annonce.findMany({ where: { statutContenu: "publie", egliseId: null }, orderBy: { datePublication: "desc" }, take: 3 }),
+      prisma.evenement.findMany({ where: { statutContenu: "publie", egliseId: null }, orderBy: { dateDebut: "asc" }, take: 3 }),
       prisma.eglise.count({ where: { statut: "actif" } }),
       prisma.communauteConfig.findMany(),
     ]);

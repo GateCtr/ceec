@@ -31,7 +31,7 @@ export default async function ChurchEvenementsPage({
 
   const where = {
     egliseId: eglise.id,
-    publie: true,
+    statutContenu: "publie",
     ...(isPast ? { dateDebut: { lt: now } } : { dateDebut: { gte: now } }),
     ...(categorie ? { categorie } : {}),
   };
@@ -45,7 +45,7 @@ export default async function ChurchEvenementsPage({
       take: ITEMS_PER_PAGE,
     }),
     prisma.evenement.findMany({
-      where: { egliseId: eglise.id, publie: true, categorie: { not: null } },
+      where: { egliseId: eglise.id, statutContenu: "publie", categorie: { not: null } },
       select: { categorie: true },
       distinct: ["categorie"],
     }),

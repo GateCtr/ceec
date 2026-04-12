@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   try {
     const evt = await prisma.evenement.findFirst({
-      where: { id: parseInt(id, 10), publie: true, eglise: { slug } },
+      where: { id: parseInt(id, 10), statutContenu: "publie", eglise: { slug } },
       select: { titre: true },
     });
     return { title: evt?.titre ?? "Événement" };
@@ -32,7 +32,7 @@ export default async function EvenementDetailPage({ params }: Props) {
   if (!eglise) notFound();
 
   const evt = await prisma.evenement.findFirst({
-    where: { id: evtId, egliseId: eglise.id, publie: true },
+    where: { id: evtId, egliseId: eglise.id, statutContenu: "publie" },
   });
   if (!evt) notFound();
 
@@ -40,7 +40,7 @@ export default async function EvenementDetailPage({ params }: Props) {
 
   // Other upcoming events
   const autres = await prisma.evenement.findMany({
-    where: { egliseId: eglise.id, publie: true, id: { not: evtId }, dateDebut: { gte: new Date() } },
+    where: { egliseId: eglise.id, statutContenu: "publie", id: { not: evtId }, dateDebut: { gte: new Date() } },
     orderBy: { dateDebut: "asc" },
     take: 3,
   });

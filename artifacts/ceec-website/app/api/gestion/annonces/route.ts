@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, hasAutoPublishRole } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -57,10 +57,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
     }
 
-    const [membre, eglise] = await Promise.all([
+    const [membre, eglise, canAutoPublish] = await Promise.all([
       prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId } }),
       prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+      hasAutoPublishRole(userId, egliseId),
     ]);
+
+    const wantsPublished = typeof body.publie === "boolean" ? body.publie : true;
+    const statutContenu = canAutoPublish && wantsPublished ? "publie" : "brouillon";
+    const publie = statutContenu === "publie";
 
     const annonce = await prisma.annonce.create({
       data: {
@@ -69,7 +74,8 @@ export async function POST(req: NextRequest) {
         egliseId,
         auteurId: membre?.id ?? null,
         priorite,
-        publie: typeof body.publie === "boolean" ? body.publie : true,
+        publie,
+        statutContenu,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie ?? null,

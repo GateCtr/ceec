@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, hasAutoPublishRole } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -46,7 +46,14 @@ export async function POST(req: NextRequest) {
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();
-    const eglise = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
+    const [eglise, canAutoPublish] = await Promise.all([
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+      hasAutoPublishRole(userId, egliseId),
+    ]);
+
+    const wantsPublished = typeof body.publie === "boolean" ? body.publie : true;
+    const statutContenu = canAutoPublish && wantsPublished ? "publie" : "brouillon";
+    const publie = statutContenu === "publie";
 
     const evt = await prisma.evenement.create({
       data: {
@@ -56,7 +63,8 @@ export async function POST(req: NextRequest) {
         dateFin: body.dateFin ? new Date(body.dateFin) : null,
         lieu: body.lieu ?? null,
         egliseId,
-        publie: body.publie ?? true,
+        publie,
+        statutContenu,
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie ?? null,
         lienInscription: body.lienInscription ?? null,

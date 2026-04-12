@@ -29,12 +29,12 @@ export default async function ChurchHomePage() {
       take: 6,
     }),
     prisma.annonce.findMany({
-      where: { egliseId: eglise.id, publie: true },
+      where: { egliseId: eglise.id, statutContenu: "publie" },
       orderBy: [{ priorite: "asc" }, { datePublication: "desc" }],
       take: 6,
     }),
     prisma.evenement.findMany({
-      where: { egliseId: eglise.id, publie: true, dateDebut: { gte: new Date() } },
+      where: { egliseId: eglise.id, statutContenu: "publie", dateDebut: { gte: new Date() } },
       orderBy: { dateDebut: "asc" },
       take: 6,
     }),

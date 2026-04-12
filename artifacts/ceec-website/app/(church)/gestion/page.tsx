@@ -44,15 +44,15 @@ export default async function GestionDashboardPage() {
     recentActivity,
   ] = await Promise.all([
     canMembres ? prisma.membre.count({ where: { egliseId, statut: "actif" } }) : Promise.resolve(null),
-    canContenus ? prisma.annonce.count({ where: { egliseId, publie: true } }) : Promise.resolve(null),
-    canContenus ? prisma.evenement.count({ where: { egliseId, publie: true, dateDebut: { gte: now } } }) : Promise.resolve(null),
+    canContenus ? prisma.annonce.count({ where: { egliseId, statutContenu: "publie" } }) : Promise.resolve(null),
+    canContenus ? prisma.evenement.count({ where: { egliseId, statutContenu: "publie", dateDebut: { gte: now } } }) : Promise.resolve(null),
     canPages ? prisma.pageEglise.count({ where: { egliseId, publie: true } }) : Promise.resolve(null),
     canContenus
       ? prisma.annonce.findMany({
           where: { egliseId },
           orderBy: { createdAt: "desc" },
           take: 5,
-          select: { id: true, titre: true, publie: true, createdAt: true },
+          select: { id: true, titre: true, publie: true, statutContenu: true, createdAt: true },
         })
       : Promise.resolve([]),
     canContenus
@@ -167,11 +167,22 @@ export default async function GestionDashboardPage() {
                     </span>
                     <span style={{
                       fontSize: 11, padding: "2px 8px", borderRadius: 100, flexShrink: 0,
-                      background: a.publie ? "#dcfce7" : "#f1f5f9",
-                      color: a.publie ? "#15803d" : "#64748b",
+                      background: (a as { statutContenu?: string }).statutContenu === "publie" ? "#dcfce7"
+                        : (a as { statutContenu?: string }).statutContenu === "en_attente" ? "#fef9c3"
+                        : (a as { statutContenu?: string }).statutContenu === "rejete" ? "#fee2e2"
+                        : "#f1f5f9",
+                      color: (a as { statutContenu?: string }).statutContenu === "publie" ? "#15803d"
+                        : (a as { statutContenu?: string }).statutContenu === "en_attente" ? "#a16207"
+                        : (a as { statutContenu?: string }).statutContenu === "rejete" ? "#b91c1c"
+                        : "#64748b",
                       fontWeight: 600,
                     }}>
-                      {a.publie ? "Publiée" : "Brouillon"}
+                      {{
+                        publie: "Publiée",
+                        en_attente: "En attente",
+                        rejete: "Rejetée",
+                        brouillon: "Brouillon",
+                      }[(a as { statutContenu?: string }).statutContenu ?? "brouillon"] ?? "Brouillon"}
                     </span>
                   </div>
                 ))}

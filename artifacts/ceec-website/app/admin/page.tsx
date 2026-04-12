@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import AdminLogsClient from "@/components/admin/AdminLogsClient";
+import AdminValidationQueue from "@/components/admin/AdminValidationQueue";
 import { getDateFrom } from "@/lib/date-filter";
 
 export const metadata = { title: "Administration Plateforme | CEEC" };
@@ -37,6 +38,8 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       evenementsAVenir,
       logs,
       eglisesForFilter,
+      annoncesEnAttente,
+      evenementsEnAttente,
     ] = await Promise.all([
       prisma.eglise.groupBy({ by: ["statut"], _count: { _all: true } }),
       prisma.eglise.findMany({
@@ -48,7 +51,7 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       }),
       prisma.membre.count(),
       prisma.annonce.count({ where: { createdAt: { gte: startOfMonth } } }),
-      prisma.evenement.count({ where: { dateDebut: { gte: now }, publie: true } }),
+      prisma.evenement.count({ where: { dateDebut: { gte: now }, statutContenu: "publie" } }),
       prisma.activityLog.findMany({
         where: logWhere,
         orderBy: { createdAt: "desc" },
@@ -61,6 +64,16 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       prisma.eglise.findMany({
         orderBy: { nom: "asc" },
         select: { id: true, nom: true, slug: true },
+      }),
+      prisma.annonce.findMany({
+        where: { statutContenu: "en_attente" },
+        orderBy: { createdAt: "asc" },
+        include: { eglise: { select: { nom: true } } },
+      }),
+      prisma.evenement.findMany({
+        where: { statutContenu: "en_attente" },
+        orderBy: { createdAt: "asc" },
+        include: { eglise: { select: { nom: true } } },
       }),
     ]);
 
@@ -93,6 +106,26 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
         createdAt: l.createdAt.toISOString(),
       })),
       eglisesForFilter: eglisesForFilter.map((e) => ({ id: e.id, nom: e.nom, slug: e.slug ?? "" })),
+      validationQueue: [
+        ...annoncesEnAttente.map((a) => ({
+          id: a.id,
+          type: "annonce" as const,
+          titre: a.titre,
+          egliseNom: a.eglise?.nom ?? null,
+          createdAt: a.createdAt.toISOString(),
+          contenu: a.contenu,
+          dateDebut: null,
+        })),
+        ...evenementsEnAttente.map((e) => ({
+          id: e.id,
+          type: "evenement" as const,
+          titre: e.titre,
+          egliseNom: e.eglise?.nom ?? null,
+          createdAt: e.createdAt.toISOString(),
+          contenu: e.description,
+          dateDebut: e.dateDebut.toISOString(),
+        })),
+      ].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     };
   } catch {
     return {
@@ -100,6 +133,7 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       eglises: [],
       logs: [],
       eglisesForFilter: [],
+      validationQueue: [],
     };
   }
 }
@@ -114,7 +148,7 @@ export default async function AdminPage({
   if (!await isSuperAdmin(userId)) redirect("/sign-in");
 
   const sp = await searchParams;
-  const { stats, eglises, logs, eglisesForFilter } = await getDashboardData(sp.eglise, sp.action, sp.date);
+  const { stats, eglises, logs, eglisesForFilter, validationQueue } = await getDashboardData(sp.eglise, sp.action, sp.date);
 
   const statCards = [
     {
@@ -160,6 +194,26 @@ export default async function AdminPage({
             {"sub" in card && card.sub ? card.sub : null}
           </div>
         ))}
+      </div>
+
+      {/* Validation queue */}
+      <div style={{ marginBottom: 36 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>
+              Validation du contenu
+              {validationQueue.length > 0 && (
+                <span style={{ marginLeft: 8, display: "inline-block", fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: "#fef9c3", color: "#a16207" }}>
+                  {validationQueue.length} en attente
+                </span>
+              )}
+            </h2>
+            <p style={{ color: "#64748b", fontSize: 13, marginTop: 3 }}>
+              Annonces et événements soumis par les gestionnaires d&apos;église
+            </p>
+          </div>
+        </div>
+        <AdminValidationQueue items={validationQueue} />
       </div>
 
       {/* Church list */}

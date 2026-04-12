@@ -131,41 +131,47 @@ model Membre {
 }
 
 model Annonce {
-  id              Int       @id @default(autoincrement())
-  titre           String    @db.VarChar(255)
-  contenu         String
-  auteurId        Int?      @map("auteur_id")
-  egliseId        Int?      @map("paroisse_id")
-  datePublication DateTime  @default(now()) @map("date_publication")
-  dateExpiration  DateTime? @map("date_expiration")
-  priorite        String    @default("normale") @db.VarChar(20)
-  publie          Boolean   @default(true)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
-  categorie       String?   @db.VarChar(100)
-  imageUrl        String?   @map("image_url")
-  auteur          Membre?   @relation(fields: [auteurId], references: [id])
-  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
+  id               Int       @id @default(autoincrement())
+  titre            String    @db.VarChar(255)
+  contenu          String
+  auteurId         Int?      @map("auteur_id")
+  egliseId         Int?      @map("paroisse_id")
+  datePublication  DateTime  @default(now()) @map("date_publication")
+  dateExpiration   DateTime? @map("date_expiration")
+  priorite         String    @default("normale") @db.VarChar(20)
+  publie           Boolean   @default(true)
+  statutContenu    String    @default("publie") @map("statut_contenu") @db.VarChar(20)
+  commentaireRejet String?   @map("commentaire_rejet")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+  categorie        String?   @db.VarChar(100)
+  imageUrl         String?   @map("image_url")
+  auteur           Membre?   @relation(fields: [auteurId], references: [id])
+  eglise           Eglise?   @relation(fields: [egliseId], references: [id])
 
+  @@index([egliseId, statutContenu])
   @@map("annonces")
 }
 
 model Evenement {
-  id              Int       @id @default(autoincrement())
-  titre           String    @db.VarChar(255)
-  description     String?
-  dateDebut       DateTime  @map("date_debut")
-  dateFin         DateTime? @map("date_fin")
-  lieu            String?   @db.VarChar(255)
-  egliseId        Int?      @map("paroisse_id")
-  imageUrl        String?   @map("image_url")
-  publie          Boolean   @default(true)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
-  categorie       String?   @db.VarChar(100)
-  lienInscription String?   @map("lien_inscription") @db.VarChar(500)
-  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
+  id               Int       @id @default(autoincrement())
+  titre            String    @db.VarChar(255)
+  description      String?
+  dateDebut        DateTime  @map("date_debut")
+  dateFin          DateTime? @map("date_fin")
+  lieu             String?   @db.VarChar(255)
+  egliseId         Int?      @map("paroisse_id")
+  imageUrl         String?   @map("image_url")
+  publie           Boolean   @default(true)
+  statutContenu    String    @default("publie") @map("statut_contenu") @db.VarChar(20)
+  commentaireRejet String?   @map("commentaire_rejet")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+  categorie        String?   @db.VarChar(100)
+  lienInscription  String?   @map("lien_inscription") @db.VarChar(500)
+  eglise           Eglise?   @relation(fields: [egliseId], references: [id])
 
+  @@index([egliseId, statutContenu])
   @@map("evenements")
 }
 

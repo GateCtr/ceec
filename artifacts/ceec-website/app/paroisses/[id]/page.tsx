@@ -16,12 +16,12 @@ async function getEgliseContent(egliseId: number) {
   try {
     const [annoncesList, evenementsList] = await Promise.all([
       prisma.annonce.findMany({
-        where: { egliseId, publie: true },
+        where: { egliseId, statutContenu: "publie" },
         orderBy: { datePublication: "desc" },
         take: 5,
       }),
       prisma.evenement.findMany({
-        where: { egliseId, publie: true },
+        where: { egliseId, statutContenu: "publie" },
         orderBy: { dateDebut: "asc" },
         take: 5,
       }),

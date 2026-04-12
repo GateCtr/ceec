@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   try {
     const annonce = await prisma.annonce.findFirst({
-      where: { id: parseInt(id, 10), publie: true, eglise: { slug } },
+      where: { id: parseInt(id, 10), statutContenu: "publie", eglise: { slug } },
       select: { titre: true },
     });
     return { title: annonce?.titre ?? "Annonce" };
@@ -38,7 +38,7 @@ export default async function AnnonceDetailPage({ params }: Props) {
   if (!eglise) notFound();
 
   const annonce = await prisma.annonce.findFirst({
-    where: { id: annonceId, egliseId: eglise.id, publie: true },
+    where: { id: annonceId, egliseId: eglise.id, statutContenu: "publie" },
   });
   if (!annonce) notFound();
 
@@ -46,7 +46,7 @@ export default async function AnnonceDetailPage({ params }: Props) {
 
   // Other recent annonces
   const autres = await prisma.annonce.findMany({
-    where: { egliseId: eglise.id, publie: true, id: { not: annonceId } },
+    where: { egliseId: eglise.id, statutContenu: "publie", id: { not: annonceId } },
     orderBy: [{ priorite: "asc" }, { datePublication: "desc" }],
     take: 3,
   });

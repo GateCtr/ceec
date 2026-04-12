@@ -178,6 +178,18 @@ export async function getUserEglises(clerkUserId: string) {
   });
 }
 
+/** Vrai si l'utilisateur peut publier directement sans validation (admin_eglise ou pasteur) */
+export async function hasAutoPublishRole(
+  clerkUserId: string,
+  egliseId: number
+): Promise<boolean> {
+  if (await isSuperAdmin(clerkUserId)) return true;
+  const userRoles = await getUserRoles(clerkUserId);
+  return userRoles.some(
+    (ur) => ur.egliseId === egliseId && CHURCH_ADMIN_ROLES.has(ur.role.nom)
+  );
+}
+
 export async function canManageContent(
   clerkUserId: string,
   egliseId?: number

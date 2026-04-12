@@ -9,7 +9,10 @@ export type ActivityAction =
   | "inviter"
   | "revoquer"
   | "publier"
-  | "depublier";
+  | "depublier"
+  | "soumettre"
+  | "approuver"
+  | "rejeter";
 
 export type ActivityEntityType =
   | "annonce"

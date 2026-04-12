@@ -261,8 +261,8 @@ export default async function AdminPage() {
               <Link href="/admin/eglises" style={quickLink}>
                 Voir toutes les églises →
               </Link>
-              <Link href="/admin/contenu" style={quickLink}>
-                Superviser le contenu →
+              <Link href="/admin/annonces" style={quickLink}>
+                Superviser les annonces →
               </Link>
             </div>
           </div>

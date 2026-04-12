@@ -18,7 +18,7 @@ export default async function GestionEvenementsPage() {
 
   const superAdmin = await isSuperAdmin(userId);
   const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
-  if (!allowed) redirect("/gestion?error=acces-refuse");
+  if (!allowed) redirect("/c?error=acces-refuse");
 
   const evenements = await prisma.evenement.findMany({
     where: { egliseId },

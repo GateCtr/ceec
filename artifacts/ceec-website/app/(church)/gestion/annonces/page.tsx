@@ -18,7 +18,7 @@ export default async function GestionAnnoncesPage() {
 
   const superAdmin = await isSuperAdmin(userId);
   const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
-  if (!allowed) redirect("/gestion?error=acces-refuse");
+  if (!allowed) redirect("/c?error=acces-refuse");
 
   const annonces = await prisma.annonce.findMany({
     where: { egliseId },

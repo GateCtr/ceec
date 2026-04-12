@@ -37,8 +37,7 @@ export default async function ChurchCustomPage({ params }: Props) {
 
   if (!page) notFound();
 
-  // Pre-load dynamic data needed by sections
-  const [liveStreams, annonces, evenements] = await Promise.all([
+  const [liveStreams, annonces, evenements, egliseConfig] = await Promise.all([
     prisma.liveStream.findMany({
       where: { egliseId: eglise.id, publie: true },
       orderBy: [{ epingle: "desc" }, { createdAt: "desc" }],
@@ -54,7 +53,16 @@ export default async function ChurchCustomPage({ params }: Props) {
       orderBy: { dateDebut: "asc" },
       take: 6,
     }),
+    prisma.egliseConfig.findUnique({
+      where: { egliseId: eglise.id },
+      select: { contactChampsActifs: true, contactMessageConfirmation: true },
+    }),
   ]);
+
+  const contactConfig = {
+    champsActifs: (egliseConfig?.contactChampsActifs as { telephone?: boolean; sujet?: boolean } | null) ?? { telephone: false, sujet: true },
+    messageConfirmation: egliseConfig?.contactMessageConfirmation ?? undefined,
+  };
 
   return (
     <>
@@ -77,6 +85,8 @@ export default async function ChurchCustomPage({ params }: Props) {
                 config: (section.config ?? {}) as Record<string, unknown>,
               }}
               eglise={eglise}
+              egliseId={eglise.id}
+              contactConfig={contactConfig}
               liveStreams={liveStreams}
               annonces={annonces}
               evenements={evenements}

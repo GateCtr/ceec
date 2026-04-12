@@ -262,3 +262,35 @@ export async function sendNewChurchNotificationEmail(
   );
   return sendEmail(toArr, `Nouvelle église — ${egliseNom} (${ville})`, html);
 }
+
+// ─── Template 7 : Message de contact reçu ───────────────────────────────────
+
+export async function sendContactEmail({
+  to,
+  nom,
+  emailExpediteur,
+  telephone,
+  sujet,
+  message,
+}: {
+  to: string;
+  nom: string;
+  emailExpediteur: string;
+  telephone?: string;
+  sujet?: string;
+  message: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const html = emailWrapper(
+    "Nouveau message de contact",
+    p("Vous avez reçu un nouveau message via le formulaire de contact de votre site.") +
+    callout("#1e3a8a", "#eff6ff",
+      `<strong>Nom :</strong> ${nom}<br>` +
+      `<strong>Email :</strong> ${emailExpediteur}<br>` +
+      (telephone ? `<strong>Téléphone :</strong> ${telephone}<br>` : "") +
+      (sujet ? `<strong>Sujet :</strong> ${sujet}<br>` : "") +
+      `<strong>Message :</strong><br><em>${message.replace(/\n/g, "<br>")}</em>`
+    ) +
+    p("Vous pouvez répondre directement à cet email pour contacter l'expéditeur.")
+  );
+  return sendEmail(to, `Nouveau message${sujet ? ` — ${sujet}` : ""} de ${nom}`, html);
+}

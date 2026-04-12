@@ -53,9 +53,16 @@ type EvenementData = {
   imageUrl?: string | null;
 };
 
+type ContactConfig = {
+  champsActifs?: { telephone?: boolean; sujet?: boolean };
+  messageConfirmation?: string;
+};
+
 type SectionRendererProps = {
   section: SectionData;
   eglise: EgliseInfo;
+  egliseId?: number;
+  contactConfig?: ContactConfig;
   liveStreams?: LiveStreamData[];
   annonces?: AnnonceData[];
   evenements?: EvenementData[];
@@ -64,6 +71,8 @@ type SectionRendererProps = {
 export default function SectionRenderer({
   section,
   eglise,
+  egliseId,
+  contactConfig,
   liveStreams = [],
   annonces = [],
   evenements = [],
@@ -99,7 +108,7 @@ export default function SectionRenderer({
       );
 
     case "contact":
-      return <SectionContact config={c} eglise={eglise} />;
+      return <SectionContact config={c} eglise={eglise} egliseId={egliseId} contactConfig={contactConfig} />;
 
     case "departements":
       return <SectionDepartements config={c} />;

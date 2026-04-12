@@ -57,6 +57,9 @@ export async function PUT(req: NextRequest) {
       ...(body.horaires !== undefined && { horaires: body.horaires || null }),
       ...(body.navLinksJson !== undefined && { navLinksJson: body.navLinksJson ?? null }),
       ...(body.footerLinksJson !== undefined && { footerLinksJson: body.footerLinksJson ?? null }),
+      ...(body.contactEmailDestinataire !== undefined && { contactEmailDestinataire: body.contactEmailDestinataire || null }),
+      ...(body.contactChampsActifs !== undefined && { contactChampsActifs: body.contactChampsActifs }),
+      ...(body.contactMessageConfirmation !== undefined && { contactMessageConfirmation: body.contactMessageConfirmation || null }),
     };
 
     const [config] = await Promise.all([

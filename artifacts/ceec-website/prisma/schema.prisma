@@ -60,7 +60,11 @@ model EgliseConfig {
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
   footerLinksJson Json?    @map("footer_links_json")
   navLinksJson    Json?    @map("nav_links_json")
+  contactEmailDestinataire String? @map("contact_email_destinataire") @db.VarChar(255)
+  contactChampsActifs      Json?   @default("{\"telephone\":false,\"sujet\":true}") @map("contact_champs_actifs")
+  contactMessageConfirmation String? @map("contact_message_confirmation")
   eglise          Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
+  messages        MessageContact[]
 
   @@map("eglise_configs")
 }
@@ -272,6 +276,24 @@ model InviteToken {
   role      Role?     @relation(fields: [roleId], references: [id])
 
   @@map("invite_tokens")
+}
+
+model MessageContact {
+  id          Int          @id @default(autoincrement())
+  configId    Int          @map("config_id")
+  nom         String       @db.VarChar(255)
+  email       String       @db.VarChar(255)
+  telephone   String?      @db.VarChar(30)
+  sujet       String?      @db.VarChar(255)
+  message     String
+  lu          Boolean      @default(false)
+  ipAdresse   String?      @map("ip_adresse") @db.VarChar(45)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  config      EgliseConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId, createdAt(sort: Desc)])
+  @@index([configId, lu])
+  @@map("messages_contact")
 }
 
 model ActivityLog {

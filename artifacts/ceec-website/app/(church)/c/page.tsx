@@ -15,13 +15,10 @@ export default async function ChurchHomePage() {
   const eglise = await prisma.eglise.findUnique({ where: { slug } });
   if (!eglise) notFound();
 
-  // Fetch homepage sections + live streams + recent content in parallel
-  const [homePageData, liveStreams, annonces, evenements] = await Promise.all([
+  const [homePageData, liveStreams, annonces, evenements, egliseConfig] = await Promise.all([
     prisma.pageEglise.findFirst({
       where: { egliseId: eglise.id, type: "accueil", publie: true },
-      include: {
-        sections: { orderBy: { ordre: "asc" } },
-      },
+      include: { sections: { orderBy: { ordre: "asc" } } },
     }),
     prisma.liveStream.findMany({
       where: { egliseId: eglise.id, publie: true },
@@ -38,7 +35,16 @@ export default async function ChurchHomePage() {
       orderBy: { dateDebut: "asc" },
       take: 6,
     }),
+    prisma.egliseConfig.findUnique({
+      where: { egliseId: eglise.id },
+      select: { contactChampsActifs: true, contactMessageConfirmation: true },
+    }),
   ]);
+
+  const contactConfig = {
+    champsActifs: (egliseConfig?.contactChampsActifs as { telephone?: boolean; sujet?: boolean } | null) ?? { telephone: false, sujet: true },
+    messageConfirmation: egliseConfig?.contactMessageConfirmation ?? undefined,
+  };
 
   // Dynamic sections from configured page
   if (homePageData && homePageData.sections.length > 0) {
@@ -54,6 +60,8 @@ export default async function ChurchHomePage() {
               config: (section.config ?? {}) as Record<string, unknown>,
             }}
             eglise={eglise}
+            egliseId={eglise.id}
+            contactConfig={contactConfig}
             liveStreams={liveStreams}
             annonces={annonces}
             evenements={evenements}
@@ -111,7 +119,7 @@ export default async function ChurchHomePage() {
         </section>
       )}
 
-      <SectionContact config={{}} eglise={eglise} />
+      <SectionContact config={{}} eglise={eglise} egliseId={eglise.id} contactConfig={contactConfig} />
     </>
   );
 }

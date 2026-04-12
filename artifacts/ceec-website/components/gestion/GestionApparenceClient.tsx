@@ -19,12 +19,34 @@ type ConfigData = {
   horaires?: string | null;
   navLinksJson?: unknown;
   footerLinksJson?: unknown;
+  contactEmailDestinataire?: string | null;
+  contactChampsActifs?: unknown;
+  contactMessageConfirmation?: string | null;
 };
 
 function parseLinks<T>(raw: unknown, fallback: T[]): T[] {
   if (!raw) return fallback;
   if (Array.isArray(raw)) return raw as T[];
   try { return JSON.parse(raw as string) as T[]; } catch { return fallback; }
+}
+
+function parseChampsActifs(raw: unknown): { telephone: boolean; sujet: boolean } {
+  const defaults = { telephone: false, sujet: true };
+  if (!raw) return defaults;
+  if (typeof raw === "object" && !Array.isArray(raw)) {
+    const r = raw as Record<string, unknown>;
+    return {
+      telephone: typeof r.telephone === "boolean" ? r.telephone : defaults.telephone,
+      sujet: typeof r.sujet === "boolean" ? r.sujet : defaults.sujet,
+    };
+  }
+  try {
+    const parsed = JSON.parse(raw as string) as Record<string, boolean>;
+    return {
+      telephone: typeof parsed.telephone === "boolean" ? parsed.telephone : defaults.telephone,
+      sujet: typeof parsed.sujet === "boolean" ? parsed.sujet : defaults.sujet,
+    };
+  } catch { return defaults; }
 }
 
 type ContactData = { adresse?: string | null; telephone?: string | null; email?: string | null };
@@ -42,7 +64,12 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
     whatsapp: initialConfig?.whatsapp ?? "",
     siteWeb: initialConfig?.siteWeb ?? "",
     horaires: initialConfig?.horaires ?? "",
+    contactEmailDestinataire: initialConfig?.contactEmailDestinataire ?? "",
+    contactMessageConfirmation: initialConfig?.contactMessageConfirmation ?? "",
   });
+  const [champsActifs, setChampsActifs] = useState(
+    parseChampsActifs(initialConfig?.contactChampsActifs)
+  );
   const [contact, setContact] = useState({
     adresse: initialContact?.adresse ?? "",
     telephone: initialContact?.telephone ?? "",
@@ -111,6 +138,7 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
           ...contact,
           navLinksJson: navLinks.filter((l) => l.label && l.href),
           footerLinksJson: footerLinks.filter((l) => l.label && l.href),
+          contactChampsActifs: champsActifs,
         }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Erreur"); return; }
@@ -258,6 +286,63 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
               onChange={(e) => updateField("horaires", e.target.value)}
               rows={3}
               placeholder="Ex: Dimanche 9h - 12h30, Mercredi 18h - 20h"
+              style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box", resize: "vertical" }}
+            />
+          </div>
+        </div>
+      )}
+
+      {section("Formulaire de contact", "Configurez le formulaire de contact affiché sur votre site public dans la section 'Contact'.",
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Email destinataire des messages</label>
+            <input
+              type="email"
+              value={form.contactEmailDestinataire}
+              onChange={(e) => updateField("contactEmailDestinataire", e.target.value)}
+              placeholder="contact@eglise.org"
+              style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
+            />
+            <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>Les messages reçus seront transmis à cette adresse par email.</p>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#374151" }}>Champs affichés dans le formulaire</label>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", borderRadius: 8, padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13, color: "#374151", flex: 1 }}>Nom et email</span>
+                <span style={{ fontSize: 12, color: "#94a3b8", background: "#e2e8f0", borderRadius: 4, padding: "2px 8px" }}>Toujours affiché</span>
+              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={champsActifs.sujet}
+                  onChange={(e) => setChampsActifs((c) => ({ ...c, sujet: e.target.checked }))}
+                />
+                <span style={{ fontSize: 13, color: "#374151" }}>Champ Sujet</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={champsActifs.telephone}
+                  onChange={(e) => setChampsActifs((c) => ({ ...c, telephone: e.target.checked }))}
+                />
+                <span style={{ fontSize: 13, color: "#374151" }}>Champ Téléphone</span>
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13, color: "#374151", flex: 1 }}>Message</span>
+                <span style={{ fontSize: 12, color: "#94a3b8", background: "#e2e8f0", borderRadius: 4, padding: "2px 8px" }}>Toujours affiché</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Message de confirmation après envoi</label>
+            <textarea
+              value={form.contactMessageConfirmation}
+              onChange={(e) => updateField("contactMessageConfirmation", e.target.value)}
+              rows={2}
+              placeholder="Merci pour votre message ! Nous vous répondrons dans les plus brefs délais."
               style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box", resize: "vertical" }}
             />
           </div>

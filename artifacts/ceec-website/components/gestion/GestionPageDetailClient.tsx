@@ -370,31 +370,33 @@ export default function GestionPageDetailClient({
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
-      setPage((prev) => {
-        const oldIndex = prev.sections.findIndex((s) => s.id === active.id);
-        const newIndex = prev.sections.findIndex((s) => s.id === over.id);
-        if (oldIndex === -1 || newIndex === -1) return prev;
-        const reordered = arrayMove(prev.sections, oldIndex, newIndex).map((s, idx) => ({
-          ...s,
-          ordre: idx + 1,
-        }));
-        return { ...prev, sections: reordered };
-      });
+      const oldIndex = page.sections.findIndex((s) => s.id === active.id);
+      const newIndex = page.sections.findIndex((s) => s.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
 
+      const previousSections = page.sections;
+      const newSections = arrayMove(page.sections, oldIndex, newIndex).map((s, idx) => ({
+        ...s,
+        ordre: idx + 1,
+      }));
+
+      setPage((prev) => ({ ...prev, sections: newSections }));
       setReordering(true);
+      setError(null);
+
       try {
-        const newSections = arrayMove(
-          page.sections,
-          page.sections.findIndex((s) => s.id === active.id),
-          page.sections.findIndex((s) => s.id === over.id)
-        );
-        await fetch(`/api/gestion/pages/${page.id}/sections/reorder`, {
+        const res = await fetch(`/api/gestion/pages/${page.id}/sections/reorder`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sectionIds: newSections.map((s) => s.id) }),
         });
-      } catch {
-        setError("Erreur lors de la sauvegarde de l'ordre");
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error ?? `Erreur ${res.status}`);
+        }
+      } catch (err) {
+        setPage((prev) => ({ ...prev, sections: previousSections }));
+        setError(err instanceof Error ? err.message : "Erreur lors de la sauvegarde de l'ordre");
       } finally {
         setReordering(false);
       }
@@ -414,7 +416,7 @@ export default function GestionPageDetailClient({
     }
   }
 
-  const previewUrl = egliseSlug ? `/c/${page.slug}` : null;
+  const previewUrl = `/c/${page.slug}`;
 
   return (
     <>
@@ -443,16 +445,14 @@ export default function GestionPageDetailClient({
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {previewUrl && (
-            <a
-              href={previewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
-            >
-              ↗ Voir la page publique
-            </a>
-          )}
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            ↗ Voir la page publique
+          </a>
           <button
             onClick={togglePublish}
             style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: page.publie ? "#fef3c7" : "#dcfce7", color: page.publie ? "#b45309" : "#15803d", fontWeight: 700, fontSize: 13, cursor: "pointer" }}

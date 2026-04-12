@@ -6,11 +6,35 @@ import AdminLogsClient from "@/components/admin/AdminLogsClient";
 
 export const metadata = { title: "Journal d'activité | Administration CEEC" };
 
-async function getLogs(egliseFilter?: string, actionFilter?: string) {
+function getDateFrom(dateRange: string): Date | null {
+  const now = new Date();
+  if (dateRange === "today") {
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+  if (dateRange === "week") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - d.getDay());
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  if (dateRange === "month") {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  if (dateRange === "30d") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 30);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  return null;
+}
+
+async function getLogs(egliseFilter?: string, actionFilter?: string, dateFilter?: string) {
   try {
     const where: {
       egliseId?: number;
       action?: string;
+      createdAt?: { gte: Date };
     } = {};
 
     if (egliseFilter) {
@@ -19,6 +43,10 @@ async function getLogs(egliseFilter?: string, actionFilter?: string) {
     }
     if (actionFilter) {
       where.action = actionFilter;
+    }
+    const dateFrom = getDateFrom(dateFilter ?? "");
+    if (dateFrom) {
+      where.createdAt = { gte: dateFrom };
     }
 
     const [logs, eglises] = await Promise.all([
@@ -54,14 +82,14 @@ async function getLogs(egliseFilter?: string, actionFilter?: string) {
 export default async function AdminLogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ eglise?: string; action?: string }>;
+  searchParams: Promise<{ eglise?: string; action?: string; date?: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
   if (!await isSuperAdmin(userId)) redirect("/sign-in");
 
   const sp = await searchParams;
-  const { logs, eglises } = await getLogs(sp.eglise, sp.action);
+  const { logs, eglises } = await getLogs(sp.eglise, sp.action, sp.date);
 
   return (
     <div style={{ padding: "2rem", maxWidth: 1100, margin: "0 auto" }}>
@@ -70,7 +98,7 @@ export default async function AdminLogsPage({
           Journal d&apos;activité global
         </h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
-          50 dernières actions enregistrées sur la plateforme
+          50 dernières actions — filtrez par église, type d&apos;action et période
         </p>
       </div>
       <AdminLogsClient
@@ -78,6 +106,7 @@ export default async function AdminLogsPage({
         eglises={eglises}
         selectedEglise={sp.eglise ?? ""}
         selectedAction={sp.action ?? ""}
+        selectedDate={sp.date ?? ""}
       />
     </div>
   );

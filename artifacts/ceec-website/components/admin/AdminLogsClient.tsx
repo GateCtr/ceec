@@ -56,28 +56,42 @@ const ACTION_COLORS: Record<string, { bg: string; color: string }> = {
 
 const ALL_ACTIONS = ["creer", "modifier", "supprimer", "suspendre", "reactiver", "inviter", "revoquer"];
 
+const DATE_RANGES = [
+  { value: "", label: "Toutes les dates" },
+  { value: "today", label: "Aujourd'hui" },
+  { value: "week", label: "Cette semaine" },
+  { value: "month", label: "Ce mois" },
+  { value: "30d", label: "30 derniers jours" },
+];
+
 export default function AdminLogsClient({
   logs,
   eglises,
   selectedEglise,
   selectedAction,
+  selectedDate,
 }: {
   logs: LogEntry[];
   eglises: EgliseOption[];
   selectedEglise: string;
   selectedAction: string;
+  selectedDate: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const [eglise, setEglise] = useState(selectedEglise);
   const [action, setAction] = useState(selectedAction);
+  const [dateRange, setDateRange] = useState(selectedDate);
 
-  function applyFilters(newEglise: string, newAction: string) {
+  function applyFilters(newEglise: string, newAction: string, newDate: string) {
     const params = new URLSearchParams();
     if (newEglise) params.set("eglise", newEglise);
     if (newAction) params.set("action", newAction);
+    if (newDate) params.set("date", newDate);
     router.push(`${pathname}?${params.toString()}`);
   }
+
+  const hasFilters = eglise || action || dateRange;
 
   return (
     <div>
@@ -91,7 +105,7 @@ export default function AdminLogsClient({
           <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Église :</label>
           <select
             value={eglise}
-            onChange={(e) => { setEglise(e.target.value); applyFilters(e.target.value, action); }}
+            onChange={(e) => { setEglise(e.target.value); applyFilters(e.target.value, action, dateRange); }}
             style={{ fontSize: 13, padding: "5px 10px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "white" }}
           >
             <option value="">Toutes les églises</option>
@@ -105,7 +119,7 @@ export default function AdminLogsClient({
           <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Action :</label>
           <select
             value={action}
-            onChange={(e) => { setAction(e.target.value); applyFilters(eglise, e.target.value); }}
+            onChange={(e) => { setAction(e.target.value); applyFilters(eglise, e.target.value, dateRange); }}
             style={{ fontSize: 13, padding: "5px 10px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "white" }}
           >
             <option value="">Toutes les actions</option>
@@ -115,9 +129,22 @@ export default function AdminLogsClient({
           </select>
         </div>
 
-        {(eglise || action) && (
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Période :</label>
+          <select
+            value={dateRange}
+            onChange={(e) => { setDateRange(e.target.value); applyFilters(eglise, action, e.target.value); }}
+            style={{ fontSize: 13, padding: "5px 10px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "white" }}
+          >
+            {DATE_RANGES.map((dr) => (
+              <option key={dr.value} value={dr.value}>{dr.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {hasFilters && (
           <button
-            onClick={() => { setEglise(""); setAction(""); router.push(pathname); }}
+            onClick={() => { setEglise(""); setAction(""); setDateRange(""); router.push(pathname); }}
             style={{ fontSize: 12, padding: "5px 12px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "#f8fafc", color: "#64748b", cursor: "pointer" }}
           >
             Réinitialiser

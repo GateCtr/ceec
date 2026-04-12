@@ -49,22 +49,36 @@ const ACTION_COLORS: Record<string, { bg: string; color: string }> = {
 
 const ALL_ACTIONS = ["creer", "modifier", "supprimer", "suspendre", "reactiver", "inviter", "revoquer"];
 
+const DATE_RANGES = [
+  { value: "", label: "Toutes les dates" },
+  { value: "today", label: "Aujourd'hui" },
+  { value: "week", label: "Cette semaine" },
+  { value: "month", label: "Ce mois" },
+  { value: "30d", label: "30 derniers jours" },
+];
+
 export default function GestionJournalClient({
   logs,
   selectedAction,
+  selectedDate,
 }: {
   logs: LogEntry[];
   selectedAction: string;
+  selectedDate: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const [action, setAction] = useState(selectedAction);
+  const [dateRange, setDateRange] = useState(selectedDate);
 
-  function applyFilter(newAction: string) {
+  function applyFilters(newAction: string, newDate: string) {
     const params = new URLSearchParams();
     if (newAction) params.set("action", newAction);
+    if (newDate) params.set("date", newDate);
     router.push(`${pathname}?${params.toString()}`);
   }
+
+  const hasFilters = action || dateRange;
 
   return (
     <div>
@@ -74,10 +88,10 @@ export default function GestionJournalClient({
         border: "1px solid #e2e8f0", marginBottom: 20,
         display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center",
       }}>
-        <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Filtrer par action :</label>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {/* Action filter pills */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", flex: 1 }}>
           <button
-            onClick={() => { setAction(""); applyFilter(""); }}
+            onClick={() => { setAction(""); applyFilters("", dateRange); }}
             style={{
               padding: "4px 12px", borderRadius: 6, fontSize: 12, cursor: "pointer",
               border: action === "" ? "none" : "1.5px solid #e2e8f0",
@@ -91,7 +105,7 @@ export default function GestionJournalClient({
           {ALL_ACTIONS.map((a) => (
             <button
               key={a}
-              onClick={() => { setAction(a); applyFilter(a); }}
+              onClick={() => { setAction(a); applyFilters(a, dateRange); }}
               style={{
                 padding: "4px 12px", borderRadius: 6, fontSize: 12, cursor: "pointer",
                 border: action === a ? "none" : "1.5px solid #e2e8f0",
@@ -104,7 +118,31 @@ export default function GestionJournalClient({
             </button>
           ))}
         </div>
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "#94a3b8" }}>
+
+        {/* Date range filter */}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Période :</label>
+          <select
+            value={dateRange}
+            onChange={(e) => { setDateRange(e.target.value); applyFilters(action, e.target.value); }}
+            style={{ fontSize: 13, padding: "5px 10px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "white" }}
+          >
+            {DATE_RANGES.map((dr) => (
+              <option key={dr.value} value={dr.value}>{dr.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {hasFilters && (
+          <button
+            onClick={() => { setAction(""); setDateRange(""); applyFilters("", ""); }}
+            style={{ fontSize: 12, padding: "5px 12px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "#f8fafc", color: "#64748b", cursor: "pointer" }}
+          >
+            Réinitialiser
+          </button>
+        )}
+
+        <span style={{ fontSize: 12, color: "#94a3b8", flexShrink: 0 }}>
           {logs.length} entrée{logs.length !== 1 ? "s" : ""}
         </span>
       </div>

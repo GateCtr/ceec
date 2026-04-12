@@ -3,6 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, isPlatformAdmin } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
+import {
+  sendContentApprovedEmail,
+  sendContentRejectedEmail,
+  getChurchStaffEmails,
+} from "@/lib/email";
 
 export async function PATCH(
   req: NextRequest,
@@ -99,6 +104,39 @@ export async function PATCH(
       egliseId: egliseId ?? undefined,
       egliseNom,
     });
+
+    // Email notification (fire and forget)
+    if (egliseId && entiteLabel && egliseNom) {
+      void (async () => {
+        try {
+          let recipientEmails: string[] = [];
+
+          if (type === "annonce") {
+            const annonce = await prisma.annonce.findUnique({
+              where: { id },
+              include: { auteur: { select: { email: true } } },
+            });
+            if (annonce?.auteur?.email) {
+              recipientEmails = [annonce.auteur.email];
+            } else {
+              recipientEmails = await getChurchStaffEmails(egliseId);
+            }
+          } else {
+            recipientEmails = await getChurchStaffEmails(egliseId);
+          }
+
+          for (const email of recipientEmails) {
+            if (estApprouve) {
+              await sendContentApprovedEmail(email, entiteLabel!, type, egliseNom!);
+            } else {
+              await sendContentRejectedEmail(email, entiteLabel!, type, egliseNom!, newCommentaire);
+            }
+          }
+        } catch (err) {
+          console.error("Email notification error:", err);
+        }
+      })();
+    }
 
     return NextResponse.json({ ok: true, statut: newStatut });
   } catch {

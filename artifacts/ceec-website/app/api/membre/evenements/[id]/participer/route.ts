@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { sendParticipationConfirmationEmail } from "@/lib/email";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,6 +40,19 @@ export async function POST(_req: NextRequest, { params }: Props) {
       update: {},
       create: { membreId: membre.id, evenementId },
     });
+
+    // Confirmation email to member (fire and forget)
+    if (membre.email) {
+      const egliseNom = (await prisma.eglise.findUnique({ where: { id: eglise.id }, select: { nom: true } }))?.nom;
+      void sendParticipationConfirmationEmail(
+        membre.email,
+        membre.prenom,
+        evt.titre,
+        evt.dateDebut,
+        evt.lieu,
+        egliseNom
+      ).catch((err) => console.error("Email confirmation error:", err));
+    }
 
     return NextResponse.json({ success: true, participationId: participation.id });
   } catch {

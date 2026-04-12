@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { sendNewMemberEmail, getChurchStaffEmails } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +45,13 @@ export async function POST(req: NextRequest) {
       where: { nom: "fidele" },
     });
 
+    let isNewMember = false;
     await prisma.$transaction(async (tx) => {
+      const existing = await tx.membre.findFirst({
+        where: { clerkUserId: userId, egliseId },
+      });
+      isNewMember = !existing;
+
       await tx.membre.upsert({
         where: {
           membre_clerk_eglise_unique: { clerkUserId: userId, egliseId },
@@ -79,6 +86,21 @@ export async function POST(req: NextRequest) {
         });
       }
     });
+
+    // Notify church staff when a genuinely new member joins (fire and forget)
+    if (isNewMember && body.email) {
+      const egliseWithNom = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
+      void (async () => {
+        try {
+          const staffEmails = await getChurchStaffEmails(egliseId);
+          if (staffEmails.length > 0 && egliseWithNom) {
+            await sendNewMemberEmail(staffEmails, body.prenom ?? "", body.nom ?? "", body.email, egliseWithNom.nom);
+          }
+        } catch (err) {
+          console.error("Email notification error:", err);
+        }
+      })();
+    }
 
     return NextResponse.json({ success: true });
   } catch {

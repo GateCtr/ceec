@@ -1,3 +1,5 @@
+import { prisma } from "@/lib/db";
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ??
   (process.env.REPLIT_DEV_DOMAIN
@@ -8,74 +10,30 @@ function buildInviteLink(token: string) {
   return `${BASE_URL}/setup/${token}`;
 }
 
-function inviteEmailHtml(egliseNom: string, inviteLink: string): string {
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif">
-  <div style="max-width:580px;margin:40px auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
-    <div style="background:linear-gradient(135deg,#1e3a8a,#1e2d6b);padding:36px 40px;text-align:center">
-      <div style="font-size:13px;color:#fcd34d;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">CEEC — Communauté Évangélique</div>
-      <h1 style="color:white;margin:0;font-size:26px;font-weight:800">Invitation à rejoindre la plateforme</h1>
-    </div>
-    <div style="padding:36px 40px">
-      <p style="color:#374151;font-size:16px;line-height:1.6;margin-top:0">Bonjour,</p>
-      <p style="color:#374151;font-size:16px;line-height:1.6">
-        Vous avez été désigné(e) comme administrateur principal de l&apos;église
-        <strong style="color:#1e3a8a">${egliseNom}</strong> sur la plateforme CEEC.
-      </p>
-      <p style="color:#374151;font-size:16px;line-height:1.6">
-        Cliquez sur le bouton ci-dessous pour créer votre compte et configurer votre espace de gestion d&apos;église.
-      </p>
-      <div style="text-align:center;margin:36px 0">
-        <a href="${inviteLink}"
-          style="display:inline-block;background:#1e3a8a;color:white;padding:16px 40px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none">
-          Configurer mon espace →
-        </a>
-      </div>
-      <p style="color:#94a3b8;font-size:13px;line-height:1.6">
-        Ce lien est valable 7 jours. Si vous n&apos;avez pas demandé cette invitation, vous pouvez ignorer cet email.
-      </p>
-      <hr style="border:none;border-top:1px solid #f1f5f9;margin:28px 0">
-      <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">
-        Lien direct : <a href="${inviteLink}" style="color:#1e3a8a">${inviteLink}</a>
-      </p>
-    </div>
-    <div style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #e2e8f0">
-      <p style="color:#94a3b8;font-size:12px;margin:0">CEEC — Communauté des Églises Évangéliques du Congo</p>
-    </div>
-  </div>
-</body>
-</html>`;
-}
+// ─── Shared send helper ───────────────────────────────────────────────────────
 
-export async function sendInviteEmail(
-  to: string,
-  token: string,
-  egliseNom: string
+async function sendEmail(
+  to: string | string[],
+  subject: string,
+  html: string
 ): Promise<{ success: boolean; error?: string }> {
-  const inviteLink = buildInviteLink(token);
-  const subject = `Invitation — Configurez l'espace de ${egliseNom} sur CEEC`;
-  const html = inviteEmailHtml(egliseNom, inviteLink);
-
   const apiKey = process.env.RESEND_API_KEY;
+  const toList = Array.isArray(to) ? to.join(", ") : to;
 
   if (!apiKey) {
-    console.log("=== EMAIL (Resend non configuré — affichage console) ===");
-    console.log(`À : ${to}`);
+    console.log("=== EMAIL (Resend non configuré — console) ===");
+    console.log(`À : ${toList}`);
     console.log(`Objet : ${subject}`);
-    console.log(`Lien d'invitation : ${inviteLink}`);
-    console.log("=========================================================");
+    console.log("================================================");
     return { success: true };
   }
 
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-
     const { error } = await resend.emails.send({
       from: "CEEC Platform <noreply@ceec.cd>",
-      to,
+      to: Array.isArray(to) ? to : [to],
       subject,
       html,
     });
@@ -90,4 +48,217 @@ export async function sendInviteEmail(
     console.error("Email send failed:", err);
     return { success: false, error: String(err) };
   }
+}
+
+// ─── Base HTML wrapper ────────────────────────────────────────────────────────
+
+function emailWrapper(title: string, body: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif">
+  <div style="max-width:580px;margin:40px auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:linear-gradient(135deg,#1e3a8a,#1e2d6b);padding:32px 40px;text-align:center">
+      <div style="font-size:12px;color:#fcd34d;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">CEEC — Communauté Évangélique</div>
+      <h1 style="color:white;margin:0;font-size:22px;font-weight:800;line-height:1.3">${title}</h1>
+    </div>
+    <div style="padding:32px 40px">${body}</div>
+    <div style="background:#f8fafc;padding:18px 40px;text-align:center;border-top:1px solid #e2e8f0">
+      <p style="color:#94a3b8;font-size:12px;margin:0">CEEC — Communauté des Églises Évangéliques du Congo</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function p(text: string) {
+  return `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">${text}</p>`;
+}
+
+function callout(color: string, bg: string, text: string) {
+  return `<div style="background:${bg};border-left:4px solid ${color};border-radius:8px;padding:14px 18px;margin:20px 0"><p style="color:${color};font-size:14px;line-height:1.6;margin:0">${text}</p></div>`;
+}
+
+function cta(href: string, label: string) {
+  return `<div style="text-align:center;margin:28px 0"><a href="${href}" style="display:inline-block;background:#1e3a8a;color:white;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none">${label} →</a></div>`;
+}
+
+// ─── Helpers : find recipients ────────────────────────────────────────────────
+
+export async function getChurchStaffEmails(egliseId: number): Promise<string[]> {
+  const staffRoles = ["admin_eglise", "pasteur", "secretaire"];
+  const userRoles = await prisma.userRole.findMany({
+    where: { egliseId, role: { nom: { in: staffRoles } } },
+    select: { clerkUserId: true },
+  });
+  if (userRoles.length === 0) return [];
+
+  const clerkIds = [...new Set(userRoles.map((ur) => ur.clerkUserId))];
+  const membres = await prisma.membre.findMany({
+    where: { clerkUserId: { in: clerkIds }, egliseId },
+    select: { email: true },
+  });
+  return membres.map((m) => m.email).filter(Boolean);
+}
+
+export async function getSuperAdminEmails(): Promise<string[]> {
+  try {
+    const userRoles = await prisma.userRole.findMany({
+      where: { role: { nom: "super_admin" }, egliseId: null },
+      select: { clerkUserId: true },
+    });
+    if (userRoles.length === 0) return [];
+
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const clerk = await clerkClient();
+    const emails: string[] = [];
+    for (const ur of userRoles) {
+      try {
+        const user = await clerk.users.getUser(ur.clerkUserId);
+        const email = user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress;
+        if (email) emails.push(email);
+      } catch {
+        // skip
+      }
+    }
+    return emails;
+  } catch {
+    return [];
+  }
+}
+
+// ─── Template 1 : Invitation (admin setup) ───────────────────────────────────
+
+export async function sendInviteEmail(
+  to: string,
+  token: string,
+  egliseNom: string
+): Promise<{ success: boolean; error?: string }> {
+  const inviteLink = buildInviteLink(token);
+  const html = emailWrapper(
+    "Invitation à rejoindre la plateforme",
+    p("Bonjour,") +
+    p(`Vous avez été désigné(e) comme administrateur principal de l'église <strong style="color:#1e3a8a">${egliseNom}</strong> sur la plateforme CEEC.`) +
+    p("Cliquez sur le bouton ci-dessous pour créer votre compte et configurer votre espace de gestion d'église.") +
+    cta(inviteLink, "Configurer mon espace") +
+    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.</p>
+     <hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0">
+     <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">Lien direct : <a href="${inviteLink}" style="color:#1e3a8a">${inviteLink}</a></p>`
+  );
+  return sendEmail(to, `Invitation — Configurez l'espace de ${egliseNom} sur CEEC`, html);
+}
+
+// ─── Template 2 : Contenu approuvé ───────────────────────────────────────────
+
+export async function sendContentApprovedEmail(
+  to: string,
+  contenuTitre: string,
+  type: "annonce" | "evenement",
+  egliseNom: string
+): Promise<{ success: boolean; error?: string }> {
+  const label = type === "annonce" ? "annonce" : "événement";
+  const html = emailWrapper(
+    `Votre ${label} a été approuvé(e) ✓`,
+    p("Bonjour,") +
+    p(`Bonne nouvelle ! Votre ${label} <strong style="color:#1e3a8a">${contenuTitre}</strong> pour l'église <strong>${egliseNom}</strong> a été <strong style="color:#16a34a">approuvé(e)</strong> par l'administration.`) +
+    callout("#16a34a", "#dcfce7", `Votre ${label} est maintenant visible sur la page publique de votre église.`) +
+    p("Merci pour votre contribution à la vie de votre communauté.")
+  );
+  return sendEmail(to, `✓ ${label.charAt(0).toUpperCase() + label.slice(1)} approuvé(e) — ${egliseNom}`, html);
+}
+
+// ─── Template 3 : Contenu rejeté ─────────────────────────────────────────────
+
+export async function sendContentRejectedEmail(
+  to: string,
+  contenuTitre: string,
+  type: "annonce" | "evenement",
+  egliseNom: string,
+  commentaire?: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const label = type === "annonce" ? "annonce" : "événement";
+  const html = emailWrapper(
+    `Votre ${label} n'a pas été publié(e)`,
+    p("Bonjour,") +
+    p(`Votre ${label} <strong style="color:#1e3a8a">${contenuTitre}</strong> pour l'église <strong>${egliseNom}</strong> a été <strong style="color:#dc2626">refusé(e)</strong> par l'administration.`) +
+    (commentaire ? callout("#b91c1c", "#fee2e2", `<strong>Motif du rejet :</strong> ${commentaire}`) : "") +
+    p("Vous pouvez modifier votre contenu et le resoumettre depuis votre espace de gestion.") +
+    p("Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administration.")
+  );
+  return sendEmail(to, `Votre ${label} n'a pas été publié(e) — ${egliseNom}`, html);
+}
+
+// ─── Template 4 : Nouveau membre (notif au staff) ────────────────────────────
+
+export async function sendNewMemberEmail(
+  to: string | string[],
+  membrePrenom: string,
+  membreNom: string,
+  membreEmail: string,
+  egliseNom: string
+): Promise<{ success: boolean; error?: string }> {
+  const toArr = Array.isArray(to) ? to : [to];
+  if (toArr.length === 0) return { success: true };
+  const html = emailWrapper(
+    `Nouveau membre — ${egliseNom}`,
+    p("Bonjour,") +
+    p(`Un nouveau fidèle vient de rejoindre l'église <strong style="color:#1e3a8a">${egliseNom}</strong> sur la plateforme CEEC.`) +
+    callout("#1e3a8a", "#eff6ff",
+      `<strong>Nom :</strong> ${membrePrenom} ${membreNom}<br><strong>Email :</strong> <a href="mailto:${membreEmail}" style="color:#1e3a8a">${membreEmail}</a>`
+    ) +
+    p("Vous pouvez consulter la liste complète de vos membres depuis votre espace de gestion.")
+  );
+  return sendEmail(toArr, `Nouveau membre — ${egliseNom}`, html);
+}
+
+// ─── Template 5 : Confirmation inscription événement (pour le membre) ─────────
+
+export async function sendParticipationConfirmationEmail(
+  to: string,
+  membrePrenom: string,
+  evenementTitre: string,
+  dateDebut: Date,
+  lieu?: string | null,
+  egliseNom?: string
+): Promise<{ success: boolean; error?: string }> {
+  const dateStr = dateDebut.toLocaleDateString("fr-FR", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+  const heureStr = dateDebut.toLocaleTimeString("fr-FR", {
+    hour: "2-digit", minute: "2-digit",
+  });
+  const html = emailWrapper(
+    "Inscription confirmée ✓",
+    p(`Bonjour ${membrePrenom},`) +
+    p(`Votre inscription à l'événement <strong style="color:#1e3a8a">${evenementTitre}</strong>${egliseNom ? ` (${egliseNom})` : ""} est bien enregistrée.`) +
+    callout("#1e3a8a", "#eff6ff",
+      `📅 <strong>Date :</strong> ${dateStr} à ${heureStr}` +
+      (lieu ? `<br>📍 <strong>Lieu :</strong> ${lieu}` : "")
+    ) +
+    p("Nous avons hâte de vous accueillir ! Si vous ne pouvez plus participer, annulez depuis votre espace membre.")
+  );
+  return sendEmail(to, `Inscription confirmée — ${evenementTitre}`, html);
+}
+
+// ─── Template 6 : Nouvelle église créée (pour les super admins) ──────────────
+
+export async function sendNewChurchNotificationEmail(
+  to: string | string[],
+  egliseNom: string,
+  ville: string,
+  emailAdmin: string
+): Promise<{ success: boolean; error?: string }> {
+  const toArr = Array.isArray(to) ? to : [to];
+  if (toArr.length === 0) return { success: true };
+  const html = emailWrapper(
+    "Nouvelle église — En attente de validation",
+    p("Bonjour,") +
+    p("Une nouvelle église vient d'être créée sur la plateforme CEEC et est en attente de validation.") +
+    callout("#c59b2e", "#fefce8",
+      `<strong>Nom :</strong> ${egliseNom}<br><strong>Ville :</strong> ${ville}<br><strong>Email admin :</strong> ${emailAdmin}`
+    ) +
+    p("Un email d'invitation a été envoyé à l'administrateur désigné. L'église est au statut <em>En attente</em>.") +
+    cta(`${BASE_URL}/admin/eglises`, "Voir les églises")
+  );
+  return sendEmail(toArr, `Nouvelle église — ${egliseNom} (${ville})`, html);
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
-import { sendInviteEmail } from "@/lib/email";
+import { sendInviteEmail, sendNewChurchNotificationEmail, getSuperAdminEmails } from "@/lib/email";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 function slugify(text: string): string {
@@ -98,6 +98,18 @@ export async function POST(req: NextRequest) {
     if (!emailResult.success) {
       console.warn("Email non envoyé :", emailResult.error);
     }
+
+    // Notify super admins (fire and forget)
+    void (async () => {
+      try {
+        const superAdminEmails = await getSuperAdminEmails();
+        if (superAdminEmails.length > 0) {
+          await sendNewChurchNotificationEmail(superAdminEmails, nom, ville, emailAdmin);
+        }
+      } catch (err) {
+        console.error("Super admin notification error:", err);
+      }
+    })();
 
     const acteurNom = await getActeurNom(userId);
     await logActivity({

@@ -35,7 +35,7 @@ export default async function ChurchAnnoncesPage({
 
   const where = {
     egliseId: eglise.id,
-    statutContenu: "publie",
+    statutContenu: "publie" as const,
     ...(categorie ? { categorie } : {}),
   };
 
@@ -48,7 +48,7 @@ export default async function ChurchAnnoncesPage({
       take: ITEMS_PER_PAGE,
     }),
     prisma.annonce.findMany({
-      where: { egliseId: eglise.id, statutContenu: "publie", categorie: { not: null } },
+      where: { egliseId: eglise.id, statutContenu: "publie" as const, categorie: { not: null } },
       select: { categorie: true },
       distinct: ["categorie"],
     }),

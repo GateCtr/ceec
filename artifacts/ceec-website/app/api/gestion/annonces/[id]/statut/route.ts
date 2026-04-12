@@ -54,7 +54,7 @@ export async function PATCH(
       }
     }
 
-    const statutMap: Record<StatutAction, { statutContenu: string; publie: boolean }> = {
+    const statutMap: Record<StatutAction, { statutContenu: "en_attente" | "brouillon" | "publie"; publie: boolean }> = {
       soumettre:  { statutContenu: "en_attente", publie: false },
       depublier:  { statutContenu: "brouillon",  publie: false },
       publier:    { statutContenu: "publie",      publie: true  },

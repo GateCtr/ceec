@@ -31,10 +31,10 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
   ) {
     setLoading(id);
     try {
-      const res = await fetch("/api/admin/contenus/valider", {
+      const res = await fetch(`/api/admin/contenus/${id}/valider`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, id, action, commentaire: comment }),
+        body: JSON.stringify({ type, action, commentaire: comment }),
       });
       if (!res.ok) {
         const data = await res.json();

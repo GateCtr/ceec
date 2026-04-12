@@ -6,7 +6,7 @@ import { canManageContent } from "@/lib/auth/rbac";
 export async function GET() {
   try {
     const all = await prisma.evenement.findMany({
-      where: { publie: true },
+      where: { statutContenu: "publie" },
       orderBy: { dateDebut: "asc" },
     });
     return NextResponse.json(all);
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         lieu: body.lieu ?? null,
         egliseId,
         publie: body.publie ?? true,
+        statutContenu: body.publie === false ? "brouillon" : "publie",
         imageUrl: body.imageUrl ?? null,
       },
     });

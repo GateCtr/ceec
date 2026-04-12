@@ -6,7 +6,7 @@ import { canManageContent } from "@/lib/auth/rbac";
 export async function GET() {
   try {
     const all = await prisma.annonce.findMany({
-      where: { publie: true },
+      where: { statutContenu: "publie" },
       orderBy: { datePublication: "desc" },
     });
     return NextResponse.json(all);
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         egliseId,
         priorite: body.priorite ?? "normale",
         publie: body.publie ?? true,
+        statutContenu: body.publie === false ? "brouillon" : "publie",
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
       },
     });

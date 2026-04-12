@@ -6,6 +6,13 @@ datasource db {
   provider = "postgresql"
 }
 
+enum StatutContenu {
+  brouillon
+  en_attente
+  publie
+  rejete
+}
+
 model Eglise {
   id           Int           @id @default(autoincrement())
   nom          String        @db.VarChar(255)
@@ -140,7 +147,7 @@ model Annonce {
   dateExpiration   DateTime? @map("date_expiration")
   priorite         String    @default("normale") @db.VarChar(20)
   publie           Boolean   @default(true)
-  statutContenu    String    @default("publie") @map("statut_contenu") @db.VarChar(20)
+  statutContenu    StatutContenu @default(publie) @map("statut_contenu")
   commentaireRejet String?   @map("commentaire_rejet")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -163,7 +170,7 @@ model Evenement {
   egliseId         Int?      @map("paroisse_id")
   imageUrl         String?   @map("image_url")
   publie           Boolean   @default(true)
-  statutContenu    String    @default("publie") @map("statut_contenu") @db.VarChar(20)
+  statutContenu    StatutContenu @default(publie) @map("statut_contenu")
   commentaireRejet String?   @map("commentaire_rejet")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")

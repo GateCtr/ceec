@@ -16,11 +16,14 @@ interface Props {
   items: ContenuEnAttente[];
 }
 
+function itemKey(type: "annonce" | "evenement", id: number) {
+  return `${type}-${id}`;
+}
+
 export default function AdminValidationQueue({ items: initialItems }: Props) {
   const [items, setItems] = useState<ContenuEnAttente[]>(initialItems);
-  const [loading, setLoading] = useState<number | null>(null);
-  const [rejectId, setRejectId] = useState<number | null>(null);
-  const [rejectType, setRejectType] = useState<"annonce" | "evenement">("annonce");
+  const [loading, setLoading] = useState<string | null>(null);
+  const [rejectKey, setRejectKey] = useState<string | null>(null);
   const [commentaire, setCommentaire] = useState("");
 
   async function handleAction(
@@ -29,7 +32,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
     action: "approuver" | "rejeter",
     comment?: string
   ) {
-    setLoading(id);
+    setLoading(itemKey(type, id));
     try {
       const res = await fetch(`/api/admin/contenus/${id}/valider`, {
         method: "PATCH",
@@ -42,7 +45,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
         return;
       }
       setItems((prev) => prev.filter((item) => item.id !== id || item.type !== type));
-      setRejectId(null);
+      setRejectKey(null);
       setCommentaire("");
     } finally {
       setLoading(null);
@@ -61,7 +64,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {items.map((item) => {
-        const isLoading = loading === item.id;
+        const isLoading = loading === itemKey(item.type, item.id);
         const typeLabel = item.type === "annonce" ? "Annonce" : "Événement";
         const typeColor = item.type === "annonce" ? { bg: "#eff6ff", color: "#1e40af" } : { bg: "#f0fdf4", color: "#15803d" };
 
@@ -96,7 +99,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
               </div>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
                 <button
-                  onClick={() => { setRejectId(item.id); setRejectType(item.type); setCommentaire(""); }}
+                  onClick={() => { setRejectKey(itemKey(item.type, item.id)); setCommentaire(""); }}
                   disabled={isLoading}
                   style={{ padding: "7px 16px", borderRadius: 7, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
                 >
@@ -112,7 +115,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
               </div>
             </div>
 
-            {rejectId === item.id && rejectType === item.type && (
+            {rejectKey === itemKey(item.type, item.id) && (
               <div style={{ marginTop: 14, padding: "1rem", background: "#fff7ed", borderRadius: 10, border: "1px solid #fed7aa" }}>
                 <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>
                   Motif du rejet (facultatif)
@@ -126,7 +129,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
                 />
                 <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
                   <button
-                    onClick={() => { setRejectId(null); setCommentaire(""); }}
+                    onClick={() => { setRejectKey(null); setCommentaire(""); }}
                     style={{ padding: "7px 16px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
                   >
                     Annuler

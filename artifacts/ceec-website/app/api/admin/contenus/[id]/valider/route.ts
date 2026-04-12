@@ -47,6 +47,11 @@ export async function PATCH(
     let entiteLabel: string | undefined;
 
     if (type === "annonce") {
+      const existing = await prisma.annonce.findUnique({ where: { id }, select: { statutContenu: true } });
+      if (!existing) return NextResponse.json({ error: "Annonce introuvable" }, { status: 404 });
+      if (existing.statutContenu !== "en_attente") {
+        return NextResponse.json({ error: "Ce contenu n'est pas en attente de validation" }, { status: 409 });
+      }
       const annonce = await prisma.annonce.update({
         where: { id },
         data: {
@@ -62,6 +67,11 @@ export async function PATCH(
         egliseNom = eg?.nom;
       }
     } else {
+      const existing = await prisma.evenement.findUnique({ where: { id }, select: { statutContenu: true } });
+      if (!existing) return NextResponse.json({ error: "Événement introuvable" }, { status: 404 });
+      if (existing.statutContenu !== "en_attente") {
+        return NextResponse.json({ error: "Ce contenu n'est pas en attente de validation" }, { status: 409 });
+      }
       const evt = await prisma.evenement.update({
         where: { id },
         data: {

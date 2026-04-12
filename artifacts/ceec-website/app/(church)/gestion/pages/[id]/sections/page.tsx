@@ -33,10 +33,13 @@ export default async function GestionPageSectionsPage({ params }: Props) {
   const pageId = parseInt(id, 10);
   if (isNaN(pageId)) notFound();
 
-  const page = await prisma.pageEglise.findFirst({
-    where: { id: pageId, egliseId },
-    include: { sections: { orderBy: { ordre: "asc" } } },
-  });
+  const [page, eglise] = await Promise.all([
+    prisma.pageEglise.findFirst({
+      where: { id: pageId, egliseId },
+      include: { sections: { orderBy: { ordre: "asc" } } },
+    }),
+    prisma.eglise.findUnique({ where: { id: egliseId }, select: { slug: true } }),
+  ]);
   if (!page) notFound();
 
   return (
@@ -48,6 +51,7 @@ export default async function GestionPageSectionsPage({ params }: Props) {
         ← Retour aux pages
       </Link>
       <GestionPageDetailClient
+        egliseSlug={eglise?.slug ?? ""}
         page={{
           ...page,
           sections: page.sections.map((s) => ({

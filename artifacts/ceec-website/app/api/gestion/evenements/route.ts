@@ -41,7 +41,11 @@ export async function POST(req: NextRequest) {
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
+    const [pCreerEvt, pCreerAnnonce] = await Promise.all([
+      hasPermission(userId, "eglise_creer_evenement", egliseId),
+      hasPermission(userId, "eglise_creer_annonce", egliseId),
+    ]);
+    const allowed = superAdmin || pCreerEvt || pCreerAnnonce;
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();

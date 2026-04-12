@@ -19,7 +19,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_evenements", egliseId);
+    const [pGerer, pCreerEvt, pCreerAnnonce] = await Promise.all([
+      hasPermission(userId, "eglise_gerer_evenements", egliseId),
+      hasPermission(userId, "eglise_creer_evenement", egliseId),
+      hasPermission(userId, "eglise_creer_annonce", egliseId),
+    ]);
+    const allowed = superAdmin || pGerer || pCreerEvt || pCreerAnnonce;
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { id } = await params;
@@ -60,7 +65,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_evenements", egliseId);
+    const [pGerer2, pCreerEvt2, pCreerAnnonce2] = await Promise.all([
+      hasPermission(userId, "eglise_gerer_evenements", egliseId),
+      hasPermission(userId, "eglise_creer_evenement", egliseId),
+      hasPermission(userId, "eglise_creer_annonce", egliseId),
+    ]);
+    const allowed = superAdmin || pGerer2 || pCreerEvt2 || pCreerAnnonce2;
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { id } = await params;

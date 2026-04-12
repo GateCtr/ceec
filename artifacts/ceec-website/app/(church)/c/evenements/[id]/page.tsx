@@ -1,8 +1,10 @@
+import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/index";
+import ParticipationButton from "@/components/church/ParticipationButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,6 +30,8 @@ export default async function EvenementDetailPage({ params }: Props) {
   const evtId = parseInt(id, 10);
   if (isNaN(evtId)) notFound();
 
+  const { userId } = await auth();
+
   const eglise = await prisma.eglise.findUnique({ where: { slug } });
   if (!eglise) notFound();
 
@@ -38,12 +42,33 @@ export default async function EvenementDetailPage({ params }: Props) {
 
   const isUpcoming = new Date(evt.dateDebut) >= new Date();
 
+  // Check membership and participation in parallel
+  const [membre, participation] = await Promise.all([
+    userId
+      ? prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId: eglise.id }, select: { id: true } })
+      : Promise.resolve(null),
+    userId
+      ? prisma.participation.findFirst({
+          where: {
+            evenementId: evtId,
+            membre: { clerkUserId: userId, egliseId: eglise.id },
+          },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  const isMembre = !!membre;
+  const initialParticipe = !!participation;
+
   // Other upcoming events
   const autres = await prisma.evenement.findMany({
     where: { egliseId: eglise.id, statutContenu: "publie", id: { not: evtId }, dateDebut: { gte: new Date() } },
     orderBy: { dateDebut: "asc" },
     take: 3,
   });
+
+  // Count participants
+  const nbParticipants = await prisma.participation.count({ where: { evenementId: evtId } });
 
   return (
     <>
@@ -80,6 +105,9 @@ export default async function EvenementDetailPage({ params }: Props) {
               </span>
             )}
             {evt.lieu && <span>📍 {evt.lieu}</span>}
+            {nbParticipants > 0 && (
+              <span>🙋 {nbParticipants} participant{nbParticipants > 1 ? "s" : ""}</span>
+            )}
           </div>
         </div>
       </section>
@@ -114,6 +142,20 @@ export default async function EvenementDetailPage({ params }: Props) {
                   </div>
                   {evt.lieu && <div>📍 {evt.lieu}</div>}
                   {evt.categorie && <div>🏷️ {evt.categorie}</div>}
+                  {nbParticipants > 0 && <div>🙋 {nbParticipants} participant{nbParticipants > 1 ? "s" : ""}</div>}
+
+                  {/* Participation button — only for upcoming events */}
+                  {isUpcoming && (
+                    <div style={{ marginTop: 8 }}>
+                      <ParticipationButton
+                        evenementId={evtId}
+                        initialParticipe={initialParticipe}
+                        isSignedIn={!!userId}
+                        isMembre={isMembre}
+                      />
+                    </div>
+                  )}
+
                   {evt.lienInscription && (
                     <a
                       href={evt.lienInscription}

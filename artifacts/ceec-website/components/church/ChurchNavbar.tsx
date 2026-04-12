@@ -129,10 +129,11 @@ export default function ChurchNavbar({
 
           {isSignedIn ? (
             <>
-              <Link href="/gestion" style={{
+              <Link href="/c/mon-espace" style={{
                 padding: "6px 12px", borderRadius: 7, fontSize: 14,
-                background: pathname.startsWith("/gestion") ? "rgba(255,255,255,0.2)" : "transparent",
-                color: "white", textDecoration: "none",
+                background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.2)" : "transparent",
+                borderBottom: pathname === "/c/mon-espace" ? `2px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "2px solid transparent",
+                color: "white", textDecoration: "none", fontWeight: pathname === "/c/mon-espace" ? 600 : 400,
               }}>
                 Mon espace
               </Link>
@@ -193,9 +194,11 @@ export default function ChurchNavbar({
             </Link>
           ))}
           {isSignedIn ? (
-            <Link href="/gestion" onClick={() => setMenuOpen(false)} style={{
+            <Link href="/c/mon-espace" onClick={() => setMenuOpen(false)} style={{
               display: "block", padding: "12px 14px", borderRadius: 8,
               color: "white", fontSize: 15, marginBottom: 4, textDecoration: "none",
+              background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.15)" : "transparent",
+              borderLeft: pathname === "/c/mon-espace" ? `3px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "3px solid transparent",
             }}>
               Mon espace
             </Link>

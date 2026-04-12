@@ -116,21 +116,22 @@ model LiveStream {
 }
 
 model Membre {
-  id                Int       @id @default(autoincrement())
-  clerkUserId       String    @map("clerk_user_id") @db.VarChar(255)
-  nom               String    @db.VarChar(100)
-  prenom            String    @db.VarChar(100)
-  email             String    @db.VarChar(255)
-  telephone         String?   @db.VarChar(20)
-  egliseId          Int?      @map("paroisse_id")
-  role              String    @default("fidele") @db.VarChar(20)
-  dateAdhesion      DateTime? @map("date_adhesion") @db.Date
-  statut            String    @default("actif") @db.VarChar(20)
-  suspendedByChurch Boolean   @default(false) @map("suspended_by_church")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+  id                Int             @id @default(autoincrement())
+  clerkUserId       String          @map("clerk_user_id") @db.VarChar(255)
+  nom               String          @db.VarChar(100)
+  prenom            String          @db.VarChar(100)
+  email             String          @db.VarChar(255)
+  telephone         String?         @db.VarChar(20)
+  egliseId          Int?            @map("paroisse_id")
+  role              String          @default("fidele") @db.VarChar(20)
+  dateAdhesion      DateTime?       @map("date_adhesion") @db.Date
+  statut            String          @default("actif") @db.VarChar(20)
+  suspendedByChurch Boolean         @default(false) @map("suspended_by_church")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @default(now()) @updatedAt @map("updated_at")
   annonces          Annonce[]
-  eglise            Eglise?   @relation(fields: [egliseId], references: [id])
+  eglise            Eglise?         @relation(fields: [egliseId], references: [id])
+  participations    Participation[]
 
   @@unique([clerkUserId, egliseId], name: "membre_clerk_eglise_unique")
   @@index([clerkUserId])
@@ -161,25 +162,40 @@ model Annonce {
 }
 
 model Evenement {
-  id               Int       @id @default(autoincrement())
-  titre            String    @db.VarChar(255)
+  id               Int             @id @default(autoincrement())
+  titre            String          @db.VarChar(255)
   description      String?
-  dateDebut        DateTime  @map("date_debut")
-  dateFin          DateTime? @map("date_fin")
-  lieu             String?   @db.VarChar(255)
-  egliseId         Int?      @map("paroisse_id")
-  imageUrl         String?   @map("image_url")
-  publie           Boolean   @default(true)
-  statutContenu    StatutContenu @default(publie) @map("statut_contenu")
-  commentaireRejet String?   @map("commentaire_rejet")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
-  categorie        String?   @db.VarChar(100)
-  lienInscription  String?   @map("lien_inscription") @db.VarChar(500)
-  eglise           Eglise?   @relation(fields: [egliseId], references: [id])
+  dateDebut        DateTime        @map("date_debut")
+  dateFin          DateTime?       @map("date_fin")
+  lieu             String?         @db.VarChar(255)
+  egliseId         Int?            @map("paroisse_id")
+  imageUrl         String?         @map("image_url")
+  publie           Boolean         @default(true)
+  statutContenu    StatutContenu   @default(publie) @map("statut_contenu")
+  commentaireRejet String?         @map("commentaire_rejet")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at")
+  categorie        String?         @db.VarChar(100)
+  lienInscription  String?         @map("lien_inscription") @db.VarChar(500)
+  eglise           Eglise?         @relation(fields: [egliseId], references: [id])
+  participations   Participation[]
 
   @@index([egliseId, statutContenu])
   @@map("evenements")
+}
+
+model Participation {
+  id          Int       @id @default(autoincrement())
+  membreId    Int       @map("membre_id")
+  evenementId Int       @map("evenement_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  membre      Membre    @relation(fields: [membreId], references: [id], onDelete: Cascade)
+  evenement   Evenement @relation(fields: [evenementId], references: [id], onDelete: Cascade)
+
+  @@unique([membreId, evenementId])
+  @@index([membreId])
+  @@index([evenementId])
+  @@map("participations")
 }
 
 model Permission {

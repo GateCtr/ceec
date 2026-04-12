@@ -7,6 +7,7 @@ import ImagePicker from "@/components/gestion/ImagePicker";
 interface Props {
   initialEvenements: Evenement[];
   canAutoPublish: boolean;
+  egliseId: number;
 }
 
 const statutLabels: Record<string, { label: string; bg: string; color: string }> = {
@@ -35,7 +36,7 @@ const emptyForm: FormData = {
   imageUrl: "", categorie: "", lienInscription: "",
 };
 
-export default function GestionEvenementsClient({ initialEvenements, canAutoPublish }: Props) {
+export default function GestionEvenementsClient({ initialEvenements, canAutoPublish, egliseId }: Props) {
   const [evenements, setEvenements] = useState<Evenement[]>(initialEvenements);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Evenement | null>(null);
@@ -206,6 +207,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
             <ImagePicker
               label="Image"
               value={form.imageUrl}
+              egliseId={egliseId}
               onChange={(url) => setForm({ ...form, imageUrl: url })}
             />
             <div>

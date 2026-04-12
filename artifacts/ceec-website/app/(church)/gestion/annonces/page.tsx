@@ -34,7 +34,7 @@ export default async function GestionAnnoncesPage() {
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Annonces</h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Gérez les annonces de votre église</p>
       </div>
-      <GestionAnnoncesClient initialAnnonces={annonces} canAutoPublish={canAutoPublish} />
+      <GestionAnnoncesClient initialAnnonces={annonces} canAutoPublish={canAutoPublish} egliseId={egliseId} />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import ImagePicker from "@/components/gestion/ImagePicker";
 interface Props {
   initialAnnonces: Annonce[];
   canAutoPublish: boolean;
+  egliseId: number;
 }
 
 const prioriteLabels: Record<string, { label: string; bg: string; color: string }> = {
@@ -36,7 +37,7 @@ type FormData = {
 
 const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", categorie: "" };
 
-export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish }: Props) {
+export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish, egliseId }: Props) {
   const [annonces, setAnnonces] = useState<Annonce[]>(initialAnnonces);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Annonce | null>(null);
@@ -194,6 +195,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish 
             <ImagePicker
               label="Image"
               value={form.imageUrl}
+              egliseId={egliseId}
               onChange={(url) => setForm({ ...form, imageUrl: url })}
             />
             <div style={{ display: "flex", gap: 16 }}>

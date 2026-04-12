@@ -6,9 +6,10 @@ interface ImagePickerProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  egliseId?: number;
 }
 
-export default function ImagePicker({ value, onChange, label = "Image" }: ImagePickerProps) {
+export default function ImagePicker({ value, onChange, label = "Image", egliseId }: ImagePickerProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -36,8 +37,12 @@ export default function ImagePicker({ value, onChange, label = "Image" }: ImageP
       fd.append("file", file);
 
       setProgress(30);
+      const headers: Record<string, string> = {};
+      if (egliseId) headers["x-eglise-id"] = String(egliseId);
+
       const res = await fetch("/api/gestion/upload-image", {
         method: "POST",
+        headers,
         body: fd,
       });
       setProgress(90);

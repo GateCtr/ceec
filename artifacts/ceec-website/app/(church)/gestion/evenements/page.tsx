@@ -34,7 +34,7 @@ export default async function GestionEvenementsPage() {
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Événements</h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Gérez les événements de votre église</p>
       </div>
-      <GestionEvenementsClient initialEvenements={evenements} canAutoPublish={canAutoPublish} />
+      <GestionEvenementsClient initialEvenements={evenements} canAutoPublish={canAutoPublish} egliseId={egliseId} />
     </div>
   );
 }

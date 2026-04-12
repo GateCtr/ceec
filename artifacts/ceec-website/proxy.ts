@@ -242,7 +242,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (isAuthPage) {
     const { userId: uidCheck } = await auth();
     if (uidCheck) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/auth/redirect", req.url));
     }
     return NextResponse.next();
   }

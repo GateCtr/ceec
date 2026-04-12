@@ -6,8 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============ TENANT ============
-
 model Eglise {
   id           Int           @id @default(autoincrement())
   nom          String        @db.VarChar(255)
@@ -15,70 +13,62 @@ model Eglise {
   sousDomaine  String?       @unique @map("sous_domaine") @db.VarChar(100)
   statut       String        @default("actif") @db.VarChar(20)
   ville        String        @db.VarChar(100)
-  adresse      String?       @db.Text
+  adresse      String?
   pasteur      String?       @db.VarChar(255)
   telephone    String?       @db.VarChar(20)
   email        String?       @db.VarChar(255)
-  description  String?       @db.Text
-  logoUrl      String?       @map("logo_url") @db.Text
-  photoUrl     String?       @map("photo_url") @db.Text
+  description  String?
+  logoUrl      String?       @map("logo_url")
+  photoUrl     String?       @map("photo_url")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
-  membres      Membre[]
   annonces     Annonce[]
-  evenements   Evenement[]
-  userRoles    UserRole[]
-  inviteTokens InviteToken[]
   config       EgliseConfig?
   pages        PageEglise[]
-  liveStreams   LiveStream[]
+  evenements   Evenement[]
+  inviteTokens InviteToken[]
+  liveStreams  LiveStream[]
+  membres      Membre[]
+  userRoles    UserRole[]
 
   @@map("paroisses")
 }
 
-// ============ CHURCH SITE CONFIG ============
-
 model EgliseConfig {
-  id               Int      @id @default(autoincrement())
-  egliseId         Int      @unique @map("eglise_id")
-  eglise           Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
-  // Branding
-  couleurPrimaire  String   @default("#1e3a8a") @map("couleur_primaire") @db.VarChar(20)
-  couleurAccent    String   @default("#c59b2e") @map("couleur_accent") @db.VarChar(20)
-  faviconUrl       String?  @map("favicon_url") @db.Text
-  cssPersonnalise  String?  @map("css_personnalise") @db.Text
-  // Social media
-  facebook         String?  @db.VarChar(255)
-  youtube          String?  @db.VarChar(255)
-  instagram        String?  @db.VarChar(255)
-  twitter          String?  @db.VarChar(255)
-  whatsapp         String?  @db.VarChar(50)
-  // Footer extras
-  siteWeb          String?  @map("site_web") @db.VarChar(255)
-  horaires         String?  @db.Text
-  // Navigation & footer links
-  navLinksJson     Json?    @map("nav_links_json")
-  footerLinksJson  Json?    @map("footer_links_json")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+  id              Int      @id @default(autoincrement())
+  egliseId        Int      @unique @map("eglise_id")
+  couleurPrimaire String   @default("#1e3a8a") @map("couleur_primaire") @db.VarChar(20)
+  couleurAccent   String   @default("#c59b2e") @map("couleur_accent") @db.VarChar(20)
+  faviconUrl      String?  @map("favicon_url")
+  cssPersonnalise String?  @map("css_personnalise")
+  facebook        String?  @db.VarChar(255)
+  youtube         String?  @db.VarChar(255)
+  instagram       String?  @db.VarChar(255)
+  twitter         String?  @db.VarChar(255)
+  whatsapp        String?  @db.VarChar(50)
+  siteWeb         String?  @map("site_web") @db.VarChar(255)
+  horaires        String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+  footerLinksJson Json?    @map("footer_links_json")
+  navLinksJson    Json?    @map("nav_links_json")
+  eglise          Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
 
   @@map("eglise_configs")
 }
 
-// ============ CHURCH PAGES ============
-
 model PageEglise {
-  id        Int          @id @default(autoincrement())
-  egliseId  Int          @map("eglise_id")
-  eglise    Eglise       @relation(fields: [egliseId], references: [id], onDelete: Cascade)
-  titre     String       @db.VarChar(255)
-  slug      String       @db.VarChar(100)
-  type      String       @default("custom") @db.VarChar(30)
-  publie    Boolean      @default(false)
-  ordre     Int          @default(0)
+  id        Int           @id @default(autoincrement())
+  egliseId  Int           @map("eglise_id")
+  titre     String        @db.VarChar(255)
+  slug      String        @db.VarChar(100)
+  type      String        @default("custom") @db.VarChar(30)
+  publie    Boolean       @default(false)
+  ordre     Int           @default(0)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @default(now()) @updatedAt @map("updated_at")
+  eglise    Eglise        @relation(fields: [egliseId], references: [id], onDelete: Cascade)
   sections  SectionPage[]
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
 
   @@unique([egliseId, slug])
   @@index([egliseId, publie, ordre])
@@ -86,111 +76,103 @@ model PageEglise {
 }
 
 model SectionPage {
-  id       Int        @id @default(autoincrement())
-  pageId   Int        @map("page_id")
-  page     PageEglise @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  type     String     @db.VarChar(50)
-  ordre    Int        @default(0)
-  config   Json       @default("{}")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  id        Int        @id @default(autoincrement())
+  pageId    Int        @map("page_id")
+  type      String     @db.VarChar(50)
+  ordre     Int        @default(0)
+  config    Json       @default("{}")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
+  page      PageEglise @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@index([pageId, ordre])
   @@map("eglise_sections")
 }
 
-// ============ LIVE STREAMING ============
-
 model LiveStream {
-  id          Int      @id @default(autoincrement())
-  egliseId    Int      @map("eglise_id")
-  eglise      Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
-  titre       String   @db.VarChar(255)
-  urlYoutube  String   @map("url_youtube") @db.VarChar(500)
-  description String?  @db.Text
+  id          Int       @id @default(autoincrement())
+  egliseId    Int       @map("eglise_id")
+  titre       String    @db.VarChar(255)
+  urlYoutube  String    @map("url_youtube") @db.VarChar(500)
+  description String?
   dateStream  DateTime? @map("date_stream")
-  estEnDirect Boolean  @default(false) @map("est_en_direct")
-  epingle     Boolean  @default(false)
-  publie      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  estEnDirect Boolean   @default(false) @map("est_en_direct")
+  epingle     Boolean   @default(false)
+  publie      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  eglise      Eglise    @relation(fields: [egliseId], references: [id], onDelete: Cascade)
 
   @@index([egliseId, publie, epingle])
   @@map("live_streams")
 }
 
-// ============ USER / MEMBRE ============
-
 model Membre {
-  id           Int       @id @default(autoincrement())
-  clerkUserId  String    @map("clerk_user_id") @db.VarChar(255)
-  nom          String    @db.VarChar(100)
-  prenom       String    @db.VarChar(100)
-  email        String    @db.VarChar(255)
-  telephone    String?   @db.VarChar(20)
-  egliseId     Int?      @map("paroisse_id")
-  eglise       Eglise?   @relation(fields: [egliseId], references: [id])
-  role         String    @default("fidele") @db.VarChar(20)
-  dateAdhesion DateTime? @map("date_adhesion") @db.Date
-  statut              String    @default("actif") @db.VarChar(20)
-  suspendedByChurch   Boolean   @default(false) @map("suspended_by_church")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
-  annonces            Annonce[]
+  id                Int       @id @default(autoincrement())
+  clerkUserId       String    @map("clerk_user_id") @db.VarChar(255)
+  nom               String    @db.VarChar(100)
+  prenom            String    @db.VarChar(100)
+  email             String    @db.VarChar(255)
+  telephone         String?   @db.VarChar(20)
+  egliseId          Int?      @map("paroisse_id")
+  role              String    @default("fidele") @db.VarChar(20)
+  dateAdhesion      DateTime? @map("date_adhesion") @db.Date
+  statut            String    @default("actif") @db.VarChar(20)
+  suspendedByChurch Boolean   @default(false) @map("suspended_by_church")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+  annonces          Annonce[]
+  eglise            Eglise?   @relation(fields: [egliseId], references: [id])
 
   @@unique([clerkUserId, egliseId], name: "membre_clerk_eglise_unique")
   @@index([clerkUserId])
   @@map("membres")
 }
 
-// ============ CONTENT ============
-
 model Annonce {
   id              Int       @id @default(autoincrement())
   titre           String    @db.VarChar(255)
-  contenu         String    @db.Text
+  contenu         String
   auteurId        Int?      @map("auteur_id")
-  auteur          Membre?   @relation(fields: [auteurId], references: [id])
   egliseId        Int?      @map("paroisse_id")
-  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
   datePublication DateTime  @default(now()) @map("date_publication")
   dateExpiration  DateTime? @map("date_expiration")
   priorite        String    @default("normale") @db.VarChar(20)
   publie          Boolean   @default(true)
-  imageUrl        String?   @map("image_url") @db.Text
-  categorie       String?   @db.VarChar(100)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+  categorie       String?   @db.VarChar(100)
+  imageUrl        String?   @map("image_url")
+  auteur          Membre?   @relation(fields: [auteurId], references: [id])
+  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
 
   @@map("annonces")
 }
 
 model Evenement {
-  id          Int       @id @default(autoincrement())
-  titre       String    @db.VarChar(255)
-  description String?   @db.Text
-  dateDebut   DateTime  @map("date_debut")
-  dateFin     DateTime? @map("date_fin")
-  lieu        String?   @db.VarChar(255)
-  egliseId    Int?      @map("paroisse_id")
-  eglise      Eglise?   @relation(fields: [egliseId], references: [id])
-  imageUrl    String?   @map("image_url") @db.Text
-  categorie   String?   @db.VarChar(100)
-  lienInscription String? @map("lien_inscription") @db.VarChar(500)
-  publie      Boolean   @default(true)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  id              Int       @id @default(autoincrement())
+  titre           String    @db.VarChar(255)
+  description     String?
+  dateDebut       DateTime  @map("date_debut")
+  dateFin         DateTime? @map("date_fin")
+  lieu            String?   @db.VarChar(255)
+  egliseId        Int?      @map("paroisse_id")
+  imageUrl        String?   @map("image_url")
+  publie          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+  categorie       String?   @db.VarChar(100)
+  lienInscription String?   @map("lien_inscription") @db.VarChar(500)
+  eglise          Eglise?   @relation(fields: [egliseId], references: [id])
 
   @@map("evenements")
 }
 
-// ============ RBAC ============
-
 model Permission {
-  id          Int      @id @default(autoincrement())
-  nom         String   @unique @db.VarChar(100)
-  description String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
+  id          Int              @id @default(autoincrement())
+  nom         String           @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
   roles       RolePermission[]
 
   @@map("permissions")
@@ -202,9 +184,9 @@ model Role {
   scope        String           @db.VarChar(20)
   permissions  String[]
   createdAt    DateTime         @default(now()) @map("created_at")
-  userRoles    UserRole[]
   inviteTokens InviteToken[]
   rolePerms    RolePermission[]
+  userRoles    UserRole[]
 
   @@map("roles")
 }
@@ -212,10 +194,10 @@ model Role {
 model RolePermission {
   id           Int        @id @default(autoincrement())
   roleId       Int        @map("role_id")
-  role         Role       @relation(fields: [roleId], references: [id])
   permissionId Int        @map("permission_id")
-  permission   Permission @relation(fields: [permissionId], references: [id])
   createdAt    DateTime   @default(now()) @map("created_at")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
@@ -225,18 +207,16 @@ model UserRole {
   id          Int      @id @default(autoincrement())
   clerkUserId String   @map("clerk_user_id") @db.VarChar(255)
   egliseId    Int?     @map("eglise_id")
-  eglise      Eglise?  @relation(fields: [egliseId], references: [id])
   roleId      Int      @map("role_id")
-  role        Role     @relation(fields: [roleId], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
+  eglise      Eglise?  @relation(fields: [egliseId], references: [id])
+  role        Role     @relation(fields: [roleId], references: [id])
 
   @@unique([clerkUserId, roleId, egliseId], name: "user_role_unique")
   @@index([clerkUserId])
   @@index([egliseId])
   @@map("user_roles")
 }
-
-// ============ CONFIG COMMUNAUTÉ ============
 
 model CommunauteConfig {
   id        Int      @id @default(autoincrement())
@@ -251,15 +231,15 @@ model CommunauteConfig {
 
 model InviteToken {
   id        Int       @id @default(autoincrement())
-  token     String    @unique @default(dbgenerated("gen_random_uuid()::text")) @db.VarChar(255)
+  token     String    @unique @default(dbgenerated("(gen_random_uuid())::text")) @db.VarChar(255)
   email     String    @db.VarChar(255)
   egliseId  Int?      @map("eglise_id")
-  eglise    Eglise?   @relation(fields: [egliseId], references: [id])
   roleId    Int?      @map("role_id")
-  role      Role?     @relation(fields: [roleId], references: [id])
   usedAt    DateTime? @map("used_at")
   expiresAt DateTime  @map("expires_at")
   createdAt DateTime  @default(now()) @map("created_at")
+  eglise    Eglise?   @relation(fields: [egliseId], references: [id])
+  role      Role?     @relation(fields: [roleId], references: [id])
 
   @@map("invite_tokens")
 }

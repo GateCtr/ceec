@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     }
 
     const acteurNom = await getActeurNom(userId);
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action: "creer",

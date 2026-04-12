@@ -45,7 +45,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       getActeurNom(userId, egliseId),
       prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
     ]);
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action: "revoquer",

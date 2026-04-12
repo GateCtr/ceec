@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     });
 
     const acteurNom = membre ? `${membre.prenom} ${membre.nom}` : await getActeurNom(userId, egliseId);
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action: "creer",

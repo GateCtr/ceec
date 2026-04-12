@@ -1,24 +1,60 @@
+import React from "react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
+import AdminLogsClient from "@/components/admin/AdminLogsClient";
 
 export const metadata = { title: "Administration Plateforme | CEEC" };
 
-async function getDashboardData() {
+function getDateFrom(dateRange: string): Date | null {
+  const now = new Date();
+  if (dateRange === "today") return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (dateRange === "week") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - d.getDay());
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  if (dateRange === "month") return new Date(now.getFullYear(), now.getMonth(), 1);
+  if (dateRange === "30d") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 30);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  return null;
+}
+
+async function getDashboardData(egliseFilter?: string, actionFilter?: string, dateFilter?: string) {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const logWhere: {
+    egliseId?: number;
+    action?: string;
+    createdAt?: { gte: Date };
+  } = {};
+
   try {
+    if (egliseFilter) {
+      const eg = await prisma.eglise.findUnique({ where: { slug: egliseFilter }, select: { id: true } });
+      if (eg) logWhere.egliseId = eg.id;
+    }
+    if (actionFilter) logWhere.action = actionFilter;
+    const dateFrom = getDateFrom(dateFilter ?? "");
+    if (dateFrom) logWhere.createdAt = { gte: dateFrom };
+
     const [
       eglisesRaw,
       eglises,
       totalMembres,
       annoncesduMois,
       evenementsAVenir,
-      recentLogs,
+      logs,
+      eglisesForFilter,
     ] = await Promise.all([
       prisma.eglise.groupBy({ by: ["statut"], _count: { _all: true } }),
       prisma.eglise.findMany({
@@ -32,12 +68,17 @@ async function getDashboardData() {
       prisma.annonce.count({ where: { createdAt: { gte: startOfMonth } } }),
       prisma.evenement.count({ where: { dateDebut: { gte: now }, publie: true } }),
       prisma.activityLog.findMany({
+        where: logWhere,
         orderBy: { createdAt: "desc" },
-        take: 5,
+        take: 50,
         select: {
           id: true, acteurNom: true, action: true, entiteType: true,
-          entiteLabel: true, egliseNom: true, createdAt: true,
+          entiteId: true, entiteLabel: true, egliseNom: true, createdAt: true,
         },
+      }),
+      prisma.eglise.findMany({
+        orderBy: { nom: "asc" },
+        select: { id: true, nom: true, slug: true },
       }),
     ]);
 
@@ -49,12 +90,7 @@ async function getDashboardData() {
     }
 
     return {
-      stats: {
-        eglises: eglisesByStatut,
-        membres: totalMembres,
-        annoncesduMois,
-        evenementsAVenir,
-      },
+      stats: { eglises: eglisesByStatut, membres: totalMembres, annoncesduMois, evenementsAVenir },
       eglises: eglises.map((e) => ({
         id: e.id,
         nom: e.nom,
@@ -64,31 +100,39 @@ async function getDashboardData() {
         membres: e._count.membres,
         createdAt: e.createdAt.toISOString(),
       })),
-      recentLogs: recentLogs.map((l) => ({
+      logs: logs.map((l) => ({
         id: l.id,
         acteurNom: l.acteurNom,
         action: l.action,
         entiteType: l.entiteType,
+        entiteId: l.entiteId,
         entiteLabel: l.entiteLabel,
         egliseNom: l.egliseNom,
         createdAt: l.createdAt.toISOString(),
       })),
+      eglisesForFilter: eglisesForFilter.map((e) => ({ id: e.id, nom: e.nom, slug: e.slug ?? "" })),
     };
   } catch {
     return {
       stats: { eglises: { actif: 0, en_attente: 0, suspendu: 0, total: 0 }, membres: 0, annoncesduMois: 0, evenementsAVenir: 0 },
       eglises: [],
-      recentLogs: [],
+      logs: [],
+      eglisesForFilter: [],
     };
   }
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ eglise?: string; action?: string; date?: string }>;
+}) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
   if (!await isSuperAdmin(userId)) redirect("/sign-in");
 
-  const { stats, eglises, recentLogs } = await getDashboardData();
+  const sp = await searchParams;
+  const { stats, eglises, logs, eglisesForFilter } = await getDashboardData(sp.eglise, sp.action, sp.date);
 
   const statCards = [
     {
@@ -104,27 +148,9 @@ export default async function AdminPage() {
       ),
       href: "/admin/eglises",
     },
-    {
-      label: "Membres inscrits",
-      value: stats.membres,
-      color: "#0891b2",
-      icon: "👥",
-      href: null,
-    },
-    {
-      label: "Annonces ce mois",
-      value: stats.annoncesduMois,
-      color: "#16a34a",
-      icon: "📢",
-      href: null,
-    },
-    {
-      label: "Événements à venir",
-      value: stats.evenementsAVenir,
-      color: "#d97706",
-      icon: "🗓️",
-      href: null,
-    },
+    { label: "Membres inscrits", value: stats.membres, color: "#0891b2", icon: "👥", href: null },
+    { label: "Annonces ce mois", value: stats.annoncesduMois, color: "#16a34a", icon: "📢", href: null },
+    { label: "Événements à venir", value: stats.evenementsAVenir, color: "#d97706", icon: "🗓️", href: null },
   ];
 
   return (
@@ -144,103 +170,50 @@ export default async function AdminPage() {
           <div key={card.label} style={statCard}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ fontSize: 12, color: "#64748b", fontWeight: 500 }}>{card.label}</div>
-              {card.icon && <span style={{ fontSize: 22, opacity: 0.6 }}>{card.icon}</span>}
+              {"icon" in card && card.icon && <span style={{ fontSize: 22, opacity: 0.6 }}>{card.icon}</span>}
             </div>
             <div style={{ fontSize: 40, fontWeight: 900, color: card.color, lineHeight: 1.1, marginTop: 6 }}>
               {card.value.toLocaleString("fr-FR")}
             </div>
-            {card.sub ?? null}
+            {"sub" in card && card.sub ? card.sub : null}
           </div>
         ))}
       </div>
 
-      {/* Main grid: church list + recent activity */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24, alignItems: "start" }}>
-        {/* Church list */}
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>Toutes les églises</h2>
-            <Link
-              href="/admin/eglises/nouveau"
-              style={{ padding: "8px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none" }}
-            >
-              + Ajouter une église
-            </Link>
+      {/* Church list */}
+      <div style={{ marginBottom: 36 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>Toutes les églises</h2>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Link href="/admin/eglises" style={secondaryBtn}>Gérer les églises →</Link>
+            <Link href="/admin/eglises/nouveau" style={primaryBtn}>+ Ajouter une église</Link>
           </div>
-          <AdminDashboardClient eglises={eglises} />
         </div>
+        <AdminDashboardClient eglises={eglises} />
+      </div>
 
-        {/* Recent activity sidebar */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>
-                Activité récente
-              </h2>
-              <Link href="/admin/logs" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
-                Voir tout →
-              </Link>
-            </div>
-            {recentLogs.length === 0 ? (
-              <p style={{ color: "#94a3b8", fontSize: 13 }}>Aucune activité enregistrée.</p>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {recentLogs.map((log) => {
-                  const ENTITY_ICONS: Record<string, string> = { annonce: "📢", evenement: "🗓️", page: "📄", membre: "👤", eglise: "⛪", admin: "🔐", role: "🏷️" };
-                  const ACTION_LABELS: Record<string, string> = { creer: "a créé", modifier: "a modifié", supprimer: "a supprimé", suspendre: "a suspendu", reactiver: "a réactivé", inviter: "a invité", revoquer: "a révoqué" };
-                  const icon = ENTITY_ICONS[log.entiteType] ?? "📌";
-                  return (
-                    <div key={log.id} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                        background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 14,
-                      }}>
-                        {icon}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>
-                          <strong>{log.acteurNom}</strong>{" "}
-                          {ACTION_LABELS[log.action] ?? log.action}{" "}
-                          {log.entiteLabel && <span style={{ color: "#1e3a8a", fontWeight: 600 }}>{log.entiteLabel}</span>}
-                        </div>
-                        {log.egliseNom && (
-                          <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{log.egliseNom}</div>
-                        )}
-                        <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>
-                          {new Date(log.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                          {" · "}
-                          {new Date(log.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Quick links */}
-          <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
-            <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: "0 0 14px" }}>
-              Actions rapides
+      {/* Activity log — full filterable view directly in /admin */}
+      <div style={{ marginBottom: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>
+              Journal d&apos;activité global
             </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <Link href="/admin/eglises/nouveau" style={quickLink}>
-                + Ajouter une église
-              </Link>
-              <Link href="/admin/eglises" style={quickLink}>
-                Voir toutes les églises →
-              </Link>
-              <Link href="/admin/annonces" style={quickLink}>
-                Superviser les annonces →
-              </Link>
-              <Link href="/admin/logs" style={quickLink}>
-                Journal d&apos;activité →
-              </Link>
-            </div>
+            <p style={{ color: "#64748b", fontSize: 13, marginTop: 3 }}>
+              50 dernières actions de toutes les églises — filtrez par église, action et période
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Link href="/admin/annonces" style={secondaryBtn}>Superviser annonces →</Link>
           </div>
         </div>
+        <AdminLogsClient
+          logs={logs}
+          eglises={eglisesForFilter}
+          selectedEglise={sp.eglise ?? ""}
+          selectedAction={sp.action ?? ""}
+          selectedDate={sp.date ?? ""}
+        />
       </div>
     </div>
   );
@@ -255,8 +228,12 @@ const badge: React.CSSProperties = {
   padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600,
 };
 
-const quickLink: React.CSSProperties = {
-  display: "block", padding: "9px 14px", borderRadius: 8,
-  background: "#f8fafc", color: "#1e3a8a", fontSize: 13, fontWeight: 600,
-  textDecoration: "none", border: "1px solid #e2e8f0",
+const primaryBtn: React.CSSProperties = {
+  padding: "8px 18px", borderRadius: 8, background: "#1e3a8a", color: "white",
+  fontWeight: 600, fontSize: 13, textDecoration: "none",
+};
+
+const secondaryBtn: React.CSSProperties = {
+  padding: "8px 16px", borderRadius: 8, background: "white", color: "#1e3a8a",
+  fontWeight: 600, fontSize: 13, textDecoration: "none", border: "1px solid #e2e8f0",
 };

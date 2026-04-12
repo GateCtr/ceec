@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const acteurNom = await getActeurNom(userId, egliseId);
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action: "inviter",

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     ]);
 
     const acteurNom = await getActeurNom(userId);
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action: "suspendre",

@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       : body.statut === "actif" && existing.statut === "suspendu" ? "reactiver"
       : "modifier";
 
-    void logActivity({
+    await logActivity({
       acteurId: userId,
       acteurNom,
       action,

@@ -1,8 +1,7 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import {
   isSuperAdminFromClaims,
-  isAdminPlatteformeFromClaims,
   hasAnyChurchRoleFromClaims,
   isEgliseAdminFromClaims,
 } from "@/lib/auth/rbac-edge";
@@ -246,7 +245,22 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isPlatformAdminRoute(req)) {
-    const canAccessAdmin = isAdminPlatteformeFromClaims(claims);
+    // Exception : sync-roles est un endpoint de bootstrap — tout utilisateur
+    // authentifié peut l'appeler (il ne modifie que ses propres métadonnées).
+    if (url.pathname === "/api/admin/sync-roles") {
+      return NextResponse.next();
+    }
+
+    // Lire publicMetadata depuis Clerk directement (le JWT ne l'inclut pas par défaut)
+    let canAccessAdmin = false;
+    try {
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      const meta = user.publicMetadata as Record<string, unknown>;
+      canAccessAdmin = meta.isAdminPlatteforme === true;
+    } catch {
+      canAccessAdmin = false;
+    }
     if (!canAccessAdmin) {
       if (url.pathname.startsWith("/api/")) {
         return NextResponse.json(
@@ -254,7 +268,11 @@ export default clerkMiddleware(async (auth, req) => {
           { status: 403 }
         );
       }
-      return NextResponse.redirect(new URL("/sign-in", req.url));
+      // Rediriger vers sync-roles→admin pour bootstrapper le flag admin
+      // (évite aussi la boucle "You're already signed in" de /sign-in)
+      const syncUrl = new URL("/api/admin/sync-roles", req.url);
+      syncUrl.searchParams.set("redirect", url.pathname);
+      return NextResponse.redirect(syncUrl);
     }
   }
 

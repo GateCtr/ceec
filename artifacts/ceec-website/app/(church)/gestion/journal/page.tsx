@@ -4,31 +4,9 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, isEgliseStaff } from "@/lib/auth/rbac";
 import GestionJournalClient from "@/components/gestion/GestionJournalClient";
+import { getDateFrom } from "@/lib/date-filter";
 
 export const metadata = { title: "Journal d'activité | Gestion" };
-
-function getDateFrom(dateRange: string): Date | null {
-  const now = new Date();
-  if (dateRange === "today") {
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-  if (dateRange === "week") {
-    const d = new Date(now);
-    d.setDate(d.getDate() - d.getDay());
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-  if (dateRange === "month") {
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  }
-  if (dateRange === "30d") {
-    const d = new Date(now);
-    d.setDate(d.getDate() - 30);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-  return null;
-}
 
 async function getChurchLogs(egliseId: number, actionFilter?: string, dateFilter?: string) {
   try {

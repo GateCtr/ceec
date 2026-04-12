@@ -46,13 +46,16 @@ export async function POST(req: NextRequest) {
     });
 
     let isNewMember = false;
+    let membreEmail = "";
+    let membrePrenom = "";
+    let membreNom = "";
     await prisma.$transaction(async (tx) => {
       const existing = await tx.membre.findFirst({
         where: { clerkUserId: userId, egliseId },
       });
       isNewMember = !existing;
 
-      await tx.membre.upsert({
+      const upserted = await tx.membre.upsert({
         where: {
           membre_clerk_eglise_unique: { clerkUserId: userId, egliseId },
         },
@@ -67,6 +70,10 @@ export async function POST(req: NextRequest) {
           statut: "actif",
         },
       });
+
+      membreEmail = upserted.email;
+      membrePrenom = upserted.prenom;
+      membreNom = upserted.nom;
 
       if (fideleRole) {
         await tx.userRole.upsert({
@@ -88,13 +95,13 @@ export async function POST(req: NextRequest) {
     });
 
     // Notify church staff when a genuinely new member joins (fire and forget)
-    if (isNewMember && body.email) {
+    if (isNewMember && membreEmail) {
       const egliseWithNom = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
       void (async () => {
         try {
           const staffEmails = await getChurchStaffEmails(egliseId);
           if (staffEmails.length > 0 && egliseWithNom) {
-            await sendNewMemberEmail(staffEmails, body.prenom ?? "", body.nom ?? "", body.email, egliseWithNom.nom);
+            await sendNewMemberEmail(staffEmails, membrePrenom, membreNom, membreEmail, egliseWithNom.nom);
           }
         } catch (err) {
           console.error("Email notification error:", err);

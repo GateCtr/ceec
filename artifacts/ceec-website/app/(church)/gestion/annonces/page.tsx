@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 import GestionAnnoncesClient from "@/components/gestion/GestionAnnoncesClient";
 
 export const metadata = { title: "Annonces | Gestion" };
@@ -14,6 +15,10 @@ export default async function GestionAnnoncesPage() {
 
   const { userId } = await auth();
   if (!userId) redirect("/c/connexion");
+
+  const superAdmin = await isSuperAdmin(userId);
+  const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
+  if (!allowed) redirect("/gestion?error=acces-refuse");
 
   const annonces = await prisma.annonce.findMany({
     where: { egliseId },

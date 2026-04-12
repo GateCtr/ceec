@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 import GestionEvenementsClient from "@/components/gestion/GestionEvenementsClient";
 
 export const metadata = { title: "Événements | Gestion" };
@@ -14,6 +15,10 @@ export default async function GestionEvenementsPage() {
 
   const { userId } = await auth();
   if (!userId) redirect("/c/connexion");
+
+  const superAdmin = await isSuperAdmin(userId);
+  const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
+  if (!allowed) redirect("/gestion?error=acces-refuse");
 
   const evenements = await prisma.evenement.findMany({
     where: { egliseId },

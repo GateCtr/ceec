@@ -30,6 +30,9 @@ export async function POST(_req: NextRequest, { params }: Props) {
       where: { id: evenementId, egliseId: eglise.id, statutContenu: "publie" },
     });
     if (!evt) return NextResponse.json({ error: "Événement introuvable" }, { status: 404 });
+    if (new Date(evt.dateDebut) < new Date()) {
+      return NextResponse.json({ error: "Impossible de s'inscrire à un événement passé" }, { status: 400 });
+    }
 
     const participation = await prisma.participation.upsert({
       where: { membreId_evenementId: { membreId: membre.id, evenementId } },

@@ -5,7 +5,10 @@ import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 
 function esc(v: string | null | undefined): string {
   if (v == null) return "";
-  const s = String(v);
+  let s = String(v);
+  if (s.length > 0 && ["=", "+", "-", "@", "\t", "\r"].includes(s[0])) {
+    s = "'" + s;
+  }
   if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
   }

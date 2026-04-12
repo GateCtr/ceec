@@ -257,7 +257,7 @@ export default clerkMiddleware(async (auth, req) => {
       const client = await clerkClient();
       const user = await client.users.getUser(userId);
       const meta = user.publicMetadata as Record<string, unknown>;
-      canAccessAdmin = meta.isAdminPlatteforme === true;
+      canAccessAdmin = meta.isAdminPlatteforme === true || meta.isSuperAdmin === true;
     } catch {
       canAccessAdmin = false;
     }

@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     const result = await syncUserRoles(userId);
 
-    if (!result.isAdminPlatteforme) {
+    if (!result.isAdminPlatteforme && !result.isSuperAdmin) {
       return NextResponse.redirect(new URL("/?error=acces-refuse", req.url));
     }
 

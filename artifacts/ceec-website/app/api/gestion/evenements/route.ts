@@ -46,9 +46,7 @@ export async function POST(req: NextRequest) {
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();
-    const [eglise] = await Promise.all([
-      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
-    ]);
+    const eglise = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
 
     const evt = await prisma.evenement.create({
       data: {

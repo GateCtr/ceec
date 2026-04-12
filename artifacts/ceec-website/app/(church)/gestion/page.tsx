@@ -5,6 +5,18 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 
+const ENTITY_ICONS: Record<string, string> = { annonce: "📢", evenement: "🗓️", page: "📄", membre: "👤", eglise: "⛪", admin: "🔐" };
+const ACTION_LABELS: Record<string, string> = { creer: "créé", modifier: "modifié", supprimer: "supprimé", suspendre: "suspendu", reactiver: "réactivé", inviter: "invité", revoquer: "révoqué" };
+const ACTIVITY_COLORS: Record<string, { bg: string; color: string }> = {
+  creer: { bg: "#dcfce7", color: "#15803d" },
+  modifier: { bg: "#dbeafe", color: "#1d4ed8" },
+  supprimer: { bg: "#fee2e2", color: "#b91c1c" },
+  suspendre: { bg: "#fee2e2", color: "#b91c1c" },
+  reactiver: { bg: "#dcfce7", color: "#15803d" },
+  inviter: { bg: "#e0e7ff", color: "#4338ca" },
+  revoquer: { bg: "#fef3c7", color: "#b45309" },
+};
+
 export const metadata = { title: "Tableau de bord | Gestion" };
 
 export default async function GestionDashboardPage() {
@@ -29,6 +41,7 @@ export default async function GestionDashboardPage() {
     pagesCount,
     recentAnnonces,
     prochainEvenements,
+    recentActivity,
   ] = await Promise.all([
     canMembres ? prisma.membre.count({ where: { egliseId, statut: "actif" } }) : Promise.resolve(null),
     canContenus ? prisma.annonce.count({ where: { egliseId, publie: true } }) : Promise.resolve(null),
@@ -50,6 +63,12 @@ export default async function GestionDashboardPage() {
           select: { id: true, titre: true, dateDebut: true, lieu: true },
         })
       : Promise.resolve([]),
+    prisma.activityLog.findMany({
+      where: { egliseId },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: { id: true, acteurNom: true, action: true, entiteType: true, entiteLabel: true, createdAt: true },
+    }),
   ]);
 
   type StatCard = {
@@ -212,6 +231,52 @@ export default async function GestionDashboardPage() {
                 </Link>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Recent activity section */}
+      <div style={{ marginTop: 24, background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>
+            Activité récente
+          </h2>
+          <Link href="/gestion/journal" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
+            Voir le journal complet →
+          </Link>
+        </div>
+        {recentActivity.length === 0 ? (
+          <p style={{ color: "#94a3b8", fontSize: 14 }}>
+            Aucune activité enregistrée. Les actions importantes apparaîtront ici.
+          </p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
+            {recentActivity.map((log) => {
+              const ac = ACTIVITY_COLORS[log.action] ?? { bg: "#f1f5f9", color: "#64748b" };
+              return (
+                <div key={log.id} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
+                    {ENTITY_ICONS[log.entiteType] ?? "📌"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>
+                      <strong>{log.acteurNom}</strong>{" "}
+                      <span style={{ display: "inline-block", padding: "1px 6px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: ac.bg, color: ac.color }}>
+                        {ACTION_LABELS[log.action] ?? log.action}
+                      </span>
+                      {log.entiteLabel && (
+                        <span style={{ color: "#1e3a8a", fontWeight: 600 }}> {log.entiteLabel}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 3 }}>
+                      {new Date(log.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      {" · "}
+                      {new Date(log.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

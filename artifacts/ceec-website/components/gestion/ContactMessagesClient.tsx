@@ -72,8 +72,10 @@ export default function ContactMessagesClient({
     try {
       const res = await fetch(`/api/gestion/contact/${id}`, { method: "DELETE" });
       if (res.ok) {
+        const wasUnread = messages.find((m) => m.id === id)?.lu === false;
         setMessages((prev) => prev.filter((m) => m.id !== id));
         setTotal((t) => Math.max(0, t - 1));
+        if (wasUnread) setNonLus((n) => Math.max(0, n - 1));
         if (selected?.id === id) setSelected(null);
       }
     } finally {

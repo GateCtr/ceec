@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     const destinataire = config.contactEmailDestinataire;
     if (destinataire) {
       try {
-        await sendContactEmail({
+        const emailResult = await sendContactEmail({
           to: destinataire,
           nom: stored.nom,
           emailExpediteur: stored.email,
@@ -82,8 +82,11 @@ export async function POST(req: NextRequest) {
           sujet: stored.sujet ?? undefined,
           message: stored.message,
         });
-      } catch {
-        // Do not fail request if email sending fails
+        if (!emailResult.success) {
+          console.error("[contact] Email send failed for message", stored.id, emailResult.error);
+        }
+      } catch (emailErr) {
+        console.error("[contact] Email send threw for message", stored.id, emailErr);
       }
     }
 

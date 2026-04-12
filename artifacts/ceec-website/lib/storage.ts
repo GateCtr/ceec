@@ -1,59 +1,48 @@
-const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-function parseObjectPath(fullPath: string): { bucketName: string; objectName: string } {
-  if (!fullPath.startsWith("/")) fullPath = `/${fullPath}`;
-  const parts = fullPath.split("/");
-  return { bucketName: parts[1], objectName: parts.slice(2).join("/") };
-}
+function getR2Client(): S3Client {
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
 
-function getPrivateObjectDir(): string {
-  const dir = process.env.PRIVATE_OBJECT_DIR;
-  if (!dir) throw new Error("PRIVATE_OBJECT_DIR not set");
-  return dir;
-}
-
-async function signObjectURL({
-  bucketName,
-  objectName,
-  method,
-  ttlSec,
-}: {
-  bucketName: string;
-  objectName: string;
-  method: "GET" | "PUT";
-  ttlSec: number;
-}): Promise<string> {
-  const res = await fetch(
-    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        bucket_name: bucketName,
-        object_name: objectName,
-        method,
-        expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
-      }),
-      signal: AbortSignal.timeout(15_000),
-    }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to sign URL: HTTP ${res.status}`);
+  if (!accountId || !accessKeyId || !secretAccessKey) {
+    throw new Error("R2 credentials not configured (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)");
   }
-  const { signed_url } = await res.json();
-  return signed_url as string;
+
+  return new S3Client({
+    region: "auto",
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: { accessKeyId, secretAccessKey },
+  });
+}
+
+function getBucketName(): string {
+  const bucket = process.env.R2_BUCKET_NAME;
+  if (!bucket) throw new Error("R2_BUCKET_NAME not configured");
+  return bucket;
 }
 
 export async function getUploadPresignedUrl(objectId: string): Promise<string> {
-  const dir = getPrivateObjectDir();
-  const fullPath = `${dir}/uploads/${objectId}`;
-  const { bucketName, objectName } = parseObjectPath(fullPath);
-  return signObjectURL({ bucketName, objectName, method: "PUT", ttlSec: 300 });
+  const client = getR2Client();
+  const bucket = getBucketName();
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: `uploads/${objectId}`,
+  });
+
+  return getSignedUrl(client, command, { expiresIn: 300 });
 }
 
 export async function getDownloadPresignedUrl(objectId: string): Promise<string> {
-  const dir = getPrivateObjectDir();
-  const fullPath = `${dir}/uploads/${objectId}`;
-  const { bucketName, objectName } = parseObjectPath(fullPath);
-  return signObjectURL({ bucketName, objectName, method: "GET", ttlSec: 3600 });
+  const client = getR2Client();
+  const bucket = getBucketName();
+
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: `uploads/${objectId}`,
+  });
+
+  return getSignedUrl(client, command, { expiresIn: 3600 });
 }

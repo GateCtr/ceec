@@ -12,6 +12,7 @@ interface ProfilData {
   statut: string;
   dateAdhesion: string | null;
   createdAt: string;
+  photoUrl: string | null;
 }
 
 interface EventInscrit {
@@ -114,13 +115,21 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
           borderRadius: 16, padding: "2rem", color: "white", marginBottom: 24,
           display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap",
         }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: "50%",
-            background: accent, display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 900, fontSize: 28, color: "#1e3a8a", flexShrink: 0,
-          }}>
-            {currentProfil.prenom.charAt(0).toUpperCase()}{currentProfil.nom.charAt(0).toUpperCase()}
-          </div>
+          {currentProfil.photoUrl ? (
+            <img
+              src={currentProfil.photoUrl}
+              alt={`${currentProfil.prenom} ${currentProfil.nom}`}
+              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: `3px solid ${accent}` }}
+            />
+          ) : (
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%",
+              background: accent, display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 900, fontSize: 28, color: "#1e3a8a", flexShrink: 0,
+            }}>
+              {currentProfil.prenom.charAt(0).toUpperCase()}{currentProfil.nom.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1.2 }}>
               {currentProfil.prenom} {currentProfil.nom}

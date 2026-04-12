@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/index";
@@ -38,8 +38,13 @@ export default async function MonEspacePage() {
   });
 
   if (!membre) {
-    redirect("/c/inscription");
+    redirect("/sign-up");
   }
+
+  // Fetch Clerk user for profile photo
+  const clerk = await clerkClient();
+  const clerkUser = await clerk.users.getUser(userId).catch(() => null);
+  const photoUrl = clerkUser?.imageUrl ?? null;
 
   const maintenant = new Date();
   const evenementsInscrits = membre.participations
@@ -73,6 +78,7 @@ export default async function MonEspacePage() {
     statut: membre.statut,
     dateAdhesion: membre.dateAdhesion?.toISOString() ?? null,
     createdAt: membre.createdAt.toISOString(),
+    photoUrl,
   };
 
   const annoncesData = annonces.map((a) => ({

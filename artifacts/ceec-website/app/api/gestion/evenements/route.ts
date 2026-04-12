@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -45,6 +46,10 @@ export async function POST(req: NextRequest) {
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const body = await req.json();
+    const [eglise] = await Promise.all([
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+
     const evt = await prisma.evenement.create({
       data: {
         titre: body.titre,
@@ -59,6 +64,19 @@ export async function POST(req: NextRequest) {
         lienInscription: body.lienInscription ?? null,
       },
     });
+
+    const acteurNom = await getActeurNom(userId, egliseId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "creer",
+      entiteType: "evenement",
+      entiteId: evt.id,
+      entiteLabel: evt.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json(evt, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -39,6 +40,22 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     await prisma.userRole.delete({ where: { id: userRoleId } });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "revoquer",
+      entiteType: "role",
+      entiteLabel: userRole.role.nom,
+      egliseId,
+      egliseNom: eglise?.nom,
+      metadata: { revokedClerkUserId: userRole.clerkUserId, roleNom: userRole.role.nom },
+    });
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

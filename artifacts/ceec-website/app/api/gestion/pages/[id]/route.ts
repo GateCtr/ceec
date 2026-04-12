@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -55,7 +56,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
-    // Ensure page belongs to this church
     const existing = await prisma.pageEglise.findFirst({ where: { id: pageId, egliseId } });
     if (!existing) return NextResponse.json({ error: "Page introuvable" }, { status: 404 });
 
@@ -70,6 +70,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
         ...(body.ordre !== undefined && { ordre: body.ordre }),
       },
     });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "modifier",
+      entiteType: "page",
+      entiteId: page.id,
+      entiteLabel: page.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json(page);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -95,7 +111,24 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const existing = await prisma.pageEglise.findFirst({ where: { id: pageId, egliseId } });
     if (!existing) return NextResponse.json({ error: "Page introuvable" }, { status: 404 });
 
+    const titre = existing.titre;
     await prisma.pageEglise.delete({ where: { id: pageId } });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "supprimer",
+      entiteType: "page",
+      entiteId: pageId,
+      entiteLabel: titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

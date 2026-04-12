@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -25,7 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const evtId = parseInt(id, 10);
 
-    const existing = await prisma.evenement.findUnique({ where: { id: evtId }, select: { egliseId: true } });
+    const existing = await prisma.evenement.findUnique({ where: { id: evtId }, select: { egliseId: true, titre: true } });
     if (!existing || existing.egliseId !== egliseId) {
       return NextResponse.json({ error: "Événement introuvable" }, { status: 404 });
     }
@@ -45,6 +46,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         lienInscription: body.lienInscription !== undefined ? (body.lienInscription || null) : undefined,
       },
     });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "modifier",
+      entiteType: "evenement",
+      entiteId: evt.id,
+      entiteLabel: evt.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json(evt);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -66,12 +83,29 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     const evtId = parseInt(id, 10);
 
-    const existing = await prisma.evenement.findUnique({ where: { id: evtId }, select: { egliseId: true } });
+    const existing = await prisma.evenement.findUnique({ where: { id: evtId }, select: { egliseId: true, titre: true } });
     if (!existing || existing.egliseId !== egliseId) {
       return NextResponse.json({ error: "Événement introuvable" }, { status: 404 });
     }
 
+    const titre = existing.titre;
     await prisma.evenement.delete({ where: { id: evtId } });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "supprimer",
+      entiteType: "evenement",
+      entiteId: evtId,
+      entiteLabel: titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

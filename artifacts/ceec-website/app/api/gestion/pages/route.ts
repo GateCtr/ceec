@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -60,23 +61,37 @@ export async function POST(req: NextRequest) {
 
     const slug = body.slug || slugify(body.titre);
 
-    // Check uniqueness within eglise
     const existing = await prisma.pageEglise.findFirst({ where: { egliseId, slug } });
     if (existing) return NextResponse.json({ error: "Ce slug est déjà utilisé" }, { status: 409 });
 
-    // Get next ordre
     const maxOrdre = await prisma.pageEglise.aggregate({ where: { egliseId }, _max: { ordre: true } });
 
-    const page = await prisma.pageEglise.create({
-      data: {
-        egliseId,
-        titre: body.titre,
-        slug,
-        type: body.type ?? "custom",
-        publie: body.publie ?? false,
-        ordre: (maxOrdre._max.ordre ?? 0) + 1,
-      },
+    const [page, eglise] = await Promise.all([
+      prisma.pageEglise.create({
+        data: {
+          egliseId,
+          titre: body.titre,
+          slug,
+          type: body.type ?? "custom",
+          publie: body.publie ?? false,
+          ordre: (maxOrdre._max.ordre ?? 0) + 1,
+        },
+      }),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+
+    const acteurNom = await getActeurNom(userId, egliseId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "creer",
+      entiteType: "page",
+      entiteId: page.id,
+      entiteLabel: page.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
     });
+
     return NextResponse.json(page, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

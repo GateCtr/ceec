@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
 import { sendInviteEmail } from "@/lib/email";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 function slugify(text: string): string {
   return text
@@ -97,6 +98,19 @@ export async function POST(req: NextRequest) {
     if (!emailResult.success) {
       console.warn("Email non envoyé :", emailResult.error);
     }
+
+    const acteurNom = await getActeurNom(userId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "creer",
+      entiteType: "eglise",
+      entiteId: eglise.id,
+      entiteLabel: eglise.nom,
+      egliseId: eglise.id,
+      egliseNom: eglise.nom,
+      metadata: { ville, emailAdmin, slug },
+    });
 
     return NextResponse.json(
       {

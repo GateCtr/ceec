@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -25,7 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const annonceId = parseInt(id, 10);
 
-    const existing = await prisma.annonce.findUnique({ where: { id: annonceId }, select: { egliseId: true } });
+    const existing = await prisma.annonce.findUnique({ where: { id: annonceId }, select: { egliseId: true, titre: true } });
     if (!existing || existing.egliseId !== egliseId) {
       return NextResponse.json({ error: "Annonce introuvable" }, { status: 404 });
     }
@@ -49,6 +50,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
       },
     });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "modifier",
+      entiteType: "annonce",
+      entiteId: annonce.id,
+      entiteLabel: annonce.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json(annonce);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -70,12 +87,29 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     const annonceId = parseInt(id, 10);
 
-    const existing = await prisma.annonce.findUnique({ where: { id: annonceId }, select: { egliseId: true } });
+    const existing = await prisma.annonce.findUnique({ where: { id: annonceId }, select: { egliseId: true, titre: true } });
     if (!existing || existing.egliseId !== egliseId) {
       return NextResponse.json({ error: "Annonce introuvable" }, { status: 404 });
     }
 
+    const titre = existing.titre;
     await prisma.annonce.delete({ where: { id: annonceId } });
+
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "supprimer",
+      entiteType: "annonce",
+      entiteId: annonceId,
+      entiteLabel: titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -56,7 +57,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
     }
 
-    const membre = await prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId } });
+    const [membre, eglise] = await Promise.all([
+      prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId } }),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
 
     const annonce = await prisma.annonce.create({
       data: {
@@ -71,6 +75,19 @@ export async function POST(req: NextRequest) {
         categorie: body.categorie ?? null,
       },
     });
+
+    const acteurNom = membre ? `${membre.prenom} ${membre.nom}` : await getActeurNom(userId, egliseId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "creer",
+      entiteType: "annonce",
+      entiteId: annonce.id,
+      entiteLabel: annonce.titre,
+      egliseId,
+      egliseNom: eglise?.nom,
+    });
+
     return NextResponse.json(annonce, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

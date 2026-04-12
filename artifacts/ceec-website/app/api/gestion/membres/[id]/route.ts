@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -26,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const membreId = parseInt(id, 10);
     const body = await req.json();
 
-    const existing = await prisma.membre.findUnique({ where: { id: membreId }, select: { egliseId: true } });
+    const existing = await prisma.membre.findUnique({ where: { id: membreId }, select: { egliseId: true, nom: true, prenom: true, statut: true, role: true } });
     if (!existing || existing.egliseId !== egliseId) {
       return NextResponse.json({ error: "Membre introuvable" }, { status: 404 });
     }
@@ -54,6 +55,29 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       where: { id: membreId },
       data,
     });
+
+    const membreLabel = `${existing.prenom} ${existing.nom}`;
+    const [acteurNom, eglise] = await Promise.all([
+      getActeurNom(userId, egliseId),
+      prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } }),
+    ]);
+
+    const action = body.statut === "suspendu" ? "suspendre"
+      : body.statut === "actif" && existing.statut === "suspendu" ? "reactiver"
+      : "modifier";
+
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action,
+      entiteType: "membre",
+      entiteId: membreId,
+      entiteLabel: membreLabel,
+      egliseId,
+      egliseNom: eglise?.nom,
+      metadata: { changes: data, ancienStatut: existing.statut, ancienRole: existing.role },
+    });
+
     return NextResponse.json(membre);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

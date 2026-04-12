@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -29,6 +30,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
         data: { statut: "actif", suspendedByChurch: false },
       }),
     ]);
+
+    const acteurNom = await getActeurNom(userId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "reactiver",
+      entiteType: "eglise",
+      entiteId: eglise.id,
+      entiteLabel: eglise.nom,
+      egliseId: eglise.id,
+      egliseNom: eglise.nom,
+    });
 
     return NextResponse.json({ ok: true, statut: "actif" });
   } catch {

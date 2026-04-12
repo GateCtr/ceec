@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 import { sendInviteEmail } from "@/lib/email";
+import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
@@ -55,6 +56,18 @@ export async function POST(req: NextRequest) {
     if (!emailResult.success) {
       console.warn("Email d'invitation non envoyé :", emailResult.error);
     }
+
+    const acteurNom = await getActeurNom(userId, egliseId);
+    void logActivity({
+      acteurId: userId,
+      acteurNom,
+      action: "inviter",
+      entiteType: "admin",
+      entiteLabel: email,
+      egliseId,
+      egliseNom: eglise.nom,
+      metadata: { email, roleNom },
+    });
 
     return NextResponse.json(
       { token: invite.token, email: invite.email, expiresAt: invite.expiresAt, emailEnvoye: emailResult.success },

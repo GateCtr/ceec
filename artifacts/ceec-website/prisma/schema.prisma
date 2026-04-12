@@ -22,14 +22,15 @@ model Eglise {
   photoUrl     String?       @map("photo_url")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
-  annonces     Annonce[]
-  config       EgliseConfig?
-  pages        PageEglise[]
-  evenements   Evenement[]
-  inviteTokens InviteToken[]
-  liveStreams  LiveStream[]
-  membres      Membre[]
-  userRoles    UserRole[]
+  annonces      Annonce[]
+  config        EgliseConfig?
+  pages         PageEglise[]
+  evenements    Evenement[]
+  inviteTokens  InviteToken[]
+  liveStreams    LiveStream[]
+  membres       Membre[]
+  userRoles     UserRole[]
+  activityLogs  ActivityLog[]
 
   @@map("paroisses")
 }
@@ -242,4 +243,24 @@ model InviteToken {
   role      Role?     @relation(fields: [roleId], references: [id])
 
   @@map("invite_tokens")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  acteurId    String   @map("acteur_id") @db.VarChar(255)
+  acteurNom   String   @map("acteur_nom") @db.VarChar(255)
+  action      String   @db.VarChar(50)
+  entiteType  String   @map("entite_type") @db.VarChar(50)
+  entiteId    Int?     @map("entite_id")
+  entiteLabel String?  @map("entite_label") @db.VarChar(255)
+  egliseId    Int?     @map("eglise_id")
+  egliseNom   String?  @map("eglise_nom") @db.VarChar(255)
+  metadata    Json?    @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  eglise      Eglise?  @relation(fields: [egliseId], references: [id], onDelete: SetNull)
+
+  @@index([egliseId, createdAt(sort: Desc)])
+  @@index([acteurId, createdAt(sort: Desc)])
+  @@index([entiteType, action])
+  @@map("activity_logs")
 }

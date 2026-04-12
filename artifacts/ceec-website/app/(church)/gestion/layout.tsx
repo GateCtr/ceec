@@ -74,6 +74,7 @@ export default async function GestionLayout({
     ...(canMembres ? [{ label: "Membres", href: "/gestion/membres", icon: "👥" }] : []),
     ...(canAdmins ? [{ label: "Admins", href: "/gestion/admins", icon: "🔐" }] : []),
     ...(canParametres ? [{ label: "Paramètres", href: "/gestion/parametres", icon: "⚙️" }] : []),
+    { label: "Journal", href: "/gestion/journal", icon: "📋" },
   ];
 
   const initial = eglise.nom.charAt(0).toUpperCase();

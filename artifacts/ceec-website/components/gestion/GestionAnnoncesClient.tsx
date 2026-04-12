@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { Annonce } from "@prisma/client";
+import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
   initialAnnonces: Annonce[];
@@ -149,15 +150,11 @@ export default function GestionAnnoncesClient({ initialAnnonces }: Props) {
                 </select>
               </div>
             </div>
-            <div>
-              <label style={s.label}>Image (URL)</label>
-              <input style={s.input} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
-              {form.imageUrl && (
-                <div style={{ marginTop: 8, borderRadius: 8, overflow: "hidden", maxWidth: 240, maxHeight: 120, background: "#f1f5f9" }}>
-                  <img src={form.imageUrl} alt="Aperçu" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                </div>
-              )}
-            </div>
+            <ImagePicker
+              label="Image"
+              value={form.imageUrl}
+              onChange={(url) => setForm({ ...form, imageUrl: url })}
+            />
             <div style={{ display: "flex", gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={s.label}>Date d&apos;expiration</label>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { Evenement } from "@prisma/client";
+import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
   initialEvenements: Evenement[];
@@ -161,15 +162,11 @@ export default function GestionEvenementsClient({ initialEvenements }: Props) {
                 <input type="datetime-local" style={s.input} value={form.dateFin} onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
               </div>
             </div>
-            <div>
-              <label style={s.label}>Image (URL)</label>
-              <input style={s.input} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
-              {form.imageUrl && (
-                <div style={{ marginTop: 8, borderRadius: 8, overflow: "hidden", maxWidth: 240, maxHeight: 120, background: "#f1f5f9" }}>
-                  <img src={form.imageUrl} alt="Aperçu" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                </div>
-              )}
-            </div>
+            <ImagePicker
+              label="Image"
+              value={form.imageUrl}
+              onChange={(url) => setForm({ ...form, imageUrl: url })}
+            />
             <div>
               <label style={s.label}>Lien d&apos;inscription (URL externe)</label>
               <input style={s.input} value={form.lienInscription} onChange={(e) => setForm({ ...form, lienInscription: e.target.value })} placeholder="https://forms.google.com/..." />

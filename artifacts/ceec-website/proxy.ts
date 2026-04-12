@@ -232,6 +232,21 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
+  // Rediriger les utilisateurs déjà connectés qui visitent /sign-in ou /sign-up
+  const isAuthPage =
+    url.pathname === "/sign-in" ||
+    url.pathname.startsWith("/sign-in/") ||
+    url.pathname === "/sign-up" ||
+    url.pathname.startsWith("/sign-up/");
+
+  if (isAuthPage) {
+    const { userId: uidCheck } = await auth();
+    if (uidCheck) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
+  }
+
   if (isPublicRoute(req)) return NextResponse.next();
 
   const { userId, sessionClaims } = await auth();

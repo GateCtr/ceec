@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, hasAutoPublishRole } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -38,13 +38,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
     }
 
+    const canAutoPublish = superAdmin || await hasAutoPublishRole(userId, egliseId);
+    let publishUpdate: { publie?: boolean; statutContenu?: "publie" | "brouillon" } = {};
+    if (typeof body.publie === "boolean") {
+      if (body.publie && canAutoPublish) {
+        publishUpdate = { publie: true, statutContenu: "publie" };
+      } else if (!body.publie) {
+        publishUpdate = { publie: false, statutContenu: "brouillon" };
+      }
+    }
+
     const annonce = await prisma.annonce.update({
       where: { id: annonceId },
       data: {
         titre: body.titre,
         contenu: body.contenu,
         priorite: body.priorite,
-        publie: typeof body.publie === "boolean" ? body.publie : undefined,
+        ...publishUpdate,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
         imageUrl: body.imageUrl !== undefined ? (body.imageUrl || null) : undefined,
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, hasAutoPublishRole } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -32,6 +32,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const body = await req.json();
+    const canAutoPublish = superAdmin || await hasAutoPublishRole(userId, egliseId);
+    let publishUpdate: { publie?: boolean; statutContenu?: "publie" | "brouillon" } = {};
+    if (typeof body.publie === "boolean") {
+      if (body.publie && canAutoPublish) {
+        publishUpdate = { publie: true, statutContenu: "publie" };
+      } else if (!body.publie) {
+        publishUpdate = { publie: false, statutContenu: "brouillon" };
+      }
+    }
+
     const evt = await prisma.evenement.update({
       where: { id: evtId },
       data: {
@@ -40,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         dateDebut: new Date(body.dateDebut),
         dateFin: body.dateFin ? new Date(body.dateFin) : null,
         lieu: body.lieu ?? null,
-        publie: body.publie,
+        ...publishUpdate,
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
         lienInscription: body.lienInscription !== undefined ? (body.lienInscription || null) : undefined,

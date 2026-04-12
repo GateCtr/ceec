@@ -41,7 +41,7 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
   try {
     if (egliseFilter) {
       const eg = await prisma.eglise.findUnique({ where: { slug: egliseFilter }, select: { id: true } });
-      if (eg) logWhere.egliseId = eg.id;
+      logWhere.egliseId = eg?.id ?? -1;
     }
     if (actionFilter) logWhere.action = actionFilter;
     const dateFrom = getDateFrom(dateFilter ?? "");

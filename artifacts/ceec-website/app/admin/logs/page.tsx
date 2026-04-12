@@ -39,7 +39,7 @@ async function getLogs(egliseFilter?: string, actionFilter?: string, dateFilter?
 
     if (egliseFilter) {
       const eglise = await prisma.eglise.findUnique({ where: { slug: egliseFilter }, select: { id: true } });
-      if (eglise) where.egliseId = eglise.id;
+      where.egliseId = eglise?.id ?? -1;
     }
     if (actionFilter) {
       where.action = actionFilter;

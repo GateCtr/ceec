@@ -92,9 +92,16 @@ export default function GestionMembresClient({ initialMembres }: Props) {
           ))}
         </div>
 
-        <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b", alignSelf: "center" }}>
+          <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b", alignSelf: "center" }}>
           {filtered.length} membre{filtered.length !== 1 ? "s" : ""}
         </span>
+        <a
+          href="/api/gestion/membres/export"
+          download
+          style={{ padding: "6px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
+        >
+          ↓ Exporter CSV
+        </a>
       </div>
 
       {filtered.length === 0 ? (

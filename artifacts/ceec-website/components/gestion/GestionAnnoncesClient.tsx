@@ -140,13 +140,20 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         {!canAutoPublish && (
           <div style={{ fontSize: 13, color: "#64748b", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px" }}>
             Votre contenu sera soumis pour validation avant publication.
           </div>
         )}
-        <div style={{ marginLeft: "auto" }}>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <a
+            href="/api/gestion/annonces/export"
+            download
+            style={{ padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
+          >
+            ↓ Exporter CSV
+          </a>
           <button onClick={openCreate} style={{
             background: "#1e3a8a", color: "white", border: "none", borderRadius: 8,
             padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer",

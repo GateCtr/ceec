@@ -101,10 +101,17 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 20 }}>
           {membres.length} membre{membres.length > 1 ? "s" : ""}
         </h2>
+        <a
+          href="/api/admin/membres/export"
+          download
+          style={{ padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
+        >
+          ↓ Exporter CSV
+        </a>
       </div>
 
       {error && <div style={{ padding: "1rem", borderRadius: 10, background: "#fee2e2", color: "#dc2626", marginBottom: 16 }}>{error}</div>}

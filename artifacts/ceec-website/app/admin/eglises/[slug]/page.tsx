@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
+import { enrichMembresWithRoles } from "@/lib/membre-role";
 import AdminEgliseDetailClient from "@/components/admin/AdminEgliseDetailClient";
 
 export const metadata = { title: "Détail Église | CEEC Admin" };
@@ -20,7 +21,7 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
 
   const { slug } = await params;
 
-  const [eglise, membres] = await Promise.all([
+  const [eglise, membresRaw] = await Promise.all([
     prisma.eglise.findUnique({
       where: { slug },
       include: {
@@ -35,11 +36,13 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
     prisma.membre.findMany({
       where: { eglise: { slug } },
       orderBy: { nom: "asc" },
-      select: { id: true, nom: true, prenom: true, email: true, role: true, statut: true, dateAdhesion: true },
+      select: { id: true, clerkUserId: true, nom: true, prenom: true, email: true, statut: true, dateAdhesion: true, egliseId: true },
     }),
   ]);
 
   if (!eglise) notFound();
+
+  const membres = await enrichMembresWithRoles(membresRaw, eglise.id);
 
   const statut = statutLabels[eglise.statut] ?? statutLabels.en_attente;
 
@@ -116,7 +119,7 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
           nom: m.nom,
           prenom: m.prenom,
           email: m.email,
-          role: m.role,
+          roleNom: m.roleNom,
           statut: m.statut,
           dateAdhesion: m.dateAdhesion ? m.dateAdhesion.toISOString() : null,
         }))}

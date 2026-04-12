@@ -106,7 +106,6 @@ export async function POST(
           prenom: clerkUser.firstName ?? "",
           email: invite.email,
           egliseId: invite.eglise.id,
-          role: "admin_eglise",
           statut: "actif",
         },
       }),

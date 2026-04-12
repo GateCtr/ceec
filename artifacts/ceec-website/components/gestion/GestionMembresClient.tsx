@@ -1,10 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import type { Membre } from "@prisma/client";
+import { CHURCH_ROLE_LABELS } from "@/lib/membre-role";
+
+interface MembreEnrichi {
+  id: number;
+  clerkUserId: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string | null;
+  egliseId: number | null;
+  statut: string;
+  dateAdhesion: Date | string | null;
+  roleNom: string;
+}
 
 interface Props {
-  initialMembres: Membre[];
+  initialMembres: MembreEnrichi[];
 }
 
 const statutLabels: Record<string, { label: string; bg: string; color: string }> = {
@@ -13,24 +26,30 @@ const statutLabels: Record<string, { label: string; bg: string; color: string }>
   suspendu: { label: "Suspendu", bg: "#fee2e2", color: "#b91c1c" },
 };
 
-const roleLabels: Record<string, { label: string; bg: string; color: string }> = {
-  fidele: { label: "Fidèle", bg: "#e0e7ff", color: "#3730a3" },
-  moderateur: { label: "Modérateur", bg: "#fef3c7", color: "#b45309" },
-  admin_eglise: { label: "Admin", bg: "#dcfce7", color: "#15803d" },
-};
-
 type StatutFilter = "all" | "actif" | "inactif" | "suspendu";
-type RoleFilter = "all" | "fidele" | "moderateur" | "admin_eglise";
+type RoleFilter = "all" | "admin_eglise" | "pasteur" | "diacre" | "tresorier" | "secretaire" | "fidele";
+
+const ROLE_FILTER_OPTIONS: { value: RoleFilter; label: string }[] = [
+  { value: "all", label: "Tous" },
+  { value: "admin_eglise", label: "Admin" },
+  { value: "pasteur", label: "Pasteur" },
+  { value: "diacre", label: "Diacre" },
+  { value: "tresorier", label: "Trésorier" },
+  { value: "secretaire", label: "Secrétaire" },
+  { value: "fidele", label: "Fidèle" },
+];
+
+const VALID_ROLES_GESTION = ["fidele", "diacre", "secretaire", "tresorier"];
 
 export default function GestionMembresClient({ initialMembres }: Props) {
-  const [membres, setMembres] = useState<Membre[]>(initialMembres);
+  const [membres, setMembres] = useState<MembreEnrichi[]>(initialMembres);
   const [statutFilter, setStatutFilter] = useState<StatutFilter>("all");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [loading, setLoading] = useState<number | null>(null);
 
   const filtered = membres.filter((m) => {
     const matchStatut = statutFilter === "all" || m.statut === statutFilter;
-    const matchRole = roleFilter === "all" || m.role === roleFilter;
+    const matchRole = roleFilter === "all" || m.roleNom === roleFilter;
     return matchStatut && matchRole;
   });
 
@@ -44,7 +63,7 @@ export default function GestionMembresClient({ initialMembres }: Props) {
       });
       if (res.ok) {
         const updated = await res.json();
-        setMembres((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+        setMembres((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
       }
     } finally {
       setLoading(null);
@@ -73,26 +92,26 @@ export default function GestionMembresClient({ initialMembres }: Props) {
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
           <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Rôle :</span>
-          {(["all", "fidele", "moderateur", "admin_eglise"] as const).map((f) => (
+          {ROLE_FILTER_OPTIONS.map((opt) => (
             <button
-              key={f}
-              onClick={() => setRoleFilter(f)}
+              key={opt.value}
+              onClick={() => setRoleFilter(opt.value)}
               style={{
                 padding: "5px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-                border: roleFilter === f ? "none" : "1.5px solid #e2e8f0",
-                background: roleFilter === f ? "#1e3a8a" : "white",
-                color: roleFilter === f ? "white" : "#374151",
-                fontWeight: roleFilter === f ? 700 : 400,
+                border: roleFilter === opt.value ? "none" : "1.5px solid #e2e8f0",
+                background: roleFilter === opt.value ? "#1e3a8a" : "white",
+                color: roleFilter === opt.value ? "white" : "#374151",
+                fontWeight: roleFilter === opt.value ? 700 : 400,
               }}
             >
-              {f === "all" ? "Tous" : roleLabels[f]?.label ?? f}
+              {opt.label}
             </button>
           ))}
         </div>
 
-          <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b", alignSelf: "center" }}>
+        <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b", alignSelf: "center" }}>
           {filtered.length} membre{filtered.length !== 1 ? "s" : ""}
         </span>
         <a
@@ -113,8 +132,9 @@ export default function GestionMembresClient({ initialMembres }: Props) {
         <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
           {filtered.map((m, idx) => {
             const statut = statutLabels[m.statut] ?? statutLabels.actif;
-            const role = roleLabels[m.role] ?? roleLabels.fidele;
+            const role = CHURCH_ROLE_LABELS[m.roleNom] ?? CHURCH_ROLE_LABELS.fidele;
             const isLoading = loading === m.id;
+            const isAdminRole = m.roleNom === "admin_eglise" || m.roleNom === "pasteur";
 
             return (
               <div key={m.id} style={{
@@ -150,15 +170,22 @@ export default function GestionMembresClient({ initialMembres }: Props) {
                     <option value="suspendu">Suspendu</option>
                   </select>
                   <select
-                    value={m.role}
-                    disabled={isLoading || m.role === "admin_eglise"}
+                    value={isAdminRole ? m.roleNom : m.roleNom}
+                    disabled={isLoading || isAdminRole}
                     onChange={(e) => updateMembre(m.id, { role: e.target.value })}
-                    style={{ padding: "5px 10px", borderRadius: 7, border: "1.5px solid #e2e8f0", fontSize: 12, cursor: m.role === "admin_eglise" ? "not-allowed" : "pointer", color: "#374151" }}
-                    title={m.role === "admin_eglise" ? "Gérez les admins depuis l'onglet Admins" : undefined}
+                    style={{
+                      padding: "5px 10px", borderRadius: 7, border: "1.5px solid #e2e8f0", fontSize: 12,
+                      cursor: isAdminRole ? "not-allowed" : "pointer", color: "#374151",
+                    }}
+                    title={isAdminRole ? "Gérez les admins depuis l'onglet Admins" : undefined}
                   >
-                    <option value="fidele">Fidèle</option>
-                    <option value="moderateur">Modérateur</option>
-                    {m.role === "admin_eglise" && <option value="admin_eglise">Admin</option>}
+                    {isAdminRole ? (
+                      <option value={m.roleNom}>{role.label}</option>
+                    ) : (
+                      VALID_ROLES_GESTION.map((r) => (
+                        <option key={r} value={r}>{CHURCH_ROLE_LABELS[r]?.label ?? r}</option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>

@@ -2,9 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Membre, Eglise } from "@prisma/client";
+import type { Eglise } from "@prisma/client";
 
-type MembreAvecEglise = Membre & { eglise: Eglise | null };
+interface MembreAvecEglise {
+  id: number;
+  clerkUserId: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string | null;
+  egliseId: number | null;
+  statut: string;
+  dateAdhesion: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  suspendedByChurch: boolean;
+  roleNom: string;
+  eglise: Eglise | null;
+}
 
 interface Props {
   initialMembres: MembreAvecEglise[];
@@ -21,16 +36,18 @@ const labelStyle: React.CSSProperties = {
 };
 
 const ROLE_LABELS: Record<string, { label: string; bg: string; color: string }> = {
-  fidele:         { label: "Fidèle",        bg: "#e0e7ff", color: "#3730a3" },
-  moderateur:     { label: "Modérateur",    bg: "#fef3c7", color: "#b45309" },
-  admin_eglise:   { label: "Admin église",  bg: "#dcfce7", color: "#15803d" },
-  admin:          { label: "Administrateur",bg: "#fef3c7", color: "#d97706" },
-  super_admin:    { label: "Super Admin",   bg: "#fce7f3", color: "#9d174d" },
-  admin_plateforme:{ label: "Admin plateforme", bg: "#ede9fe", color: "#6d28d9" },
+  fidele:           { label: "Fidèle",          bg: "#e0e7ff", color: "#3730a3" },
+  diacre:           { label: "Diacre",           bg: "#fef9c3", color: "#a16207" },
+  tresorier:        { label: "Trésorier",        bg: "#ffedd5", color: "#c2410c" },
+  secretaire:       { label: "Secrétaire",       bg: "#e0f2fe", color: "#0369a1" },
+  pasteur:          { label: "Pasteur",          bg: "#ede9fe", color: "#6d28d9" },
+  admin_eglise:     { label: "Admin église",     bg: "#dcfce7", color: "#15803d" },
+  super_admin:      { label: "Super Admin",      bg: "#fce7f3", color: "#9d174d" },
+  admin_plateforme: { label: "Admin plateforme", bg: "#ede9fe", color: "#6d28d9" },
 };
 
-function getRoleDisplay(role: string) {
-  return ROLE_LABELS[role] ?? { label: role, bg: "#f1f5f9", color: "#475569" };
+function getRoleDisplay(roleNom: string) {
+  return ROLE_LABELS[roleNom] ?? { label: roleNom, bg: "#f1f5f9", color: "#475569" };
 }
 
 export default function AdminMembresClient({ initialMembres, paroissesList }: Props) {
@@ -48,10 +65,10 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
   const sansParoisse = membres.filter(m => !m.egliseId);
   const avecParoisse = membres.filter(m => !!m.egliseId);
 
-  const handleEdit = (m: Membre) => {
+  const handleEdit = (m: MembreAvecEglise) => {
     setEditId(m.id);
     setEditForm({
-      role: m.role,
+      role: m.roleNom,
       statut: m.statut,
       egliseId: m.egliseId?.toString() || "",
     });
@@ -64,7 +81,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
     setError("");
   };
 
-  const handleSave = async (id: number, m: Membre) => {
+  const handleSave = async (id: number, m: MembreAvecEglise) => {
     if (!editForm) return;
     setLoading(true);
     setError("");
@@ -117,7 +134,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
 
   const renderMembre = (m: MembreAvecEglise) => {
     const eg = m.eglise;
-    const rd = getRoleDisplay(m.role);
+    const rd = getRoleDisplay(m.roleNom);
     return (
       <div key={m.id} style={{ background: "white", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
         {editId === m.id && editForm ? (
@@ -136,7 +153,10 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
                 <label style={labelStyle}>Rôle église</label>
                 <select value={editForm.role} onChange={e => setEditForm(f => f ? { ...f, role: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
                   <option value="fidele">Fidèle</option>
-                  <option value="moderateur">Modérateur</option>
+                  <option value="diacre">Diacre</option>
+                  <option value="secretaire">Secrétaire</option>
+                  <option value="tresorier">Trésorier</option>
+                  <option value="pasteur">Pasteur</option>
                   <option value="admin_eglise">Admin église</option>
                 </select>
               </div>

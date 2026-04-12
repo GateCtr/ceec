@@ -2,6 +2,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/index";
+import { getMemberChurchRole } from "@/lib/membre-role";
 import MonEspaceClient from "@/components/church/MonEspaceClient";
 import type { Metadata } from "next";
 
@@ -41,10 +42,12 @@ export default async function MonEspacePage() {
     redirect("/sign-up");
   }
 
-  // Fetch Clerk user for profile photo
-  const clerk = await clerkClient();
-  const clerkUser = await clerk.users.getUser(userId).catch(() => null);
-  const photoUrl = clerkUser?.imageUrl ?? null;
+  const [clerk, roleNom] = await Promise.all([
+    clerkClient().then((c) => c.users.getUser(userId).catch(() => null)),
+    getMemberChurchRole(userId, eglise.id),
+  ]);
+
+  const photoUrl = clerk?.imageUrl ?? null;
 
   const maintenant = new Date();
   const evenementsInscrits = membre.participations
@@ -74,7 +77,7 @@ export default async function MonEspacePage() {
     prenom: membre.prenom,
     email: membre.email,
     telephone: membre.telephone,
-    role: membre.role,
+    role: roleNom,
     statut: membre.statut,
     dateAdhesion: membre.dateAdhesion?.toISOString() ?? null,
     createdAt: membre.createdAt.toISOString(),

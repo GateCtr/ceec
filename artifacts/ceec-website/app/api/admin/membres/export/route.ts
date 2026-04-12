@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac";
+import { enrichMembresWithRolesMultiChurch, CHURCH_ROLE_LABELS } from "@/lib/membre-role";
 
 function esc(v: string | null | undefined): string {
   if (v == null) return "";
@@ -17,9 +18,7 @@ function esc(v: string | null | undefined): string {
 
 function toCSV(rows: Record<string, unknown>[], headers: { key: string; label: string }[]): string {
   const head = headers.map((h) => esc(h.label)).join(",");
-  const body = rows
-    .map((row) => headers.map((h) => esc(row[h.key] as string)).join(","))
-    .join("\n");
+  const body = rows.map((row) => headers.map((h) => esc(row[h.key] as string)).join(",")).join("\n");
   return `${head}\n${body}`;
 }
 
@@ -42,12 +41,14 @@ export async function GET(req: NextRequest) {
       orderBy: [{ eglise: { nom: "asc" } }, { nom: "asc" }],
     });
 
-    const rows = membres.map((m) => ({
+    const enriched = await enrichMembresWithRolesMultiChurch(membres);
+
+    const rows = enriched.map((m) => ({
       prenom: m.prenom,
       nom: m.nom,
       email: m.email,
       telephone: m.telephone ?? "",
-      role: m.role,
+      role: CHURCH_ROLE_LABELS[m.roleNom]?.label ?? m.roleNom,
       statut: m.statut,
       eglise: m.eglise?.nom ?? "",
       dateAdhesion: fmtDate(m.dateAdhesion),

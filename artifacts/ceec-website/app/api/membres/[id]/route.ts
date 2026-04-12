@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { canManageMembres, isSuperAdmin } from "@/lib/auth/rbac";
+import { setMemberChurchRole, getMemberChurchRole } from "@/lib/membre-role";
 
 function parseId(id: string) {
   const n = parseInt(id, 10);
@@ -23,7 +24,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!await canManageMembres(userId, membre.egliseId ?? undefined)) {
       return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
     }
-    return NextResponse.json(membre);
+
+    const roleNom = membre.egliseId
+      ? await getMemberChurchRole(membre.clerkUserId, membre.egliseId)
+      : "fidele";
+
+    return NextResponse.json({ ...membre, roleNom });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
@@ -62,11 +68,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         email: body.email,
         telephone: body.telephone ?? null,
         egliseId: targetEgliseId,
-        role: body.role,
         statut: body.statut,
       },
     });
-    return NextResponse.json(updated);
+
+    let roleNom = "fidele";
+    if (body.role && targetEgliseId) {
+      await setMemberChurchRole(existing.clerkUserId, targetEgliseId, body.role);
+      roleNom = body.role;
+    } else if (targetEgliseId) {
+      roleNom = await getMemberChurchRole(existing.clerkUserId, targetEgliseId);
+    }
+
+    return NextResponse.json({ ...updated, roleNom });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

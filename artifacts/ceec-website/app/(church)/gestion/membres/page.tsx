@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { enrichMembresWithRoles } from "@/lib/membre-role";
 import GestionMembresClient from "@/components/gestion/GestionMembresClient";
 
 export const metadata = { title: "Membres | Gestion" };
@@ -25,6 +26,8 @@ export default async function GestionMembresPage() {
     orderBy: { nom: "asc" },
   });
 
+  const membresEnrichis = await enrichMembresWithRoles(membres, egliseId);
+
   return (
     <div style={{ padding: "2rem", maxWidth: 900 }}>
       <div style={{ marginBottom: 24 }}>
@@ -33,7 +36,7 @@ export default async function GestionMembresPage() {
           {membres.length} membre{membres.length !== 1 ? "s" : ""} inscrit{membres.length !== 1 ? "s" : ""}
         </p>
       </div>
-      <GestionMembresClient initialMembres={membres} />
+      <GestionMembresClient initialMembres={membresEnrichis} />
     </div>
   );
 }

@@ -127,7 +127,6 @@ model Membre {
   email             String          @db.VarChar(255)
   telephone         String?         @db.VarChar(20)
   egliseId          Int?            @map("paroisse_id")
-  role              String          @default("fidele") @db.VarChar(20)
   dateAdhesion      DateTime?       @map("date_adhesion") @db.Date
   statut            String          @default("actif") @db.VarChar(20)
   suspendedByChurch Boolean         @default(false) @map("suspended_by_church")

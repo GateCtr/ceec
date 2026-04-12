@@ -41,7 +41,7 @@ interface MembreItem {
   nom: string;
   prenom: string;
   email: string;
-  role: string;
+  roleNom: string;
   statut: string;
   dateAdhesion: string | null;
 }
@@ -53,9 +53,12 @@ interface Props {
 }
 
 const roleLabels: Record<string, { label: string; bg: string; color: string }> = {
-  admin_eglise: { label: "Admin église", bg: "#dcfce7", color: "#15803d" },
-  moderateur: { label: "Modérateur", bg: "#fef3c7", color: "#b45309" },
-  fidele: { label: "Fidèle", bg: "#e0e7ff", color: "#3730a3" },
+  admin_eglise: { label: "Admin église",  bg: "#dcfce7", color: "#15803d" },
+  pasteur:      { label: "Pasteur",       bg: "#ede9fe", color: "#6d28d9" },
+  diacre:       { label: "Diacre",        bg: "#fef9c3", color: "#a16207" },
+  tresorier:    { label: "Trésorier",     bg: "#ffedd5", color: "#c2410c" },
+  secretaire:   { label: "Secrétaire",    bg: "#e0f2fe", color: "#0369a1" },
+  fidele:       { label: "Fidèle",        bg: "#e0e7ff", color: "#3730a3" },
 };
 
 const statutLabels: Record<string, { label: string; bg: string; color: string }> = {
@@ -269,7 +272,7 @@ export default function AdminEgliseDetailClient({ eglise, admins: initialAdmins,
               </thead>
               <tbody>
                 {filteredMembres.map((m) => {
-                  const rl = roleLabels[m.role] ?? roleLabels.fidele;
+                  const rl = roleLabels[m.roleNom] ?? roleLabels.fidele;
                   const sl = statutLabels[m.statut] ?? statutLabels.actif;
                   return (
                     <tr key={m.id} style={{ borderBottom: "1px solid #f1f5f9" }}>

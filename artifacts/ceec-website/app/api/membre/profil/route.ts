@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { getMemberChurchRole } from "@/lib/membre-role";
 
 export async function GET() {
   try {
@@ -31,6 +32,8 @@ export async function GET() {
 
     if (!membre) return NextResponse.json({ error: "Membre introuvable" }, { status: 404 });
 
+    const roleNom = await getMemberChurchRole(userId, eglise.id);
+
     const maintenant = new Date();
     const evenementsInscrits = membre.participations
       .filter((p) => p.evenement.statutContenu === "publie")
@@ -49,7 +52,7 @@ export async function GET() {
       prenom: membre.prenom,
       email: membre.email,
       telephone: membre.telephone,
-      role: membre.role,
+      role: roleNom,
       statut: membre.statut,
       dateAdhesion: membre.dateAdhesion,
       createdAt: membre.createdAt,
@@ -90,10 +93,12 @@ export async function PUT(req: NextRequest) {
     const updated = await prisma.membre.update({
       where: { id: membre.id },
       data: { nom, prenom, ...(telephone !== undefined ? { telephone } : {}) },
-      select: { id: true, nom: true, prenom: true, email: true, telephone: true, role: true, statut: true },
+      select: { id: true, nom: true, prenom: true, email: true, telephone: true, statut: true },
     });
 
-    return NextResponse.json(updated);
+    const roleNom = await getMemberChurchRole(userId, eglise.id);
+
+    return NextResponse.json({ ...updated, role: roleNom });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

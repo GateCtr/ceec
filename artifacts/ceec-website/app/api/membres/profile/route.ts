@@ -25,10 +25,21 @@ export async function POST(req: NextRequest) {
         email: body.email,
         telephone: body.telephone ?? null,
         egliseId,
-        role: "fidele",
         statut: "actif",
       },
     });
+
+    if (egliseId) {
+      const fideleRole = await prisma.role.findUnique({ where: { nom: "fidele" } });
+      if (fideleRole) {
+        await prisma.userRole.upsert({
+          where: { user_role_unique: { clerkUserId: userId, roleId: fideleRole.id, egliseId } },
+          update: {},
+          create: { clerkUserId: userId, roleId: fideleRole.id, egliseId },
+        });
+      }
+    }
+
     return NextResponse.json(newMembre, { status: 201 });
   } catch (error) {
     console.error("Error creating membre:", error);
@@ -69,10 +80,19 @@ export async function PUT(req: NextRequest) {
           email: body.email,
           telephone: body.telephone ?? null,
           egliseId,
-          role: "fidele",
           statut: "actif",
         },
       });
+      if (egliseId) {
+        const fideleRole = await prisma.role.findUnique({ where: { nom: "fidele" } });
+        if (fideleRole) {
+          await prisma.userRole.upsert({
+            where: { user_role_unique: { clerkUserId: userId, roleId: fideleRole.id, egliseId } },
+            update: {},
+            create: { clerkUserId: userId, roleId: fideleRole.id, egliseId },
+          });
+        }
+      }
       return NextResponse.json(created, { status: 201 });
     }
   } catch (error) {

@@ -13,18 +13,13 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}));
 
-    // Résolution du slug : 1) corps de la requête, 2) header middleware, 3) cookie
     const headersList = await headers();
     const slugFromHeader = headersList.get("x-eglise-slug");
     const slugFromCookie = req.cookies.get("ceec_church_slug")?.value;
-    const slug: string | undefined =
-      body.egliseSlug || slugFromHeader || slugFromCookie;
+    const slug: string | undefined = body.egliseSlug || slugFromHeader || slugFromCookie;
 
     if (!slug) {
-      return NextResponse.json(
-        { error: "Contexte d'église introuvable" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Contexte d'église introuvable" }, { status: 400 });
     }
 
     const eglise = await prisma.eglise.findUnique({
@@ -33,22 +28,18 @@ export async function POST(req: NextRequest) {
     });
 
     if (!eglise || eglise.statut !== "actif") {
-      return NextResponse.json(
-        { error: "Église introuvable ou inactive" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Église introuvable ou inactive" }, { status: 404 });
     }
 
     const egliseId = eglise.id;
 
-    const fideleRole = await prisma.role.findFirst({
-      where: { nom: "fidele" },
-    });
+    const fideleRole = await prisma.role.findFirst({ where: { nom: "fidele" } });
 
     let isNewMember = false;
     let membreEmail = "";
     let membrePrenom = "";
     let membreNom = "";
+
     await prisma.$transaction(async (tx) => {
       const existing = await tx.membre.findFirst({
         where: { clerkUserId: userId, egliseId },
@@ -56,9 +47,7 @@ export async function POST(req: NextRequest) {
       isNewMember = !existing;
 
       const upserted = await tx.membre.upsert({
-        where: {
-          membre_clerk_eglise_unique: { clerkUserId: userId, egliseId },
-        },
+        where: { membre_clerk_eglise_unique: { clerkUserId: userId, egliseId } },
         update: {},
         create: {
           clerkUserId: userId,
@@ -66,7 +55,6 @@ export async function POST(req: NextRequest) {
           prenom: body.prenom ?? "",
           email: body.email ?? "",
           egliseId,
-          role: "fidele",
           statut: "actif",
         },
       });
@@ -78,23 +66,14 @@ export async function POST(req: NextRequest) {
       if (fideleRole) {
         await tx.userRole.upsert({
           where: {
-            user_role_unique: {
-              clerkUserId: userId,
-              roleId: fideleRole.id,
-              egliseId,
-            },
+            user_role_unique: { clerkUserId: userId, roleId: fideleRole.id, egliseId },
           },
           update: {},
-          create: {
-            clerkUserId: userId,
-            roleId: fideleRole.id,
-            egliseId,
-          },
+          create: { clerkUserId: userId, roleId: fideleRole.id, egliseId },
         });
       }
     });
 
-    // Notify church staff when a genuinely new member joins (fire and forget)
     if (isNewMember && membreEmail) {
       const egliseWithNom = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
       void (async () => {

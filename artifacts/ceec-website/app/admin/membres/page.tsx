@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, hasAnyAdminRole } from "@/lib/auth/rbac";
+import { enrichMembresWithRolesMultiChurch } from "@/lib/membre-role";
 import AdminMembresClient from "@/components/admin/AdminMembresClient";
 
 async function isAdminUser(userId: string): Promise<boolean> {
@@ -24,6 +25,8 @@ export default async function AdminMembresPage() {
     prisma.eglise.findMany({ orderBy: { nom: "asc" } }),
   ]);
 
+  const membresEnrichis = await enrichMembresWithRolesMultiChurch(membresList);
+
   return (
     <div style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
@@ -31,10 +34,10 @@ export default async function AdminMembresPage() {
           Membres & Fidèles
         </h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
-          {membresList.length} membre{membresList.length !== 1 ? "s" : ""} au total
+          {membresEnrichis.length} membre{membresEnrichis.length !== 1 ? "s" : ""} au total
         </p>
       </div>
-      <AdminMembresClient initialMembres={membresList} paroissesList={eglisesList} />
+      <AdminMembresClient initialMembres={membresEnrichis} paroissesList={eglisesList} />
     </div>
   );
 }

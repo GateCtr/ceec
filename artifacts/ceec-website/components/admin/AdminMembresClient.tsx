@@ -20,6 +20,19 @@ const labelStyle: React.CSSProperties = {
   display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6
 };
 
+const ROLE_LABELS: Record<string, { label: string; bg: string; color: string }> = {
+  fidele:         { label: "Fidèle",        bg: "#e0e7ff", color: "#3730a3" },
+  moderateur:     { label: "Modérateur",    bg: "#fef3c7", color: "#b45309" },
+  admin_eglise:   { label: "Admin église",  bg: "#dcfce7", color: "#15803d" },
+  admin:          { label: "Administrateur",bg: "#fef3c7", color: "#d97706" },
+  super_admin:    { label: "Super Admin",   bg: "#fce7f3", color: "#9d174d" },
+  admin_plateforme:{ label: "Admin plateforme", bg: "#ede9fe", color: "#6d28d9" },
+};
+
+function getRoleDisplay(role: string) {
+  return ROLE_LABELS[role] ?? { label: role, bg: "#f1f5f9", color: "#475569" };
+}
+
 export default function AdminMembresClient({ initialMembres, paroissesList }: Props) {
   const router = useRouter();
   const [membres, setMembres] = useState(initialMembres);
@@ -31,6 +44,9 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
     statut: string;
     egliseId: string;
   } | null>(null);
+
+  const sansParoisse = membres.filter(m => !m.egliseId);
+  const avecParoisse = membres.filter(m => !!m.egliseId);
 
   const handleEdit = (m: Membre) => {
     setEditId(m.id);
@@ -99,11 +115,96 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
     setLoading(false);
   };
 
+  const renderMembre = (m: MembreAvecEglise) => {
+    const eg = m.eglise;
+    const rd = getRoleDisplay(m.role);
+    return (
+      <div key={m.id} style={{ background: "white", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+        {editId === m.id && editForm ? (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 14 }}>
+                {m.prenom.charAt(0)}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, color: "#0f172a" }}>{m.prenom} {m.nom}</div>
+                <div style={{ color: "#64748b", fontSize: 13 }}>{m.email}</div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <div>
+                <label style={labelStyle}>Rôle église</label>
+                <select value={editForm.role} onChange={e => setEditForm(f => f ? { ...f, role: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
+                  <option value="fidele">Fidèle</option>
+                  <option value="moderateur">Modérateur</option>
+                  <option value="admin_eglise">Admin église</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Statut</label>
+                <select value={editForm.statut} onChange={e => setEditForm(f => f ? { ...f, statut: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
+                  <option value="actif">Actif</option>
+                  <option value="inactif">Inactif</option>
+                  <option value="suspendu">Suspendu</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Église</label>
+                <select value={editForm.egliseId} onChange={e => setEditForm(f => f ? { ...f, egliseId: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
+                  <option value="">Aucune église</option>
+                  {paroissesList.map(eg => <option key={eg.id} value={eg.id.toString()}>{eg.nom}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={handleCancelEdit} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
+                Annuler
+              </button>
+              <button onClick={() => handleSave(m.id, m)} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: loading ? "#94a3b8" : "#1e3a8a", color: "white", fontWeight: 700, border: "none", cursor: loading ? "not-allowed" : "pointer", fontSize: 13 }}>
+                {loading ? "Sauvegarde..." : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                {m.prenom.charAt(0)}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, color: "#0f172a", fontSize: 14 }}>{m.prenom} {m.nom}</div>
+                <div style={{ color: "#64748b", fontSize: 13 }}>{m.email}</div>
+                {eg
+                  ? <div style={{ color: "#c59b2e", fontSize: 12, fontWeight: 600 }}>{eg.nom}</div>
+                  : <div style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>⚠ Sans paroisse</div>
+                }
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: rd.bg, color: rd.color }}>
+                {rd.label}
+              </span>
+              <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: m.statut === "actif" ? "#dcfce7" : m.statut === "suspendu" ? "#fee2e2" : "#f1f5f9", color: m.statut === "actif" ? "#16a34a" : m.statut === "suspendu" ? "#dc2626" : "#64748b" }}>
+                {m.statut === "actif" ? "Actif" : m.statut === "suspendu" ? "Suspendu" : "Inactif"}
+              </span>
+              <button onClick={() => handleEdit(m)} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#1e3a8a" }}>
+                Modifier
+              </button>
+              <button onClick={() => handleDelete(m.id)} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #fee2e2", background: "#fee2e2", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#dc2626" }}>
+                Supprimer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 20 }}>
-          {membres.length} membre{membres.length > 1 ? "s" : ""}
+          {membres.length} membre{membres.length > 1 ? "s" : ""} au total
         </h2>
         <a
           href="/api/admin/membres/export"
@@ -122,82 +223,31 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
           <p style={{ color: "#64748b" }}>Aucun membre inscrit pour le moment.</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {membres.map((m) => { const eg = m.eglise; return (
-            <div key={m.id} style={{ background: "white", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-              {editId === m.id && editForm ? (
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 14 }}>
-                      {m.prenom.charAt(0)}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: "#0f172a" }}>{m.prenom} {m.nom}</div>
-                      <div style={{ color: "#64748b", fontSize: 13 }}>{m.email}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-                    <div>
-                      <label style={labelStyle}>Rôle</label>
-                      <select value={editForm.role} onChange={e => setEditForm(f => f ? { ...f, role: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
-                        <option value="fidele">Fidèle</option>
-                        <option value="admin">Administrateur</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Statut</label>
-                      <select value={editForm.statut} onChange={e => setEditForm(f => f ? { ...f, statut: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
-                        <option value="actif">Actif</option>
-                        <option value="inactif">Inactif</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Église</label>
-                      <select value={editForm.egliseId} onChange={e => setEditForm(f => f ? { ...f, egliseId: e.target.value } : f)} style={{ ...inputStyle, cursor: "pointer" }}>
-                        <option value="">Aucune église</option>
-                        {paroissesList.map(eg => <option key={eg.id} value={eg.id.toString()}>{eg.nom}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={handleCancelEdit} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
-                      Annuler
-                    </button>
-                    <button onClick={() => handleSave(m.id, m)} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: loading ? "#94a3b8" : "#1e3a8a", color: "white", fontWeight: 700, border: "none", cursor: loading ? "not-allowed" : "pointer", fontSize: 13 }}>
-                      {loading ? "Sauvegarde..." : "Enregistrer"}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                      {m.prenom.charAt(0)}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: "#0f172a", fontSize: 14 }}>{m.prenom} {m.nom}</div>
-                      <div style={{ color: "#64748b", fontSize: 13 }}>{m.email}</div>
-                      {eg && <div style={{ color: "#c59b2e", fontSize: 12, fontWeight: 600 }}>{eg.nom}</div>}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: m.role === "admin" ? "#fef3c7" : "#e0f2fe", color: m.role === "admin" ? "#d97706" : "#0369a1" }}>
-                      {m.role === "admin" ? "Admin" : "Fidèle"}
-                    </span>
-                    <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: m.statut === "actif" ? "#dcfce7" : "#fee2e2", color: m.statut === "actif" ? "#16a34a" : "#dc2626" }}>
-                      {m.statut === "actif" ? "Actif" : "Inactif"}
-                    </span>
-                    <button onClick={() => handleEdit(m)} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#1e3a8a" }}>
-                      Modifier
-                    </button>
-                    <button onClick={() => handleDelete(m.id)} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #fee2e2", background: "#fee2e2", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#dc2626" }}>
-                      Supprimer
-                    </button>
-                  </div>
+        <div>
+          {sansParoisse.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#dc2626" }}>⚠ Membres sans paroisse ({sansParoisse.length})</span>
+                <span style={{ fontSize: 12, color: "#64748b" }}>— Ces enregistrements n'ont pas d'église associée</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {sansParoisse.map(renderMembre)}
+              </div>
+            </div>
+          )}
+
+          {avecParoisse.length > 0 && (
+            <div>
+              {sansParoisse.length > 0 && (
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 12 }}>
+                  Membres avec paroisse ({avecParoisse.length})
                 </div>
               )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {avecParoisse.map(renderMembre)}
+              </div>
             </div>
-          )})}
+          )}
         </div>
       )}
     </div>

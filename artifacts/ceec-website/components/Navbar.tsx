@@ -98,7 +98,7 @@ export default function Navbar({ initialNavInfo }: Props) {
           </div>
           <div>
             <div className="font-bold text-base leading-tight text-white tracking-wide">CEEC</div>
-            <div className="text-[11px] leading-tight text-white/70">Communauté Évangélique au Congo</div>
+            <div className="text-[11px] leading-tight text-white/70">Communauté des Églises Évangéliques au Congo</div>
           </div>
         </Link>
 

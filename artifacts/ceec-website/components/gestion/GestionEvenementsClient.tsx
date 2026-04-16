@@ -77,7 +77,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
       lieu: e.lieu ?? "",
       publie: e.publie,
       imageUrl: e.imageUrl ?? "",
-      videoUrl: (e as Evenement & { videoUrl?: string | null }).videoUrl ?? "",
+      videoUrl: e.videoUrl ?? "",
       categorie: e.categorie ?? "",
       lienInscription: e.lienInscription ?? "",
       visibilite: (e as Evenement & { visibilite?: string }).visibilite ?? "public",

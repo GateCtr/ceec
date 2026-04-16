@@ -72,7 +72,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
       publie: a.publie,
       dateExpiration: a.dateExpiration ? new Date(a.dateExpiration).toISOString().slice(0, 10) : "",
       imageUrl: a.imageUrl ?? "",
-      videoUrl: (a as Annonce & { videoUrl?: string | null }).videoUrl ?? "",
+      videoUrl: a.videoUrl ?? "",
       categorie: a.categorie ?? "",
       visibilite: (a as Annonce & { visibilite?: string }).visibilite ?? "public",
     });

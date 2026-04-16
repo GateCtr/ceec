@@ -136,10 +136,10 @@ export default async function EvenementDetailPage({ params }: Props) {
             {/* Main content */}
             <div>
               <div style={{ background: "white", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: 16 }}>
-                {(evt as typeof evt & { videoUrl?: string | null }).videoUrl && (
+                {evt.videoUrl && (
                   <div style={{ padding: "1.5rem 1.5rem 0" }}>
                     <video
-                      src={(evt as typeof evt & { videoUrl?: string | null }).videoUrl!}
+                      src={evt.videoUrl}
                       controls
                       style={{
                         width: "100%", borderRadius: 10, display: "block",

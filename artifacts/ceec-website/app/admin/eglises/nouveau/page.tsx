@@ -53,7 +53,7 @@ export default async function NouvelleEglisePage() {
         alignItems: "center",
       }}
     >
-      <div style={{ width: "100%", maxWidth: 600 }}>
+      <div style={{ width: "100%", maxWidth: 680 }}>
         <NouvelleEgliseForm initialPending={initialPending} />
       </div>
     </div>

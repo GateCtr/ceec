@@ -205,7 +205,7 @@ export default function NouvelleEgliseForm({ initialPending }: Props) {
             <Field label="Ville *">
               <input style={input} type="text" placeholder="Kinshasa" value={form.ville} onChange={(e) => setForm((f) => ({ ...f, ville: e.target.value }))} required />
             </Field>
-            <Field label="Sous-domaine (optionnel)" hint="ex: kinshasa-centre → kinshasa-centre.ceec.cd">
+            <Field label="Sous-domaine (optionnel)" hint="ex: kinshasa-centre (donne kinshasa-centre.ceec.cd)">
               <input style={input} type="text" placeholder="kinshasa-centre" value={form.sousDomaine}
                 onChange={(e) => setForm((f) => ({ ...f, sousDomaine: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") }))} />
             </Field>

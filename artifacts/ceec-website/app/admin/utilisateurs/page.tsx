@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, PLATFORM_ROLES, ROLES } from "@/lib/auth/rbac";
 import AdminUtilisateursClient from "@/components/admin/AdminUtilisateursClient";
+import { Info } from "lucide-react";
 
 export const metadata = { title: "Utilisateurs Admin | CEEC" };
 
@@ -79,7 +80,7 @@ export default async function AdminUtilisateursPage() {
           alignItems: "flex-start",
         }}
       >
-        <span style={{ fontSize: 18, flexShrink: 0 }}>ℹ️</span>
+        <span style={{ flexShrink: 0, color: "#1e40af" }}><Info size={18} /></span>
         <div style={{ fontSize: 13, color: "#1e40af", lineHeight: 1.55 }}>
           <strong>Admin Plateforme</strong> — accès complet (églises, membres, contenu, invitations) sans pouvoir modifier la configuration système.
           <br />

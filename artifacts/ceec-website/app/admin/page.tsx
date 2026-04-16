@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Users, Megaphone, Calendar, AlertCircle, ChevronRight } from "lucide-react";
+import { Building2, Users, Megaphone, Calendar, AlertCircle, ChevronRight, TrendingUp, TrendingDown } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin, getUserRoles, ROLES } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
@@ -456,7 +456,7 @@ function StatCard({
       </div>
       {trend != null && trend !== 0 && (
         <div style={{ marginTop: 5, fontSize: 12, color: trend > 0 ? "#15803d" : "#b91c1c", fontWeight: 600 }}>
-          {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}% vs mois dernier
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>{trend > 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />} {Math.abs(trend)}% vs mois dernier</span>
         </div>
       )}
       {sub}

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { Megaphone, ChevronLeft, ChevronRight } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/index";
 import type { Metadata } from "next";
 
@@ -29,6 +30,21 @@ export default async function ChurchAnnoncesPage({
   const eglise = await prisma.eglise.findUnique({ where: { slug } });
   if (!eglise) notFound();
 
+  const { userId } = await auth();
+
+  let visibiliteFilter: string[] = ["public"];
+  if (userId) {
+    const [memberOfThis, memberOfAny] = await Promise.all([
+      prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId: eglise.id, statut: "actif" } }),
+      prisma.membre.findFirst({ where: { clerkUserId: userId, statut: "actif" } }),
+    ]);
+    if (memberOfThis) {
+      visibiliteFilter = ["public", "communaute", "prive"];
+    } else if (memberOfAny) {
+      visibiliteFilter = ["public", "communaute"];
+    }
+  }
+
   const { page: pageStr, categorie } = await searchParams;
   const parsedPage = Number.parseInt(pageStr ?? "1", 10);
   const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
@@ -37,6 +53,7 @@ export default async function ChurchAnnoncesPage({
   const where = {
     egliseId: eglise.id,
     statutContenu: "publie" as const,
+    visibilite: { in: visibiliteFilter },
     ...(categorie ? { categorie } : {}),
   };
 
@@ -49,7 +66,7 @@ export default async function ChurchAnnoncesPage({
       take: ITEMS_PER_PAGE,
     }),
     prisma.annonce.findMany({
-      where: { egliseId: eglise.id, statutContenu: "publie" as const, categorie: { not: null } },
+      where: { egliseId: eglise.id, statutContenu: "publie" as const, visibilite: { in: visibiliteFilter }, categorie: { not: null } },
       select: { categorie: true },
       distinct: ["categorie"],
     }),

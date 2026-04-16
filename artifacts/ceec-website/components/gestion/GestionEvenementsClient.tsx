@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { Evenement } from "@prisma/client";
-import { Calendar as CalendarIcon, MapPin, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
@@ -18,6 +18,12 @@ const statutLabels: Record<string, { label: string; bg: string; color: string }>
   rejete:     { label: "Rejeté",     bg: "#fee2e2", color: "#b91c1c" },
 };
 
+const visibiliteConfig: Record<string, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
+  public:     { label: "Public",       bg: "#f0fdf4", color: "#15803d", icon: <Globe size={11} /> },
+  communaute: { label: "Communauté",   bg: "#eff6ff", color: "#1e40af", icon: <Users size={11} /> },
+  prive:      { label: "Privé",        bg: "#faf5ff", color: "#7c3aed", icon: <Lock size={11} /> },
+};
+
 const CATEGORIES_EVT = ["", "Culte", "Conférence", "Retraite", "Formation", "Mission", "Social", "Jeunesse", "Femmes", "Hommes", "Concert", "Autre"];
 
 type FormData = {
@@ -30,11 +36,12 @@ type FormData = {
   imageUrl: string;
   categorie: string;
   lienInscription: string;
+  visibilite: string;
 };
 
 const emptyForm: FormData = {
   titre: "", description: "", dateDebut: "", dateFin: "", lieu: "", publie: true,
-  imageUrl: "", categorie: "", lienInscription: "",
+  imageUrl: "", categorie: "", lienInscription: "", visibilite: "public",
 };
 
 export default function GestionEvenementsClient({ initialEvenements, canAutoPublish, egliseId }: Props) {
@@ -70,6 +77,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
       imageUrl: e.imageUrl ?? "",
       categorie: e.categorie ?? "",
       lienInscription: e.lienInscription ?? "",
+      visibilite: (e as Evenement & { visibilite?: string }).visibilite ?? "public",
     });
     setShowForm(true);
     setError(null);
@@ -212,6 +220,38 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                 <input type="datetime-local" style={s.input} value={form.dateFin} onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
               </div>
             </div>
+            <div>
+              <label style={s.label}>Visibilité</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {(["public", "communaute", "prive"] as const).map((v) => {
+                  const cfg = visibiliteConfig[v];
+                  const selected = form.visibilite === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setForm({ ...form, visibilite: v })}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "8px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        border: selected ? `2px solid ${cfg.color}` : "2px solid #e2e8f0",
+                        background: selected ? cfg.bg : "white",
+                        color: selected ? cfg.color : "#64748b",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {cfg.icon}
+                      {v === "public" ? "Public" : v === "communaute" ? "Communauté CEEC" : "Membres de l\u2019église"}
+                    </button>
+                  );
+                })}
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#94a3b8" }}>
+                {form.visibilite === "public" && "Visible par tous les visiteurs du site."}
+                {form.visibilite === "communaute" && "Visible uniquement par les membres connectés de la CEEC."}
+                {form.visibilite === "prive" && "Visible uniquement par les membres de cette église."}
+              </p>
+            </div>
             <ImagePicker
               label="Image"
               value={form.imageUrl}
@@ -250,6 +290,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
           {evenements.map((e) => {
             const past = isPast(e.dateDebut);
             const statut = statutLabels[e.statutContenu as string] ?? statutLabels.brouillon;
+            const visib = visibiliteConfig[(e as Evenement & { visibilite?: string }).visibilite ?? "public"] ?? visibiliteConfig.public;
             const isLoading = actionLoading === e.id;
             return (
               <div key={e.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", overflow: "hidden", opacity: past ? 0.85 : 1 }}>
@@ -264,6 +305,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{e.titre}</span>
                         <span style={{ ...s.badge, background: statut.bg, color: statut.color }}>{statut.label}</span>
+                        <span style={{ ...s.badge, background: visib.bg, color: visib.color, display: "inline-flex", alignItems: "center", gap: 4 }}>{visib.icon}{visib.label}</span>
                         {e.categorie && <span style={{ ...s.badge, background: "#eff6ff", color: "#1e40af" }}>{e.categorie}</span>}
                         {past && <span style={{ ...s.badge, background: "#f1f5f9", color: "#94a3b8" }}>Passé</span>}
                       </div>

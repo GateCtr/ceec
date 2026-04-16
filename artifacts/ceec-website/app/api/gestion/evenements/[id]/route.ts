@@ -42,6 +42,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
+    const VALID_VISIBILITES = ["public", "communaute", "prive"];
+    const visibiliteUpdate = body.visibilite && VALID_VISIBILITES.includes(body.visibilite)
+      ? { visibilite: body.visibilite }
+      : {};
+
     const evt = await prisma.evenement.update({
       where: { id: evtId },
       data: {
@@ -51,6 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         dateFin: body.dateFin ? new Date(body.dateFin) : null,
         lieu: body.lieu ?? null,
         ...publishUpdate,
+        ...visibiliteUpdate,
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
         lienInscription: body.lienInscription !== undefined ? (body.lienInscription || null) : undefined,

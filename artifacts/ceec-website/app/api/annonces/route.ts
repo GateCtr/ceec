@@ -6,7 +6,7 @@ import { canManageContent } from "@/lib/auth/rbac";
 export async function GET() {
   try {
     const all = await prisma.annonce.findMany({
-      where: { statutContenu: "publie" },
+      where: { statutContenu: "publie", visibilite: "public" },
       orderBy: { datePublication: "desc" },
     });
     return NextResponse.json(all);

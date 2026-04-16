@@ -44,8 +44,8 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 
 #### Church Gestion Dashboard (`/gestion/`)
 - `/gestion` — Dashboard home (stats)
-- `/gestion/annonces` — CRUD with image, categorie, priorité
-- `/gestion/evenements` — CRUD with image, categorie, lieu, lien inscription
+- `/gestion/annonces` — CRUD with image, categorie, priorité, **visibilite** (public/communaute/prive)
+- `/gestion/evenements` — CRUD with image, categorie, lieu, lien inscription, **visibilite** (public/communaute/prive)
 - `/gestion/membres` — Member management
 - `/gestion/admins` — Admin/role management
 - `/gestion/parametres` — Church settings (basic info)

@@ -67,6 +67,9 @@ export async function POST(req: NextRequest) {
     const statutContenu = canAutoPublish && wantsPublished ? "publie" : "brouillon";
     const publie = statutContenu === "publie";
 
+    const VALID_VISIBILITES = ["public", "communaute", "prive"];
+    const visibilite = body.visibilite && VALID_VISIBILITES.includes(body.visibilite) ? body.visibilite : "public";
+
     const annonce = await prisma.annonce.create({
       data: {
         titre: body.titre,
@@ -79,6 +82,7 @@ export async function POST(req: NextRequest) {
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie ?? null,
+        visibilite,
       },
     });
 

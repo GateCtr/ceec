@@ -6,7 +6,7 @@ import { Megaphone, ChevronRight } from "lucide-react";
 async function getAnnonces() {
   try {
     return await prisma.annonce.findMany({
-      where: { statutContenu: "publie" as const },
+      where: { statutContenu: "publie" as const, visibilite: "public" },
       orderBy: { datePublication: "desc" },
     });
   } catch {

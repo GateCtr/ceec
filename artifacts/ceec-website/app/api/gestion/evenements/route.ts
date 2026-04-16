@@ -55,6 +55,9 @@ export async function POST(req: NextRequest) {
     const statutContenu = canAutoPublish && wantsPublished ? "publie" : "brouillon";
     const publie = statutContenu === "publie";
 
+    const VALID_VISIBILITES = ["public", "communaute", "prive"];
+    const visibilite = body.visibilite && VALID_VISIBILITES.includes(body.visibilite) ? body.visibilite : "public";
+
     const evt = await prisma.evenement.create({
       data: {
         titre: body.titre,
@@ -68,6 +71,7 @@ export async function POST(req: NextRequest) {
         imageUrl: body.imageUrl ?? null,
         categorie: body.categorie ?? null,
         lienInscription: body.lienInscription ?? null,
+        visibilite,
       },
     });
 

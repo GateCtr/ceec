@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/index";
 
@@ -23,6 +24,21 @@ export default async function ChurchEvenementsPage({
   const eglise = await prisma.eglise.findUnique({ where: { slug } });
   if (!eglise) notFound();
 
+  const { userId } = await auth();
+
+  let visibiliteFilter: string[] = ["public"];
+  if (userId) {
+    const [memberOfThis, memberOfAny] = await Promise.all([
+      prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId: eglise.id, statut: "actif" } }),
+      prisma.membre.findFirst({ where: { clerkUserId: userId, statut: "actif" } }),
+    ]);
+    if (memberOfThis) {
+      visibiliteFilter = ["public", "communaute", "prive"];
+    } else if (memberOfAny) {
+      visibiliteFilter = ["public", "communaute"];
+    }
+  }
+
   const { tab = "avenir", page: pageStr, categorie } = await searchParams;
   const isPast = tab === "passes";
   const parsedPage = Number.parseInt(pageStr ?? "1", 10);
@@ -33,6 +49,7 @@ export default async function ChurchEvenementsPage({
   const where = {
     egliseId: eglise.id,
     statutContenu: "publie" as const,
+    visibilite: { in: visibiliteFilter },
     ...(isPast ? { dateDebut: { lt: now } } : { dateDebut: { gte: now } }),
     ...(categorie ? { categorie } : {}),
   };
@@ -46,7 +63,7 @@ export default async function ChurchEvenementsPage({
       take: ITEMS_PER_PAGE,
     }),
     prisma.evenement.findMany({
-      where: { egliseId: eglise.id, statutContenu: "publie" as const, categorie: { not: null } },
+      where: { egliseId: eglise.id, statutContenu: "publie" as const, visibilite: { in: visibiliteFilter }, categorie: { not: null } },
       select: { categorie: true },
       distinct: ["categorie"],
     }),

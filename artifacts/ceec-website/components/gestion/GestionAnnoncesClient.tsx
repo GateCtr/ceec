@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { Annonce } from "@prisma/client";
-import { Megaphone, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus } from "lucide-react";
+import { Megaphone, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
@@ -24,6 +24,12 @@ const statutLabels: Record<string, { label: string; bg: string; color: string }>
   rejete:     { label: "Rejeté",      bg: "#fee2e2", color: "#b91c1c" },
 };
 
+const visibiliteConfig: Record<string, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
+  public:     { label: "Public",       bg: "#f0fdf4", color: "#15803d", icon: <Globe size={11} /> },
+  communaute: { label: "Communauté",   bg: "#eff6ff", color: "#1e40af", icon: <Users size={11} /> },
+  prive:      { label: "Privé",        bg: "#faf5ff", color: "#7c3aed", icon: <Lock size={11} /> },
+};
+
 const CATEGORIES = ["", "Culte", "Formation", "Prière", "Mission", "Social", "Jeunesse", "Femmes", "Hommes", "Autre"];
 
 type FormData = {
@@ -34,9 +40,10 @@ type FormData = {
   dateExpiration: string;
   imageUrl: string;
   categorie: string;
+  visibilite: string;
 };
 
-const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", categorie: "" };
+const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", categorie: "", visibilite: "public" };
 
 export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish, egliseId }: Props) {
   const [annonces, setAnnonces] = useState<Annonce[]>(initialAnnonces);
@@ -64,6 +71,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
       dateExpiration: a.dateExpiration ? new Date(a.dateExpiration).toISOString().slice(0, 10) : "",
       imageUrl: a.imageUrl ?? "",
       categorie: a.categorie ?? "",
+      visibilite: (a as Annonce & { visibilite?: string }).visibilite ?? "public",
     });
     setShowForm(true);
     setError(null);
@@ -201,6 +209,38 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
                 </select>
               </div>
             </div>
+            <div>
+              <label style={s.label}>Visibilité</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {(["public", "communaute", "prive"] as const).map((v) => {
+                  const cfg = visibiliteConfig[v];
+                  const selected = form.visibilite === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setForm({ ...form, visibilite: v })}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "8px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        border: selected ? `2px solid ${cfg.color}` : "2px solid #e2e8f0",
+                        background: selected ? cfg.bg : "white",
+                        color: selected ? cfg.color : "#64748b",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {cfg.icon}
+                      {v === "public" ? "Public" : v === "communaute" ? "Communauté CEEC" : "Membres de l\u2019église"}
+                    </button>
+                  );
+                })}
+              </div>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#94a3b8" }}>
+                {form.visibilite === "public" && "Visible par tous les visiteurs du site."}
+                {form.visibilite === "communaute" && "Visible uniquement par les membres connectés de la CEEC."}
+                {form.visibilite === "prive" && "Visible uniquement par les membres de cette église."}
+              </p>
+            </div>
             <ImagePicker
               label="Image"
               value={form.imageUrl}
@@ -243,6 +283,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
           {annonces.map((a) => {
             const pr = prioriteLabels[a.priorite] ?? prioriteLabels.normale;
             const statut = statutLabels[a.statutContenu as string] ?? statutLabels.brouillon;
+            const visib = visibiliteConfig[(a as Annonce & { visibilite?: string }).visibilite ?? "public"] ?? visibiliteConfig.public;
             const isLoading = actionLoading === a.id;
             return (
               <div key={a.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", overflow: "hidden" }}>
@@ -258,6 +299,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
                         <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{a.titre}</span>
                         <span style={{ ...s.badge, background: pr.bg, color: pr.color }}>{pr.label}</span>
                         <span style={{ ...s.badge, background: statut.bg, color: statut.color }}>{statut.label}</span>
+                        <span style={{ ...s.badge, background: visib.bg, color: visib.color, display: "inline-flex", alignItems: "center", gap: 4 }}>{visib.icon}{visib.label}</span>
                         {a.categorie && <span style={{ ...s.badge, background: "#f0fdf4", color: "#15803d" }}>{a.categorie}</span>}
                       </div>
                       <p style={{ color: "#64748b", fontSize: 13, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{a.contenu}</p>

@@ -6,7 +6,7 @@ import { CalendarDays, MapPin, ChevronRight } from "lucide-react";
 async function getEvenements() {
   try {
     return await prisma.evenement.findMany({
-      where: { statutContenu: "publie" as const },
+      where: { statutContenu: "publie" as const, visibilite: "public" },
       orderBy: { dateDebut: "asc" },
     });
   } catch {

@@ -157,6 +157,7 @@ model Annonce {
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
   categorie        String?   @db.VarChar(100)
   imageUrl         String?   @map("image_url")
+  visibilite       String    @default("public") @db.VarChar(20)
   auteur           Membre?   @relation(fields: [auteurId], references: [id])
   eglise           Eglise?   @relation(fields: [egliseId], references: [id])
 
@@ -180,6 +181,7 @@ model Evenement {
   updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at")
   categorie        String?         @db.VarChar(100)
   lienInscription  String?         @map("lien_inscription") @db.VarChar(500)
+  visibilite       String          @default("public") @db.VarChar(20)
   eglise           Eglise?         @relation(fields: [egliseId], references: [id])
   participations   Participation[]
 

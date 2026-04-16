@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/index";
 
@@ -61,8 +62,8 @@ export default async function AnnonceDetailPage({ params }: Props) {
         }}
       >
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
-          <Link href="/c/annonces" style={{ display: "inline-block", color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", marginBottom: 20 }}>
-            ← Toutes les annonces
+          <Link href="/c/annonces" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", marginBottom: 20 }}>
+            <ArrowLeft size={14} /> Toutes les annonces
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
             <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: style.bg, color: style.color }}>
@@ -134,9 +135,10 @@ export default async function AnnonceDetailPage({ params }: Props) {
               style={{
                 padding: "12px 28px", borderRadius: 10, background: "var(--church-primary, #1e3a8a)",
                 color: "white", fontWeight: 700, fontSize: 14, textDecoration: "none",
+                display: "inline-flex", alignItems: "center", gap: 8,
               }}
             >
-              ← Retour aux annonces
+              <ArrowLeft size={15} /> Retour aux annonces
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Calendar, Megaphone, MapPin, CheckCircle, ChevronRight } from "lucide-react";
 
 interface ProfilData {
   id: number;
@@ -147,7 +148,11 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
             background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "6px 14px",
             fontSize: 12, fontWeight: 700,
           }}>
-            {currentProfil.statut === "actif" ? "✓ Actif" : currentProfil.statut}
+            {currentProfil.statut === "actif" ? (
+              <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <CheckCircle size={13} />Actif
+              </span>
+            ) : currentProfil.statut}
           </div>
         </div>
 
@@ -277,10 +282,12 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
             )}
             {evenementsInscrits.length === 0 && (
               <div style={{ background: "white", borderRadius: 16, padding: "3rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>📅</div>
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+                  <Calendar size={40} color="#94a3b8" strokeWidth={1.5} />
+                </div>
                 <p style={{ color: "#64748b", fontSize: 15 }}>Vous n&apos;êtes inscrit à aucun événement pour le moment.</p>
-                <a href="/c/evenements" style={{ display: "inline-block", marginTop: 14, padding: "9px 20px", borderRadius: 8, background: primary, color: "white", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-                  Voir les événements →
+                <a href="/c/evenements" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, padding: "9px 20px", borderRadius: 8, background: primary, color: "white", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+                  Voir les événements <ChevronRight size={15} />
                 </a>
               </div>
             )}
@@ -292,7 +299,9 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {annonces.length === 0 ? (
               <div style={{ background: "white", borderRadius: 16, padding: "3rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>📢</div>
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+                  <Megaphone size={40} color="#94a3b8" strokeWidth={1.5} />
+                </div>
                 <p style={{ color: "#64748b", fontSize: 15 }}>Aucune annonce pour le moment.</p>
               </div>
             ) : (
@@ -339,7 +348,11 @@ function EventCard({ evt, primary }: { evt: { id: number; titre: string; dateDeb
         </div>
         <div style={{ padding: "0.875rem 1rem", flex: 1 }}>
           <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{evt.titre}</div>
-          {evt.lieu && <div style={{ color: "#64748b", fontSize: 12, marginTop: 3 }}>📍 {evt.lieu}</div>}
+          {evt.lieu && (
+            <div style={{ color: "#64748b", fontSize: 12, marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
+              <MapPin size={11} />{evt.lieu}
+            </div>
+          )}
         </div>
       </div>
     </a>

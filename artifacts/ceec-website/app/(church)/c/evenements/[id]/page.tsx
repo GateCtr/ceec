@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, Clock, Timer, MapPin, Users, CalendarDays, Tag, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/index";
 import ParticipationButton from "@/components/church/ParticipationButton";
@@ -82,8 +83,8 @@ export default async function EvenementDetailPage({ params }: Props) {
         }}
       >
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
-          <Link href="/c/evenements" style={{ display: "inline-block", color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", marginBottom: 20 }}>
-            ← Tous les événements
+          <Link href="/c/evenements" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", marginBottom: 20 }}>
+            <ArrowLeft size={14} /> Tous les événements
           </Link>
           {!isUpcoming && (
             <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: "rgba(255,255,255,0.15)", marginBottom: 12, marginLeft: 0 }}>
@@ -94,19 +95,26 @@ export default async function EvenementDetailPage({ params }: Props) {
             {evt.titre}
           </h1>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap", fontSize: 14, opacity: 0.85 }}>
-            <span>
-              🕐 {new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Clock size={14} />
+              {new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
               {" "}à{" "}
               {new Date(evt.dateDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
             </span>
             {evt.dateFin && (
-              <span>
-                ⏱ Jusqu&apos;au {new Date(evt.dateFin).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Timer size={14} /> Jusqu&apos;au {new Date(evt.dateFin).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
               </span>
             )}
-            {evt.lieu && <span>📍 {evt.lieu}</span>}
+            {evt.lieu && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <MapPin size={14} /> {evt.lieu}
+              </span>
+            )}
             {nbParticipants > 0 && (
-              <span>🙋 {nbParticipants} participant{nbParticipants > 1 ? "s" : ""}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Users size={14} /> {nbParticipants} participant{nbParticipants > 1 ? "s" : ""}
+              </span>
             )}
           </div>
         </div>
@@ -133,16 +141,30 @@ export default async function EvenementDetailPage({ params }: Props) {
                   Informations
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14, color: "#475569" }}>
-                  <div>
-                    📅 {new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <CalendarDays size={15} style={{ flexShrink: 0 }} />
+                    {new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                   </div>
-                  <div>
-                    🕐 {new Date(evt.dateDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Clock size={15} style={{ flexShrink: 0 }} />
+                    {new Date(evt.dateDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                     {evt.dateFin && ` – ${new Date(evt.dateFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`}
                   </div>
-                  {evt.lieu && <div>📍 {evt.lieu}</div>}
-                  {evt.categorie && <div>🏷️ {evt.categorie}</div>}
-                  {nbParticipants > 0 && <div>🙋 {nbParticipants} participant{nbParticipants > 1 ? "s" : ""}</div>}
+                  {evt.lieu && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <MapPin size={15} style={{ flexShrink: 0 }} />{evt.lieu}
+                    </div>
+                  )}
+                  {evt.categorie && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Tag size={15} style={{ flexShrink: 0 }} />{evt.categorie}
+                    </div>
+                  )}
+                  {nbParticipants > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Users size={15} style={{ flexShrink: 0 }} />{nbParticipants} participant{nbParticipants > 1 ? "s" : ""}
+                    </div>
+                  )}
 
                   {/* Participation button — only for upcoming events */}
                   {isUpcoming && (
@@ -168,7 +190,7 @@ export default async function EvenementDetailPage({ params }: Props) {
                         fontWeight: 700, fontSize: 14, textDecoration: "none",
                       }}
                     >
-                      S&apos;inscrire à cet événement →
+                      S&apos;inscrire à cet événement <ExternalLink size={13} style={{ marginLeft: 4 }} />
                     </a>
                   )}
                 </div>
@@ -212,9 +234,10 @@ export default async function EvenementDetailPage({ params }: Props) {
               style={{
                 padding: "12px 28px", borderRadius: 10, background: "var(--church-primary, #1e3a8a)",
                 color: "white", fontWeight: 700, fontSize: 14, textDecoration: "none",
+                display: "inline-flex", alignItems: "center", gap: 8,
               }}
             >
-              ← Retour aux événements
+              <ArrowLeft size={15} /> Retour aux événements
             </Link>
           </div>
         </div>

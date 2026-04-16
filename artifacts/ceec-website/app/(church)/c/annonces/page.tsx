@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { Megaphone, ChevronLeft, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/db/index";
 import type { Metadata } from "next";
 
@@ -104,7 +105,9 @@ export default async function ChurchAnnoncesPage({
 
           {annoncesList.length === 0 ? (
             <div style={{ textAlign: "center", padding: "5rem", background: "white", borderRadius: 16, border: "1px dashed #e2e8f0" }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>📢</div>
+              <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+                <Megaphone size={52} color="var(--church-primary, #1e3a8a)" strokeWidth={1.5} />
+              </div>
               <h3 style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 700, marginBottom: 8 }}>
                 Aucune annonce pour le moment
               </h3>
@@ -174,9 +177,9 @@ export default async function ChurchAnnoncesPage({
                   {currentPage > 1 && (
                     <Link
                       href={`/c/annonces?page=${currentPage - 1}${categorie ? `&categorie=${encodeURIComponent(categorie)}` : ""}`}
-                      style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14 }}
+                      style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}
                     >
-                      ← Précédent
+                      <ChevronLeft size={14} /> Précédent
                     </Link>
                   )}
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -197,9 +200,9 @@ export default async function ChurchAnnoncesPage({
                   {currentPage < totalPages && (
                     <Link
                       href={`/c/annonces?page=${currentPage + 1}${categorie ? `&categorie=${encodeURIComponent(categorie)}` : ""}`}
-                      style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14 }}
+                      style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}
                     >
-                      Suivant →
+                      Suivant <ChevronRight size={14} />
                     </Link>
                   )}
                 </div>

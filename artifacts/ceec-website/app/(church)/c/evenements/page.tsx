@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/index";
 
@@ -132,7 +133,9 @@ export default async function ChurchEvenementsPage({
 
           {evenementsList.length === 0 ? (
             <div style={{ textAlign: "center", padding: "5rem", background: "white", borderRadius: 16, border: "1px dashed #e2e8f0" }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>📅</div>
+              <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+                <Calendar size={52} color="var(--church-primary, #1e3a8a)" strokeWidth={1.5} />
+              </div>
               <h3 style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 700, marginBottom: 8 }}>
                 {isPast ? "Aucun événement passé" : "Aucun événement à venir"}
               </h3>
@@ -181,10 +184,12 @@ export default async function ChurchEvenementsPage({
                           {evt.titre}
                         </h2>
                         {evt.lieu && (
-                          <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 6px" }}>📍 {evt.lieu}</p>
+                          <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 5 }}>
+                            <MapPin size={13} />{evt.lieu}
+                          </p>
                         )}
-                        <p style={{ color: "#64748b", fontSize: 12, margin: "0 0 8px" }}>
-                          🕐 {new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                        <p style={{ color: "#64748b", fontSize: 12, margin: "0 0 8px", display: "flex", alignItems: "center", gap: 5 }}>
+                          <Clock size={13} />{new Date(evt.dateDebut).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                           {!evt.imageUrl && ` – ${new Date(evt.dateDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`}
                         </p>
                         {evt.description && (
@@ -207,8 +212,8 @@ export default async function ChurchEvenementsPage({
               {totalPages > 1 && (
                 <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 40, flexWrap: "wrap" }}>
                   {currentPage > 1 && (
-                    <Link href={buildHref({ page: String(currentPage - 1) })} style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14 }}>
-                      ← Précédent
+                    <Link href={buildHref({ page: String(currentPage - 1) })} style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <ChevronLeft size={14} /> Précédent
                     </Link>
                   )}
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -223,8 +228,8 @@ export default async function ChurchEvenementsPage({
                     </Link>
                   ))}
                   {currentPage < totalPages && (
-                    <Link href={buildHref({ page: String(currentPage + 1) })} style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14 }}>
-                      Suivant →
+                    <Link href={buildHref({ page: String(currentPage + 1) })} style={{ padding: "8px 16px", borderRadius: 8, background: "white", border: "1px solid #e2e8f0", color: "#334155", textDecoration: "none", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      Suivant <ChevronRight size={14} />
                     </Link>
                   )}
                 </div>

@@ -40,6 +40,12 @@ async function getDashboardData(
     const dateFrom = getDateFrom(dateFilter ?? "");
     if (dateFrom) logWhere.createdAt = { gte: dateFrom };
 
+    const platformAdminIds = await prisma.userRole.findMany({
+      where: { egliseId: null },
+      select: { clerkUserId: true },
+    });
+    const excludedClerkIds = platformAdminIds.map((r) => r.clerkUserId);
+
     const [
       eglisesRaw,
       eglises,
@@ -67,7 +73,11 @@ async function getDashboardData(
           _count: { select: { membres: true } },
         },
       }),
-      prisma.membre.count(),
+      prisma.membre.count({
+        where: excludedClerkIds.length > 0
+          ? { clerkUserId: { notIn: excludedClerkIds } }
+          : undefined,
+      }),
       prisma.annonce.count({ where: { createdAt: { gte: startOfMonth } } }),
       prisma.annonce.count({
         where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },

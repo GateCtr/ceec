@@ -83,7 +83,6 @@ interface Props {
   collapsed: boolean;
   onToggle: () => void;
   user?: UserInfo;
-  mobileOpen?: boolean;
   onMobileClose?: () => void;
 }
 
@@ -99,7 +98,6 @@ export default function DashboardSidebar({
   collapsed,
   onToggle,
   user,
-  mobileOpen = false,
   onMobileClose,
 }: Props) {
   const pathname = usePathname();

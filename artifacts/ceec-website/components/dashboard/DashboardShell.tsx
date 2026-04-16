@@ -171,7 +171,6 @@ export default function DashboardShell({
               collapsed={false}
               onToggle={() => setMobileOpen(false)}
               user={userInfo}
-              mobileOpen={mobileOpen}
               onMobileClose={() => setMobileOpen(false)}
             />
           </div>

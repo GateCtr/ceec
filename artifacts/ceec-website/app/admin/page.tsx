@@ -2,6 +2,7 @@ import React from "react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Building2, Users, Megaphone, Calendar, AlertCircle } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin, getUserRoles, ROLES } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
@@ -239,6 +240,7 @@ export default async function AdminPage({
           total={stats.eglises.total}
           color="#1e3a8a"
           href="/admin/eglises"
+          icon={<Building2 size={20} />}
           sub={
             <div style={{ marginTop: 8, display: "flex", gap: 5, flexWrap: "wrap" }}>
               {stats.eglises.en_attente > 0 && (
@@ -255,6 +257,7 @@ export default async function AdminPage({
           value={stats.membres}
           color="#0891b2"
           href="/admin/membres"
+          icon={<Users size={20} />}
         />
         <StatCard
           label="Annonces ce mois"
@@ -262,12 +265,14 @@ export default async function AdminPage({
           color="#16a34a"
           trend={stats.annoncesTrend}
           href="/admin/annonces"
+          icon={<Megaphone size={20} />}
         />
         <StatCard
           label="Événements à venir"
           value={stats.evenementsAVenir}
           color="#d97706"
           href="/admin/evenements"
+          icon={<Calendar size={20} />}
         />
         {totalValidation > 0 && (
           <StatCard
@@ -275,6 +280,7 @@ export default async function AdminPage({
             value={totalValidation}
             color="#dc2626"
             urgent
+            icon={<AlertCircle size={20} />}
           />
         )}
       </div>
@@ -390,6 +396,7 @@ function StatCard({
   href,
   urgent,
   sub,
+  icon,
 }: {
   label: string;
   value: number;
@@ -399,6 +406,7 @@ function StatCard({
   href?: string;
   urgent?: boolean;
   sub?: React.ReactNode;
+  icon?: React.ReactNode;
 }) {
   const inner = (
     <div
@@ -416,8 +424,15 @@ function StatCard({
         display: "block",
       }}
     >
-      <div style={{ fontSize: 11.5, color: urgent ? "#b91c1c" : "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        {label}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ fontSize: 11.5, color: urgent ? "#b91c1c" : "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          {label}
+        </div>
+        {icon && (
+          <div style={{ color, opacity: 0.7, flexShrink: 0 }}>
+            {icon}
+          </div>
+        )}
       </div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, marginTop: 6 }}>
         <div style={{ fontSize: 38, fontWeight: 900, color, lineHeight: 1.05 }}>

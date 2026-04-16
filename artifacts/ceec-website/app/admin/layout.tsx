@@ -17,7 +17,6 @@ export default async function AdminLayout({
   const roleNames = userRoles.map((ur) => ur.role.nom);
   const isSuperAdmin = roleNames.includes(ROLES.SUPER_ADMIN);
   const isAdminPlateforme = roleNames.includes(ROLES.ADMIN_PLATEFORME);
-  const isModerateur = roleNames.includes(ROLES.MODERATEUR_PLATEFORME);
 
   const userRoleLabel = isSuperAdmin
     ? "Super Administrateur"

@@ -95,7 +95,7 @@ export default async function EvenementsPage({
             }}>
               Agenda communautaire
             </span>
-            <h1 style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 900, margin: "0 0 16px", lineHeight: 1.15 }}>
+            <h1 style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 900, margin: "0 0 16px", lineHeight: 1.15, color: "white" }}>
               Événements à venir
             </h1>
             <p style={{ fontSize: 16, opacity: 0.8, lineHeight: 1.7, margin: 0 }}>

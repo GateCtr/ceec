@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import { sendInviteEmail, sendNewChurchNotificationEmail, getSuperAdminEmails } from "@/lib/email";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
@@ -19,7 +19,7 @@ export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorise" }, { status: 401 });
-    if (!await isSuperAdmin(userId)) return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
+    if (!await isAdminPlatteforme(userId)) return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
 
     const eglises = await prisma.eglise.findMany({
       orderBy: { createdAt: "desc" },
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorise" }, { status: 401 });
-    if (!await isSuperAdmin(userId)) return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
+    if (!await isAdminPlatteforme(userId)) return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
 
     const body = await req.json();
     const { nom, ville, emailAdmin, slug: rawSlug, sousDomaine } = body;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import { sendInviteEmail } from "@/lib/email";
 
 export async function POST(
@@ -11,7 +11,7 @@ export async function POST(
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    if (!(await isSuperAdmin(userId))) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    if (!(await isAdminPlatteforme(userId))) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
     const { slug } = await params;
 

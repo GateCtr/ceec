@@ -10,16 +10,7 @@ import ParticipationButton from "@/components/church/ParticipationButton";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const headersList = await headers();
-  const slug = headersList.get("x-eglise-slug") ?? "";
-  const { id } = await params;
-  try {
-    const evt = await prisma.evenement.findFirst({
-      where: { id: parseInt(id, 10), statutContenu: "publie", eglise: { slug } },
-      select: { titre: true },
-    });
-    return { title: evt?.titre ?? "Événement" };
-  } catch { return { title: "Événement" }; }
+  return { title: "Événement" };
 }
 
 export default async function EvenementDetailPage({ params }: Props) {

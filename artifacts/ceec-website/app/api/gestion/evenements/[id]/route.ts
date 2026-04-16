@@ -43,9 +43,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const VALID_VISIBILITES = ["public", "communaute", "prive"];
-    const visibiliteUpdate = body.visibilite && VALID_VISIBILITES.includes(body.visibilite)
-      ? { visibilite: body.visibilite }
-      : {};
+    if (body.visibilite !== undefined && !VALID_VISIBILITES.includes(body.visibilite)) {
+      return NextResponse.json({ error: "Visibilité invalide" }, { status: 400 });
+    }
+    const visibiliteUpdate = body.visibilite ? { visibilite: body.visibilite } : {};
 
     const evt = await prisma.evenement.update({
       where: { id: evtId },

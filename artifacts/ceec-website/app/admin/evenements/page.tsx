@@ -1,20 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin, hasAnyAdminRole } from "@/lib/auth/rbac";
+import { isPlatformAdmin } from "@/lib/auth/rbac";
 import AdminEvenementsClient from "@/components/admin/AdminEvenementsClient";
-
-async function isAdminUser(userId: string): Promise<boolean> {
-  if (await isSuperAdmin(userId)) return true;
-  return hasAnyAdminRole(userId);
-}
 
 export const metadata = { title: "Gestion des Événements | CEEC Admin" };
 
 export default async function AdminEvenementsPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/sign-in");
+  if (!await isPlatformAdmin(userId)) redirect("/admin");
 
   const [evenementsList, eglisesList] = await Promise.all([
     prisma.evenement.findMany({ orderBy: { dateDebut: "asc" } }),

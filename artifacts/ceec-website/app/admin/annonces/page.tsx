@@ -1,20 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin, hasAnyAdminRole } from "@/lib/auth/rbac";
+import { isPlatformAdmin } from "@/lib/auth/rbac";
 import AdminAnnoncesClient from "@/components/admin/AdminAnnoncesClient";
-
-async function isAdminUser(userId: string): Promise<boolean> {
-  if (await isSuperAdmin(userId)) return true;
-  return hasAnyAdminRole(userId);
-}
 
 export const metadata = { title: "Gestion des Annonces | CEEC Admin" };
 
 export default async function AdminAnnoncesPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/sign-in");
+  if (!await isPlatformAdmin(userId)) redirect("/admin");
 
   const [annoncesList, eglisesList] = await Promise.all([
     prisma.annonce.findMany({ orderBy: { datePublication: "desc" } }),

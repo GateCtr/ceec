@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin } from "@/lib/auth/rbac";
+import { isPlatformAdmin } from "@/lib/auth/rbac";
 import AdminLogsClient from "@/components/admin/AdminLogsClient";
 import { getDateFrom } from "@/lib/date-filter";
 
@@ -64,7 +64,7 @@ export default async function AdminLogsPage({
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isSuperAdmin(userId)) redirect("/sign-in");
+  if (!await isPlatformAdmin(userId)) redirect("/admin");
 
   const sp = await searchParams;
   const { logs, eglises } = await getLogs(sp.eglise, sp.action, sp.date);

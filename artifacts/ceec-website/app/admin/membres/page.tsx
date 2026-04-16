@@ -1,21 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin, hasAnyAdminRole } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import { enrichMembresWithRolesMultiChurch } from "@/lib/membre-role";
 import AdminMembresClient from "@/components/admin/AdminMembresClient";
-
-async function isAdminUser(userId: string): Promise<boolean> {
-  if (await isSuperAdmin(userId)) return true;
-  return hasAnyAdminRole(userId);
-}
 
 export const metadata = { title: "Gestion des Membres | CEEC Admin" };
 
 export default async function AdminMembresPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isAdminUser(userId)) redirect("/sign-in");
+  if (!await isAdminPlatteforme(userId)) redirect("/admin");
 
   const [membresList, eglisesList] = await Promise.all([
     prisma.membre.findMany({

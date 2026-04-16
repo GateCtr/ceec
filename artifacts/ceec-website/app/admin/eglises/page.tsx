@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin } from "@/lib/auth/rbac";
+import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import AdminEglisesClient from "@/components/admin/AdminEglisesClient";
 
 export const metadata = { title: "Gestion des Églises | CEEC Admin" };
@@ -10,7 +10,7 @@ export const metadata = { title: "Gestion des Églises | CEEC Admin" };
 export default async function AdminEglisesPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isSuperAdmin(userId)) redirect("/sign-in");
+  if (!await isAdminPlatteforme(userId)) redirect("/admin");
 
   const eglises = await prisma.eglise.findMany({
     orderBy: { createdAt: "desc" },

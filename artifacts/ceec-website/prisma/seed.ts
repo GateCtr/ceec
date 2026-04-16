@@ -181,7 +181,7 @@ const ROLES: Array<{ nom: string; scope: string; permissions: string[] }> = [
 
 // ─── Super admin initial ──────────────────────────────────────────────────────
 
-const SUPER_ADMIN_CLERK_ID = "user_3CBl2z66hYfxWguiyvxmxBd9rCt";
+const SUPER_ADMIN_CLERK_ID = "user_3CQs56BwAL6UafOgnW6cPEIZsag";
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 

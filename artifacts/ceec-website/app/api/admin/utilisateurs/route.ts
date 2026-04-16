@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, ROLES, PLATFORM_ROLES } from "@/lib/auth/rbac";
 
-const ASSIGNABLE_ROLES = [ROLES.ADMIN_PLATEFORME, ROLES.MODERATEUR_PLATEFORME];
+const ASSIGNABLE_ROLES: string[] = [ROLES.ADMIN_PLATEFORME, ROLES.MODERATEUR_PLATEFORME];
 
 export async function GET() {
   try {

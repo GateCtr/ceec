@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Calendar, Megaphone, MapPin, CheckCircle, ChevronRight } from "lucide-react";
+import { CHURCH_ROLE_LABELS } from "@/lib/membre-role-constants";
 
 interface ProfilData {
   id: number;
@@ -135,10 +136,23 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
             <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1.2 }}>
               {currentProfil.prenom} {currentProfil.nom}
             </div>
-            <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-              {roleFR(currentProfil.role)} · {eglise.nom}
+            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {(() => {
+                const roleInfo = CHURCH_ROLE_LABELS[currentProfil.role];
+                return roleInfo ? (
+                  <span style={{
+                    display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px",
+                    borderRadius: 99, background: roleInfo.bg, color: roleInfo.color,
+                  }}>
+                    {roleInfo.label}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 13, opacity: 0.8 }}>{roleFR(currentProfil.role)}</span>
+                );
+              })()}
+              <span style={{ fontSize: 13, opacity: 0.75 }}>{eglise.nom}</span>
             </div>
-            <div style={{ fontSize: 12, opacity: 0.65, marginTop: 4 }}>
+            <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>
               Membre depuis {currentProfil.dateAdhesion
                 ? new Date(currentProfil.dateAdhesion).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
                 : new Date(currentProfil.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}

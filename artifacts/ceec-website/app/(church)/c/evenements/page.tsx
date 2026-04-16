@@ -202,6 +202,17 @@ export default async function ChurchEvenementsPage({
                             #{evt.categorie}
                           </span>
                         )}
+                        {!isPast && (
+                          <div style={{ marginTop: 14 }}>
+                            <span style={{
+                              display: "inline-block", padding: "7px 16px", borderRadius: 8,
+                              background: "var(--church-primary, #1e3a8a)", color: "white",
+                              fontWeight: 600, fontSize: 13,
+                            }}>
+                              Voir et s&apos;inscrire
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </article>
                   </Link>

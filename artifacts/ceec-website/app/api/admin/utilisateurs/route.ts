@@ -119,6 +119,14 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Impossible de révoquer le rôle super_admin" }, { status: 403 });
     }
 
+    if (!ASSIGNABLE_ROLES.includes(ur.role.nom)) {
+      return NextResponse.json({ error: "Ce rôle ne peut pas être révoqué via cette interface" }, { status: 403 });
+    }
+
+    if (ur.egliseId !== null) {
+      return NextResponse.json({ error: "Impossible de révoquer un rôle lié à une église via cette interface" }, { status: 403 });
+    }
+
     await prisma.userRole.delete({ where: { id: userRoleId } });
     return NextResponse.json({ success: true });
   } catch (e) {

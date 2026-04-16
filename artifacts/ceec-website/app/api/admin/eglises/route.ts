@@ -26,7 +26,7 @@ export async function GET() {
       include: {
         _count: { select: { membres: true } },
         inviteTokens: {
-          where: { usedAt: null, expiresAt: { gt: new Date() } },
+          where: { usedAt: null },
           orderBy: { createdAt: "desc" },
           take: 1,
         },

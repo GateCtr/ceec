@@ -13,14 +13,63 @@ export default function ContactPage() {
       <NavbarServer />
       <main>
         <section style={{
-          background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
-          color: "white", padding: "4rem 1rem", textAlign: "center"
+          background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
+          minHeight: "75vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "8rem 1rem 5rem",
+          color: "white",
+          position: "relative",
+          overflow: "hidden",
         }}>
-          <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: 12 }}>Contactez-nous</h1>
-          <p style={{ opacity: 0.8, fontSize: 16 }}>Notre équipe est disponible pour répondre à vos questions</p>
+          {/* Motif de fond */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, opacity: 0.04,
+            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }} />
+          {/* Halo or */}
+          <div aria-hidden style={{
+            position: "absolute", top: "30%", right: "25%",
+            width: 500, height: 500, borderRadius: "50%",
+            background: "#c59b2e", opacity: 0.05, filter: "blur(120px)",
+            pointerEvents: "none",
+          }} />
+          <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center", position: "relative" }}>
+            <span style={{
+              display: "inline-block", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "rgba(197,155,46,1)",
+              background: "rgba(197,155,46,0.12)", borderRadius: 20, padding: "4px 16px", marginBottom: 20,
+            }}>
+              Nous rejoindre
+            </span>
+            <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 900, margin: "0 0 20px", lineHeight: 1.15, color: "#fff" }}>
+              Contactez-nous
+            </h1>
+            <p style={{ fontSize: 18, opacity: 0.8, lineHeight: 1.7, margin: "0 auto", maxWidth: 580 }}>
+              Notre équipe est à votre disposition pour répondre à toutes vos questions
+              sur la CEEC, ses paroisses et ses programmes.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+              <a href="#formulaire" style={{
+                padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
+                color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
+              }}>
+                Écrire un message →
+              </a>
+              <a href="/paroisses" style={{
+                padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",
+                color: "white", fontWeight: 600, fontSize: 15, textDecoration: "none",
+              }}>
+                Trouver une église
+              </a>
+            </div>
+          </div>
         </section>
 
-        <section style={{ padding: "4rem 1rem", background: "#f8fafc" }}>
+        <section id="formulaire" style={{ padding: "4rem 1rem", background: "#f8fafc" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
             <div>
               <h2 style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 24, marginBottom: 24 }}>

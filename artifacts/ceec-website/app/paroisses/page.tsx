@@ -23,16 +23,64 @@ export default async function ParoissesPage() {
     <>
       <NavbarServer />
       <main>
-        <section style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "4rem 1rem", textAlign: "center" }}>
-          <div style={{ maxWidth: 600, margin: "0 auto" }}>
-            <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: 12 }}>Nos Eglises</h1>
-            <p style={{ opacity: 0.8, fontSize: 16 }}>
-              Decouvrez les eglises membres de la Communaute des Eglises Evangeliques au Congo
+        <section style={{
+          background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
+          minHeight: "75vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "8rem 1rem 5rem",
+          color: "white",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Motif de fond */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, opacity: 0.04,
+            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }} />
+          {/* Halo or */}
+          <div aria-hidden style={{
+            position: "absolute", top: "25%", right: "20%",
+            width: 500, height: 500, borderRadius: "50%",
+            background: "#c59b2e", opacity: 0.05, filter: "blur(120px)",
+            pointerEvents: "none",
+          }} />
+          <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center", position: "relative" }}>
+            <span style={{
+              display: "inline-block", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "rgba(197,155,46,1)",
+              background: "rgba(197,155,46,0.12)", borderRadius: 20, padding: "4px 16px", marginBottom: 20,
+            }}>
+              Réseau national
+            </span>
+            <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 900, margin: "0 0 20px", lineHeight: 1.15, color: "#fff" }}>
+              Nos Églises membres
+            </h1>
+            <p style={{ fontSize: 18, opacity: 0.8, lineHeight: 1.7, margin: "0 auto", maxWidth: 580 }}>
+              Découvrez les paroisses de la Communauté des Églises Évangéliques au Congo,
+              présentes dans toutes les provinces de la République Démocratique du Congo.
             </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+              <a href="#liste" style={{
+                padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
+                color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
+              }}>
+                Voir les églises →
+              </a>
+              <a href="/contact" style={{
+                padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",
+                color: "white", fontWeight: 600, fontSize: 15, textDecoration: "none",
+              }}>
+                Nous contacter
+              </a>
+            </div>
           </div>
         </section>
 
-        <section style={{ padding: "4rem 1rem", background: "#f8fafc" }}>
+        <section id="liste" style={{ padding: "4rem 1rem", background: "#f8fafc" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             {eglisesList.length === 0 ? (
               <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 16, border: "1px dashed #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>

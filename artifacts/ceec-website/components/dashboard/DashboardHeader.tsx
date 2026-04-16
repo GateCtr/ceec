@@ -113,9 +113,7 @@ export default function DashboardHeader({ items, contextLabel, onMobileMenuOpen 
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
-              display: "none",
             }}
-            className="sm-show"
           >
             {displayName}
           </span>

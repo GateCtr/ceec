@@ -75,7 +75,6 @@ export default function AdminUtilisateursClient({ initialUsers, membres }: Props
           clerkUserId: data.clerkUserId,
           roleNom: form.roleNom,
           roleLabel,
-          membreId: data.membreId,
           nom: data.nom,
           prenom: data.prenom,
           email: data.email,

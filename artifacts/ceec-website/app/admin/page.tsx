@@ -279,56 +279,103 @@ export default async function AdminPage({
         )}
       </div>
 
-      {/* Validation queue — toujours en premier si contenu en attente */}
-      {totalValidation > 0 && (
-        <section style={{ marginBottom: 28 }}>
-          <SectionHeader
-            title="Validation du contenu"
-            badge={`${totalValidation} en attente`}
-            badgeColor="#dc2626"
-            description="Annonces et événements soumis par les gestionnaires d'église"
-          />
-          <AdminValidationQueue items={validationQueue} />
-        </section>
-      )}
+      {/* 2-column desktop layout : main (2/3) + side panel (1/3) */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: totalValidation > 0 ? "1fr 340px" : "1fr",
+          gap: 24,
+          alignItems: "start",
+        }}
+      >
+        {/* Colonne principale */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Églises récentes */}
+          <section>
+            <SectionHeader
+              title="Dernières églises enregistrées"
+              action={
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Link href="/admin/eglises" style={secondaryBtn}>Toutes les églises →</Link>
+                  {isSuperAdmin && (
+                    <Link href="/admin/eglises/nouveau" style={primaryBtnSm}>+ Inviter</Link>
+                  )}
+                </div>
+              }
+            />
+            <AdminDashboardClient eglises={eglises} />
+          </section>
 
-      {/* Main grid : Églises + Journal */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }}>
-        {/* Églises récentes */}
-        <section>
-          <SectionHeader
-            title="Dernières églises enregistrées"
-            action={
-              <div style={{ display: "flex", gap: 8 }}>
-                <Link href="/admin/eglises" style={secondaryBtn}>Toutes les églises →</Link>
-                {isSuperAdmin && (
-                  <Link href="/admin/eglises/nouveau" style={primaryBtnSm}>+ Inviter</Link>
-                )}
+          {/* Journal d'activité */}
+          <section>
+            <SectionHeader
+              title="Journal d'activité"
+              description={`${logs.length} dernières actions — filtrez par église, type et période`}
+              action={
+                <Link href="/admin/annonces" style={secondaryBtn}>
+                  Superviser annonces →
+                </Link>
+              }
+            />
+            <AdminLogsClient
+              logs={logs}
+              eglises={eglisesForFilter}
+              selectedEglise={sp.eglise ?? ""}
+              selectedAction={sp.action ?? ""}
+              selectedDate={sp.date ?? ""}
+            />
+          </section>
+        </div>
+
+        {/* Panneau latéral — Validation en attente */}
+        {totalValidation > 0 && (
+          <aside>
+            <div
+              style={{
+                background: "#fff5f5",
+                border: "1.5px solid #fca5a5",
+                borderRadius: 14,
+                padding: "1.25rem",
+                position: "sticky",
+                top: 20,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <div
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: "#dc2626",
+                    flexShrink: 0,
+                    boxShadow: "0 0 0 3px #fee2e2",
+                  }}
+                />
+                <h2 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: "#b91c1c" }}>
+                  Validation du contenu
+                </h2>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    padding: "2px 9px",
+                    borderRadius: 100,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    background: "#fee2e2",
+                    color: "#b91c1c",
+                    border: "1px solid #fca5a5",
+                  }}
+                >
+                  {totalValidation}
+                </span>
               </div>
-            }
-          />
-          <AdminDashboardClient eglises={eglises} />
-        </section>
-
-        {/* Journal d'activité */}
-        <section>
-          <SectionHeader
-            title="Journal d'activité"
-            description={`${logs.length} dernières actions — filtrez par église, type et période`}
-            action={
-              <Link href="/admin/annonces" style={secondaryBtn}>
-                Superviser annonces →
-              </Link>
-            }
-          />
-          <AdminLogsClient
-            logs={logs}
-            eglises={eglisesForFilter}
-            selectedEglise={sp.eglise ?? ""}
-            selectedAction={sp.action ?? ""}
-            selectedDate={sp.date ?? ""}
-          />
-        </section>
+              <p style={{ fontSize: 12, color: "#b91c1c", margin: "0 0 14px", opacity: 0.8 }}>
+                Annonces et événements soumis par les gestionnaires d&apos;église
+              </p>
+              <AdminValidationQueue items={validationQueue} />
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

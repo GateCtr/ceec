@@ -44,8 +44,8 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 
 #### Church Gestion Dashboard (`/gestion/`)
 - `/gestion` — Dashboard home (stats)
-- `/gestion/annonces` — CRUD with image, categorie, priorité, **visibilite** (public/communaute/prive)
-- `/gestion/evenements` — CRUD with image, categorie, lieu, lien inscription, **visibilite** (public/communaute/prive)
+- `/gestion/annonces` — CRUD with image, **video**, categorie, priorité, **visibilite** (public/communaute/prive)
+- `/gestion/evenements` — CRUD with image, **video**, categorie, lieu, lien inscription, **visibilite** (public/communaute/prive)
 - `/gestion/membres` — Member management
 - `/gestion/admins` — Admin/role management
 - `/gestion/parametres` — Church settings (basic info)
@@ -92,8 +92,8 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `Membre` — Church member profile (clerkUserId, nom, prenom, email, role, statut)
 - `UserRole` — RBAC join table (clerkUserId, roleId, egliseId)
 - `Role` — Role registry (nom)
-- `Annonce` — Announcements (titre, contenu, imageUrl, categorie, priorite, publie, dateExpiration)
-- `Evenement` — Events (titre, description, imageUrl, categorie, lienInscription, dateDebut, dateFin, lieu, publie)
+- `Annonce` — Announcements (titre, contenu, imageUrl, videoUrl, categorie, priorite, publie, dateExpiration, visibilite)
+- `Evenement` — Events (titre, description, imageUrl, videoUrl, categorie, lienInscription, dateDebut, dateFin, lieu, publie, visibilite)
 
 #### Key Components
 - `components/church/SectionRenderer.tsx` — Dispatches to 8 section type components
@@ -104,8 +104,10 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `components/gestion/GestionPageDetailClient.tsx` — Section editor with up/down reorder
 - `components/gestion/GestionApparenceClient.tsx` — Branding editor with color picker
 - `components/gestion/GestionVideosClient.tsx` — YouTube live manager with thumbnails
-- `components/gestion/GestionAnnoncesClient.tsx` — Annonces CRUD (image, categorie, priorite)
-- `components/gestion/GestionEvenementsClient.tsx` — Evenements CRUD (image, categorie, lienInscription)
+- `components/gestion/GestionAnnoncesClient.tsx` — Annonces CRUD (image, video, categorie, priorite, visibilite)
+- `components/gestion/GestionEvenementsClient.tsx` — Evenements CRUD (image, video, categorie, lienInscription, visibilite)
+- `components/gestion/ImagePicker.tsx` — Image upload (Cloudinary, drag & drop, 5 Mo max)
+- `components/gestion/VideoPicker.tsx` — Video upload (Cloudinary, drag & drop, 100 Mo max, MP4/MOV/WebM)
 - `lib/sanitize-url.ts` — `safeUrl()` for config-sourced URLs (social links, CTAs, YouTube)
 
 #### Security

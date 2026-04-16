@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Annonce } from "@prisma/client";
 import { Megaphone, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
+import VideoPicker from "@/components/gestion/VideoPicker";
 
 interface Props {
   initialAnnonces: Annonce[];
@@ -39,11 +40,12 @@ type FormData = {
   publie: boolean;
   dateExpiration: string;
   imageUrl: string;
+  videoUrl: string;
   categorie: string;
   visibilite: string;
 };
 
-const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", categorie: "", visibilite: "public" };
+const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", videoUrl: "", categorie: "", visibilite: "public" };
 
 export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish, egliseId }: Props) {
   const [annonces, setAnnonces] = useState<Annonce[]>(initialAnnonces);
@@ -70,6 +72,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
       publie: a.publie,
       dateExpiration: a.dateExpiration ? new Date(a.dateExpiration).toISOString().slice(0, 10) : "",
       imageUrl: a.imageUrl ?? "",
+      videoUrl: (a as Annonce & { videoUrl?: string | null }).videoUrl ?? "",
       categorie: a.categorie ?? "",
       visibilite: (a as Annonce & { visibilite?: string }).visibilite ?? "public",
     });
@@ -86,6 +89,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
         ...form,
         dateExpiration: form.dateExpiration || null,
         imageUrl: form.imageUrl || null,
+        videoUrl: form.videoUrl || null,
         categorie: form.categorie || null,
       };
       let res;
@@ -246,6 +250,12 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
               value={form.imageUrl}
               egliseId={egliseId}
               onChange={(url) => setForm({ ...form, imageUrl: url })}
+            />
+            <VideoPicker
+              label="Vidéo (optionnel)"
+              value={form.videoUrl}
+              egliseId={egliseId}
+              onChange={(url) => setForm({ ...form, videoUrl: url })}
             />
             <div style={{ display: "flex", gap: 16 }}>
               <div style={{ flex: 1 }}>

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
-import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { uploadVideoToCloudinary } from "@/lib/cloudinary";
 
-const MAX_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE = 100 * 1024 * 1024;
+const ALLOWED_TYPES = ["video/mp4", "video/quicktime", "video/webm"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,19 +25,19 @@ export async function POST(req: NextRequest) {
 
     if (!file) return NextResponse.json({ error: "Fichier manquant" }, { status: 400 });
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "Fichier trop grand (max 5 Mo)" }, { status: 400 });
+      return NextResponse.json({ error: "Fichier trop grand (max 100 Mo)" }, { status: 400 });
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: "Format non accepté (JPG, PNG, WebP uniquement)" }, { status: 400 });
+      return NextResponse.json({ error: "Format non accepté (MP4, MOV, WebM uniquement)" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const imageUrl = await uploadImageToCloudinary(buffer, file.type);
+    const videoUrl = await uploadVideoToCloudinary(buffer, file.type);
 
-    return NextResponse.json({ imageUrl }, { status: 201 });
+    return NextResponse.json({ videoUrl }, { status: 201 });
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("Upload video error:", err);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

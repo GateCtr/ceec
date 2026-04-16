@@ -59,6 +59,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...publishUpdate,
         ...visibiliteUpdate,
         imageUrl: body.imageUrl ?? null,
+        videoUrl: body.videoUrl !== undefined ? (body.videoUrl || null) : undefined,
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
         lienInscription: body.lienInscription !== undefined ? (body.lienInscription || null) : undefined,
       },

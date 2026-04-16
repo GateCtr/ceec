@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
         statutContenu,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
         imageUrl: body.imageUrl ?? null,
+        videoUrl: body.videoUrl ?? null,
         categorie: body.categorie ?? null,
         visibilite,
       },

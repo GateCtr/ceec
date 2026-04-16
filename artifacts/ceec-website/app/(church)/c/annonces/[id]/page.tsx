@@ -106,6 +106,18 @@ export default async function AnnonceDetailPage({ params }: Props) {
                   style={{ width: "100%", maxHeight: 380, objectFit: "cover", display: "block" }}
                 />
               )}
+              {(annonce as typeof annonce & { videoUrl?: string | null }).videoUrl && (
+                <div style={{ padding: "1.5rem 1.5rem 0" }}>
+                  <video
+                    src={(annonce as typeof annonce & { videoUrl?: string | null }).videoUrl!}
+                    controls
+                    style={{
+                      width: "100%", borderRadius: 10, display: "block",
+                      background: "#000", maxHeight: 380,
+                    }}
+                  />
+                </div>
+              )}
               <div style={{ padding: "2rem" }}>
                 <div style={{ fontSize: 15, lineHeight: 1.85, color: "#334155", whiteSpace: "pre-wrap" }}>
                   {annonce.contenu}

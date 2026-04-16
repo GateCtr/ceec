@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
         publie,
         statutContenu,
         imageUrl: body.imageUrl ?? null,
+        videoUrl: body.videoUrl ?? null,
         categorie: body.categorie ?? null,
         lienInscription: body.lienInscription ?? null,
         visibilite,

@@ -135,14 +135,28 @@ export default async function EvenementDetailPage({ params }: Props) {
           <div style={{ display: "grid", gridTemplateColumns: autres.length > 0 ? "1fr 280px" : "1fr", gap: "2rem", alignItems: "start" }}>
             {/* Main content */}
             <div>
-              <div style={{ background: "white", borderRadius: 16, padding: "2rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: 16 }}>
-                {evt.description ? (
-                  <div style={{ fontSize: 15, lineHeight: 1.85, color: "#334155", whiteSpace: "pre-wrap" }}>
-                    {evt.description}
+              <div style={{ background: "white", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: 16 }}>
+                {(evt as typeof evt & { videoUrl?: string | null }).videoUrl && (
+                  <div style={{ padding: "1.5rem 1.5rem 0" }}>
+                    <video
+                      src={(evt as typeof evt & { videoUrl?: string | null }).videoUrl!}
+                      controls
+                      style={{
+                        width: "100%", borderRadius: 10, display: "block",
+                        background: "#000", maxHeight: 380,
+                      }}
+                    />
                   </div>
-                ) : (
-                  <p style={{ color: "#94a3b8", fontStyle: "italic" }}>Aucune description pour cet événement.</p>
                 )}
+                <div style={{ padding: "2rem" }}>
+                  {evt.description ? (
+                    <div style={{ fontSize: 15, lineHeight: 1.85, color: "#334155", whiteSpace: "pre-wrap" }}>
+                      {evt.description}
+                    </div>
+                  ) : (
+                    <p style={{ color: "#94a3b8", fontStyle: "italic" }}>Aucune description pour cet événement.</p>
+                  )}
+                </div>
               </div>
 
               {/* Meta card */}

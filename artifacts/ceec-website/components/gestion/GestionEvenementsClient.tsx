@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Evenement } from "@prisma/client";
 import { Calendar as CalendarIcon, MapPin, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
+import VideoPicker from "@/components/gestion/VideoPicker";
 
 interface Props {
   initialEvenements: Evenement[];
@@ -34,6 +35,7 @@ type FormData = {
   lieu: string;
   publie: boolean;
   imageUrl: string;
+  videoUrl: string;
   categorie: string;
   lienInscription: string;
   visibilite: string;
@@ -41,7 +43,7 @@ type FormData = {
 
 const emptyForm: FormData = {
   titre: "", description: "", dateDebut: "", dateFin: "", lieu: "", publie: true,
-  imageUrl: "", categorie: "", lienInscription: "", visibilite: "public",
+  imageUrl: "", videoUrl: "", categorie: "", lienInscription: "", visibilite: "public",
 };
 
 export default function GestionEvenementsClient({ initialEvenements, canAutoPublish, egliseId }: Props) {
@@ -75,6 +77,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
       lieu: e.lieu ?? "",
       publie: e.publie,
       imageUrl: e.imageUrl ?? "",
+      videoUrl: (e as Evenement & { videoUrl?: string | null }).videoUrl ?? "",
       categorie: e.categorie ?? "",
       lienInscription: e.lienInscription ?? "",
       visibilite: (e as Evenement & { visibilite?: string }).visibilite ?? "public",
@@ -94,6 +97,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
         description: form.description || null,
         lieu: form.lieu || null,
         imageUrl: form.imageUrl || null,
+        videoUrl: form.videoUrl || null,
         categorie: form.categorie || null,
         lienInscription: form.lienInscription || null,
       };
@@ -257,6 +261,12 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
               value={form.imageUrl}
               egliseId={egliseId}
               onChange={(url) => setForm({ ...form, imageUrl: url })}
+            />
+            <VideoPicker
+              label="Vidéo (optionnel)"
+              value={form.videoUrl}
+              egliseId={egliseId}
+              onChange={(url) => setForm({ ...form, videoUrl: url })}
             />
             <div>
               <label style={s.label}>Lien d&apos;inscription (URL externe)</label>

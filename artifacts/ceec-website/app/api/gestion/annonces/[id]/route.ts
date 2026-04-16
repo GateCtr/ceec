@@ -64,6 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...visibiliteUpdate,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
         imageUrl: body.imageUrl !== undefined ? (body.imageUrl || null) : undefined,
+        videoUrl: body.videoUrl !== undefined ? (body.videoUrl || null) : undefined,
         categorie: body.categorie !== undefined ? (body.categorie || null) : undefined,
       },
     });

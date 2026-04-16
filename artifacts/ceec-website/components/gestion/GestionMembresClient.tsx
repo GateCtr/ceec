@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users } from "lucide-react";
+import { Users, Download } from "lucide-react";
 import { CHURCH_ROLE_LABELS } from "@/lib/membre-role-constants";
 
 interface MembreEnrichi {
@@ -120,7 +120,7 @@ export default function GestionMembresClient({ initialMembres }: Props) {
           download
           style={{ padding: "6px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
         >
-          ↓ Exporter CSV
+          <Download size={13} /> Exporter CSV
         </a>
       </div>
 

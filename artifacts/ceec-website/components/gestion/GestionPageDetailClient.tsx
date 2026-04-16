@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
-import { AlertTriangle, LayoutGrid, GripVertical } from "lucide-react";
+import { AlertTriangle, LayoutGrid, GripVertical, X, ArrowLeft, ExternalLink, Plus, Eye, EyeOff } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -263,9 +263,9 @@ function SortableSectionCard({
         <button
           onClick={() => onDeleteRequest(section.id)}
           title="Supprimer cette section"
-          style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #fca5a5", background: "#fee2e2", fontSize: 12, color: "#b91c1c", cursor: "pointer", flexShrink: 0 }}
+          style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
         >
-          ✕
+          <X size={13} />
         </button>
       </div>
 
@@ -433,7 +433,7 @@ export default function GestionPageDetailClient({
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
         <div>
           <Link href="/gestion/pages" style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
-            ← Retour aux pages
+            <ArrowLeft size={13} /> Retour aux pages
           </Link>
           <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>{page.titre}</h1>
           <div style={{ display: "flex", gap: 10, marginTop: 6, alignItems: "center" }}>
@@ -454,19 +454,19 @@ export default function GestionPageDetailClient({
             rel="noopener noreferrer"
             style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            ↗ Voir la page publique
+            <ExternalLink size={13} /> Voir la page publique
           </a>
           <button
             onClick={togglePublish}
-            style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: page.publie ? "#fef3c7" : "#dcfce7", color: page.publie ? "#b45309" : "#15803d", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+            style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: page.publie ? "#fef3c7" : "#dcfce7", color: page.publie ? "#b45309" : "#15803d", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            {page.publie ? "Dépublier" : "Publier"}
+            {page.publie ? <><EyeOff size={14} /> Dépublier</> : <><Eye size={14} /> Publier</>}
           </button>
           <button
             onClick={() => setShowAddSection(true)}
-            style={{ padding: "9px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+            style={{ padding: "9px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            + Ajouter une section
+            <Plus size={15} /> Ajouter une section
           </button>
         </div>
       </div>

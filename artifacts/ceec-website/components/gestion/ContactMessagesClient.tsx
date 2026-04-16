@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Trash2, Phone } from "lucide-react";
+import { Mail, Trash2, Phone, X, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 
 type Message = {
   id: number;
@@ -127,14 +127,14 @@ export default function ContactMessagesClient({
               fontSize: 13, fontWeight: 600, cursor: "pointer",
             }}
           >
-            {filterNonLu ? "✕ Non lus seulement" : "Non lus seulement"}
+            {filterNonLu ? <><X size={12} style={{ marginRight: 4 }} />Non lus seulement</> : "Non lus seulement"}
           </button>
           <button
             onClick={() => fetchPage(page, filterNonLu)}
             disabled={loading}
-            style={{ padding: "6px 14px", borderRadius: 7, background: "white", color: "#374151", border: "1px solid #d1d5db", fontSize: 13, cursor: "pointer" }}
+            style={{ padding: "6px 14px", borderRadius: 7, background: "white", color: "#374151", border: "1px solid #d1d5db", fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}
           >
-            ↻ Actualiser
+            <RefreshCw size={13} /> Actualiser
           </button>
         </div>
 
@@ -201,14 +201,14 @@ export default function ContactMessagesClient({
 
         {pages > 1 && (
           <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 16 }}>
-            <button onClick={() => fetchPage(page - 1, filterNonLu)} disabled={page <= 1 || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page <= 1 ? 0.5 : 1 }}>
-              ← Préc.
+            <button onClick={() => fetchPage(page - 1, filterNonLu)} disabled={page <= 1 || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page <= 1 ? 0.5 : 1, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <ChevronLeft size={14} /> Préc.
             </button>
             <span style={{ padding: "7px 14px", fontSize: 13, color: "#64748b" }}>
               Page {page} / {pages}
             </span>
-            <button onClick={() => fetchPage(page + 1, filterNonLu)} disabled={page >= pages || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page >= pages ? 0.5 : 1 }}>
-              Suiv. →
+            <button onClick={() => fetchPage(page + 1, filterNonLu)} disabled={page >= pages || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page >= pages ? 0.5 : 1, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              Suiv. <ChevronRight size={14} />
             </button>
           </div>
         )}
@@ -218,7 +218,7 @@ export default function ContactMessagesClient({
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 14, padding: "1.5rem", alignSelf: "start", position: "sticky", top: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
             <h3 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: 0 }}>Détail du message</h3>
-            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#94a3b8", lineHeight: 1 }}>✕</button>
+            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", display: "flex", alignItems: "center" }}><X size={18} /></button>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

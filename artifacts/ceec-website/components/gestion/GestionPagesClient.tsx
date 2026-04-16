@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 
 type Page = {
   id: number;
@@ -110,9 +110,9 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginBottom: 20 }}>
         <Link
           href="/gestion/pages/nouveau"
-          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14 }}
+          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}
         >
-          + Créer une page
+          <Plus size={16} /> Créer une page
         </Link>
       </div>
 

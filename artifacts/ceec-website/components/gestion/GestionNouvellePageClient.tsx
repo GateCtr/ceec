@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 const TYPE_OPTIONS = [
   { value: "custom", label: "Page libre" },
@@ -50,7 +51,7 @@ export default function GestionNouvellePageClient() {
   return (
     <>
       <Link href="/gestion/pages" style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 20 }}>
-        ← Retour aux pages
+        <ArrowLeft size={13} /> Retour aux pages
       </Link>
 
       <div style={{ marginBottom: 24 }}>

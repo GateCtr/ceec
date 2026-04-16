@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Plus } from "lucide-react";
 
 interface UserRoleItem {
   id: number;
@@ -103,9 +103,9 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
           </h2>
           <button
             onClick={() => { setShowInviteForm(true); setError(null); }}
-            style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+            style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            + Inviter un admin
+            <Plus size={15} /> Inviter un admin
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, X, ChevronUp, ChevronDown, Plus } from "lucide-react";
 
 type NavLink = { label: string; href: string; externe?: boolean };
 type FooterLink = { label: string; href: string };
@@ -218,8 +218,8 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
             {navLinks.map((link, i) => (
               <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "#f8fafc", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <button type="button" onClick={() => moveNavLink(i, -1)} disabled={i === 0} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8", padding: "0 4px", lineHeight: 1 }}>▲</button>
-                  <button type="button" onClick={() => moveNavLink(i, 1)} disabled={i === navLinks.length - 1} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8", padding: "0 4px", lineHeight: 1 }}>▼</button>
+                  <button type="button" onClick={() => moveNavLink(i, -1)} disabled={i === 0} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", padding: "1px 4px", display: "flex", alignItems: "center" }}><ChevronUp size={14} /></button>
+                  <button type="button" onClick={() => moveNavLink(i, 1)} disabled={i === navLinks.length - 1} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", padding: "1px 4px", display: "flex", alignItems: "center" }}><ChevronDown size={14} /></button>
                 </div>
                 <input value={link.label} onChange={(e) => updateNavLink(i, "label", e.target.value)} placeholder="Libellé (ex: Dons)" style={{ flex: 1, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
                 <input value={link.href} onChange={(e) => updateNavLink(i, "href", e.target.value)} placeholder="URL (/c/dons ou https://...)" style={{ flex: 2, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
@@ -227,12 +227,12 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
                   <input type="checkbox" checked={!!link.externe} onChange={(e) => updateNavLink(i, "externe", e.target.checked)} />
                   Ext.
                 </label>
-                <button type="button" onClick={() => removeNavLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer", flexShrink: 0 }}>✕</button>
+                <button type="button" onClick={() => removeNavLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 8px", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}><X size={13} /></button>
               </div>
             ))}
           </div>
-          <button type="button" onClick={addNavLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600 }}>
-            + Ajouter un lien de navigation
+          <button type="button" onClick={addNavLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <Plus size={14} /> Ajouter un lien de navigation
           </button>
         </>
       )}
@@ -244,12 +244,12 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
               <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "#f8fafc", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
                 <input value={link.label} onChange={(e) => updateFooterLink(i, "label", e.target.value)} placeholder="Libellé (ex: FAQ)" style={{ flex: 1, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
                 <input value={link.href} onChange={(e) => updateFooterLink(i, "href", e.target.value)} placeholder="URL (/c/faq ou https://...)" style={{ flex: 2, padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }} />
-                <button type="button" onClick={() => removeFooterLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer", flexShrink: 0 }}>✕</button>
+                <button type="button" onClick={() => removeFooterLink(i)} style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", borderRadius: 6, padding: "5px 8px", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}><X size={13} /></button>
               </div>
             ))}
           </div>
-          <button type="button" onClick={addFooterLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600 }}>
-            + Ajouter un lien de pied de page
+          <button type="button" onClick={addFooterLink} style={{ padding: "8px 16px", borderRadius: 7, border: "1px dashed #cbd5e1", background: "white", fontSize: 13, color: "#1e3a8a", cursor: "pointer", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <Plus size={14} /> Ajouter un lien de pied de page
           </button>
         </>
       )}

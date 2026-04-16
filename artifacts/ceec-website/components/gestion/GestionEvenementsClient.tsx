@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { Evenement } from "@prisma/client";
-import { Calendar as CalendarIcon, MapPin } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
@@ -162,10 +162,10 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
             download
             style={{ padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
           >
-            ↓ Exporter CSV
+            <Download size={14} /> Exporter CSV
           </a>
-          <button onClick={openCreate} style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-            + Nouvel événement
+          <button onClick={openCreate} style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Plus size={16} /> Nouvel événement
           </button>
         </div>
       </div>
@@ -281,8 +281,12 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0, alignItems: "flex-end" }}>
                       <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => openEdit(e)} style={s.editBtn} disabled={isLoading}>Modifier</button>
-                        <button onClick={() => handleDelete(e.id)} style={s.deleteBtn} disabled={isLoading}>Supprimer</button>
+                        <button onClick={() => openEdit(e)} style={s.editBtn} disabled={isLoading} title="Modifier">
+                          <Pencil size={13} /> Modifier
+                        </button>
+                        <button onClick={() => handleDelete(e.id)} style={s.deleteBtn} disabled={isLoading} title="Supprimer">
+                          <Trash2 size={13} /> Supprimer
+                        </button>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
                         {(e.statutContenu as string) !== "en_attente" && (e.statutContenu as string) !== "publie" && (
@@ -291,7 +295,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                             disabled={isLoading}
                             style={{ ...s.actionBtn, background: "#fef9c3", color: "#a16207", border: "1px solid #fde68a" }}
                           >
-                            {isLoading ? "…" : "Soumettre"}
+                            {isLoading ? "…" : <><Send size={11} style={{ marginRight: 4 }} />Soumettre</>}
                           </button>
                         )}
                         {(e.statutContenu as string) === "publie" && (
@@ -300,7 +304,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                             disabled={isLoading}
                             style={{ ...s.actionBtn, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}
                           >
-                            {isLoading ? "…" : "Dépublier"}
+                            {isLoading ? "…" : <><EyeOff size={11} style={{ marginRight: 4 }} />Dépublier</>}
                           </button>
                         )}
                         {(e.statutContenu as string) === "en_attente" && (
@@ -309,7 +313,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                             disabled={isLoading}
                             style={{ ...s.actionBtn, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}
                           >
-                            {isLoading ? "…" : "Retirer"}
+                            {isLoading ? "…" : <><EyeOff size={11} style={{ marginRight: 4 }} />Retirer</>}
                           </button>
                         )}
                         {canAutoPublish && (e.statutContenu as string) !== "publie" && (
@@ -318,7 +322,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                             disabled={isLoading}
                             style={{ ...s.actionBtn, background: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0" }}
                           >
-                            {isLoading ? "…" : "Publier"}
+                            {isLoading ? "…" : <><Eye size={11} style={{ marginRight: 4 }} />Publier</>}
                           </button>
                         )}
                       </div>
@@ -338,9 +342,9 @@ const s = {
   label:     { fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 } as React.CSSProperties,
   input:     { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" as const } as React.CSSProperties,
   badge:     { padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600 } as React.CSSProperties,
-  actionBtn: { padding: "5px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer" } as React.CSSProperties,
-  editBtn:   { padding: "7px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
-  deleteBtn: { padding: "7px 14px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
+  actionBtn: { padding: "5px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center" } as React.CSSProperties,
+  editBtn:   { padding: "7px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 } as React.CSSProperties,
+  deleteBtn: { padding: "7px 14px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 } as React.CSSProperties,
   cancelBtn: { padding: "9px 20px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
   submitBtn: { padding: "9px 24px", borderRadius: 8, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
 };

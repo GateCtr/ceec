@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { ImageIcon } from "lucide-react";
 
 interface ImagePickerProps {
   value: string;
@@ -154,7 +155,7 @@ export default function ImagePicker({ value, onChange, label = "Image", egliseId
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 28, marginBottom: 6 }}>🖼️</div>
+              <div style={{ marginBottom: 8 }}><ImageIcon size={28} color="#94a3b8" /></div>
               <div style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>
                 Cliquez ou déposez une image
               </div>

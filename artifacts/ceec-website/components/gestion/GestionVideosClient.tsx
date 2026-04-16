@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { LiveStream } from "@prisma/client";
-import { Play, Pin, Radio } from "lucide-react";
+import { Play, Pin, Radio, Plus, X } from "lucide-react";
 
 function getYoutubeId(url: string): string | null {
   try {
@@ -113,9 +113,9 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
         <button
           onClick={openCreate}
-          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
         >
-          + Ajouter une vidéo
+          <Plus size={16} /> Ajouter une vidéo
         </button>
       </div>
 
@@ -233,8 +233,9 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
                       {v.epingle ? "Désépingler" : "Épingler"}
                     </button>
                     <button onClick={() => handleDelete(v.id)}
-                      style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fee2e2", fontSize: 12, color: "#b91c1c", cursor: "pointer" }}>
-                      ✕
+                      title="Supprimer"
+                      style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                      <X size={13} />
                     </button>
                   </div>
                 </div>

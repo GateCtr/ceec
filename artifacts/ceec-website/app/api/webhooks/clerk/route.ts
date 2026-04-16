@@ -91,7 +91,6 @@ export async function POST(req: NextRequest) {
                 nom,
                 prenom,
                 egliseId: eglise.id,
-                role: "fidele",
                 statut: "actif",
               },
             });
@@ -131,7 +130,6 @@ export async function POST(req: NextRequest) {
             email,
             nom,
             prenom,
-            role: "fidele",
             statut: "actif",
           },
         });

@@ -69,7 +69,8 @@ export default async function AnnoncesPage({
           background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
           padding: "7rem 1rem 4rem",
           color: "white", textAlign: "center", position: "relative", overflow: "hidden",
-        }}>
+          ["--color-foreground" as string]: "white",
+        } as React.CSSProperties}>
           <div aria-hidden style={{
             position: "absolute", inset: 0, opacity: 0.04,
             backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
@@ -88,7 +89,7 @@ export default async function AnnoncesPage({
             }}>
               Actualités CEEC
             </span>
-            <h1 style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 900, margin: "0 0 16px", lineHeight: 1.15, color: "white" }}>
+            <h1 className="hero-title" style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 900, margin: "0 0 16px", lineHeight: 1.15 }}>
               Annonces & Nouvelles
             </h1>
             <p style={{ fontSize: 16, opacity: 0.8, lineHeight: 1.7, margin: 0 }}>

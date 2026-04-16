@@ -767,6 +767,11 @@
 /* ────────────────────────────────────────────────────────────────────
    5. Rétrocompatibilité — Variables sans préfixe --color-
    ──────────────────────────────────────────────────────────────────── */
+/* ── Overrides hors-layer (priorité cascade supérieure à @layer base) ── */
+.hero-title {
+  color: #ffffff;
+}
+
 :root {
   --background:        var(--color-background);
   --foreground:        var(--color-foreground);

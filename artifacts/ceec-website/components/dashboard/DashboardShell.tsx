@@ -1,10 +1,29 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { Menu } from "lucide-react";
-import DashboardSidebar, { type NavItem } from "./DashboardSidebar";
+import { Menu, LayoutDashboard, Church, Users, Settings, ScrollText, Megaphone, CalendarDays, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock, LucideIcon } from "lucide-react";
+import DashboardSidebar, { type NavItem, type IconName } from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
+
+const BOTTOM_NAV_ICON_MAP: Record<IconName, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  church: Church,
+  users: Users,
+  megaphone: Megaphone,
+  calendar: CalendarDays,
+  logs: ScrollText,
+  settings: Settings,
+  shield: Shield,
+  "user-cog": UserCog,
+  "file-text": FileText,
+  message: MessageSquare,
+  palette: Palette,
+  video: Video,
+  lock: Lock,
+};
 
 interface Props {
   items: NavItem[];
@@ -25,6 +44,8 @@ const COLLAPSED_W = 64;
 const EXPANDED_W = 240;
 const MOBILE_BREAKPOINT = 768;
 
+const BOTTOM_NAV_MAX = 5;
+
 export default function DashboardShell({
   items,
   headerTitle,
@@ -44,6 +65,7 @@ export default function DashboardShell({
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useUser();
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -173,10 +195,114 @@ export default function DashboardShell({
           contextLabel={contextLabel}
           onMobileMenuOpen={isMobile ? () => setMobileOpen(true) : undefined}
         />
-        <main style={{ flex: 1, overflowX: "hidden" }}>
+        <main
+          style={{
+            flex: 1,
+            overflowX: "hidden",
+            paddingBottom: mounted && isMobile ? 64 : 0,
+          }}
+        >
           {children}
         </main>
       </div>
+
+      {/* Bottom navigation bar — mobile uniquement */}
+      {mounted && isMobile && (
+        <nav
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 62,
+            background: "white",
+            borderTop: "1px solid #e2e8f0",
+            display: "flex",
+            alignItems: "stretch",
+            zIndex: 60,
+            boxShadow: "0 -2px 12px rgba(0,0,0,0.06)",
+          }}
+        >
+          {items.slice(0, BOTTOM_NAV_MAX).map((item) => {
+            const iconKey = item.icon as IconName;
+            const Icon = BOTTOM_NAV_ICON_MAP[iconKey];
+            const isActive = item.matchExact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 3,
+                  textDecoration: "none",
+                  color: isActive ? "#1e3a8a" : "#94a3b8",
+                  fontSize: 10,
+                  fontWeight: isActive ? 700 : 500,
+                  padding: "6px 4px 8px",
+                  borderTop: isActive ? "2px solid #1e3a8a" : "2px solid transparent",
+                  background: isActive ? "#eff6ff" : "transparent",
+                  transition: "color 0.15s, background 0.15s",
+                }}
+              >
+                {Icon && <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />}
+                <span style={{ lineHeight: 1, textAlign: "center", maxWidth: 56, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {item.label}
+                </span>
+                {item.badge != null && item.badge > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: "50%",
+                      marginRight: -20,
+                      background: "#dc2626",
+                      color: "white",
+                      fontSize: 9,
+                      fontWeight: 800,
+                      borderRadius: 100,
+                      padding: "1px 5px",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+          {/* Bouton "Plus" si plus de BOTTOM_NAV_MAX items */}
+          {items.length > BOTTOM_NAV_MAX && (
+            <button
+              onClick={() => setMobileOpen(true)}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                border: "none",
+                background: "transparent",
+                color: "#94a3b8",
+                fontSize: 10,
+                fontWeight: 500,
+                padding: "6px 4px 8px",
+                borderTop: "2px solid transparent",
+                cursor: "pointer",
+              }}
+            >
+              <Menu size={20} strokeWidth={1.8} />
+              <span>Plus</span>
+            </button>
+          )}
+        </nav>
+      )}
     </div>
   );
 }

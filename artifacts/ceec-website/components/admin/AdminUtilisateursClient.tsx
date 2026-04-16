@@ -8,7 +8,6 @@ interface PlatformUser {
   clerkUserId: string;
   roleNom: string;
   roleLabel: string;
-  membreId: number | null;
   nom: string | null;
   prenom: string | null;
   email: string | null;

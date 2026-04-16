@@ -380,20 +380,21 @@ export default function NouvelleEglisePage() {
                       >
                         {expired ? "Expirée" : "En attente"}
                       </span>
-                      {inv.slug && (
+                      {/* Bouton renvoyer uniquement pour les invitations expirées */}
+                      {expired && inv.slug && (
                         <button
                           onClick={() => handleResend(inv)}
                           disabled={isResending}
-                          title="Renvoyer l'invitation"
+                          title="Renouveler l'invitation expirée"
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
                             gap: 5,
                             padding: "5px 12px",
                             borderRadius: 7,
-                            border: "1px solid #e2e8f0",
-                            background: "white",
-                            color: "#1e3a8a",
+                            border: "1px solid #fca5a5",
+                            background: "#fff5f5",
+                            color: "#b91c1c",
                             fontWeight: 600,
                             fontSize: 12,
                             cursor: "pointer",
@@ -401,7 +402,7 @@ export default function NouvelleEglisePage() {
                           }}
                         >
                           <RefreshCw size={11} style={{ animation: isResending ? "spin 1s linear infinite" : "none" }} />
-                          {isResending ? "Envoi…" : "Renvoyer"}
+                          {isResending ? "Envoi…" : "Renouveler"}
                         </button>
                       )}
                     </div>

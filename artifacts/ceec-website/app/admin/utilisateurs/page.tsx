@@ -25,7 +25,6 @@ export default async function AdminUtilisateursPage() {
   const membreByClerk = Object.fromEntries(membresMap.map((m) => [m.clerkUserId, m]));
 
   const allMembres = await prisma.membre.findMany({
-    where: { clerkUserId: { not: null } },
     select: { id: true, nom: true, prenom: true, email: true, clerkUserId: true },
     orderBy: { nom: "asc" },
   });
@@ -49,15 +48,13 @@ export default async function AdminUtilisateursPage() {
     };
   });
 
-  const membresOptions = allMembres
-    .filter((m) => m.clerkUserId)
-    .map((m) => ({
-      id: m.id,
-      clerkUserId: m.clerkUserId!,
-      nom: m.nom,
-      prenom: m.prenom,
-      email: m.email ?? "",
-    }));
+  const membresOptions = allMembres.map((m) => ({
+    id: m.id,
+    clerkUserId: m.clerkUserId,
+    nom: m.nom,
+    prenom: m.prenom,
+    email: m.email ?? "",
+  }));
 
   return (
     <div style={{ padding: "2rem", maxWidth: 920, margin: "0 auto" }}>

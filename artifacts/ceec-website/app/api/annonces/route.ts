@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
         publie: body.publie ?? true,
         statutContenu: body.publie === false ? "brouillon" : "publie",
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
+        imageUrl: body.imageUrl ?? null,
+        videoUrl: body.videoUrl ?? null,
+        visibilite: body.visibilite ?? "public",
+        categorie: body.categorie ?? null,
       },
     });
     return NextResponse.json(annonce, { status: 201 });

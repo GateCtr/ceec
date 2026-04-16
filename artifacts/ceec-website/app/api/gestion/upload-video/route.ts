@@ -11,14 +11,17 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-    const egliseIdHeader = req.headers.get("x-eglise-id");
-    if (!egliseIdHeader) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
-    const egliseId = parseInt(egliseIdHeader, 10);
-    if (isNaN(egliseId)) return NextResponse.json({ error: "Église invalide" }, { status: 400 });
-
     const superAdmin = await isSuperAdmin(userId);
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_annonce", egliseId);
-    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+
+    if (!superAdmin) {
+      const egliseIdHeader = req.headers.get("x-eglise-id");
+      if (!egliseIdHeader) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
+      const egliseId = parseInt(egliseIdHeader, 10);
+      if (isNaN(egliseId)) return NextResponse.json({ error: "Église invalide" }, { status: 400 });
+
+      const allowed = await hasPermission(userId, "eglise_creer_annonce", egliseId);
+      if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;

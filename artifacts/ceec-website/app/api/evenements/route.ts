@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
         publie: body.publie ?? true,
         statutContenu: body.publie === false ? "brouillon" : "publie",
         imageUrl: body.imageUrl ?? null,
+        videoUrl: body.videoUrl ?? null,
+        visibilite: body.visibilite ?? "public",
+        categorie: body.categorie ?? null,
+        lienInscription: body.lienInscription ?? null,
       },
     });
     return NextResponse.json(evt, { status: 201 });

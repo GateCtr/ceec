@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Annonce, Eglise } from "@prisma/client";
-import { Megaphone } from "lucide-react";
+import { Megaphone, Globe, Users, Lock } from "lucide-react";
+import ImagePicker from "@/components/gestion/ImagePicker";
+import VideoPicker from "@/components/gestion/VideoPicker";
 
 interface Props {
   initialAnnonces: Annonce[];
@@ -25,7 +27,18 @@ type FormData = {
   priorite: string;
   egliseId: string;
   publie: boolean;
+  imageUrl: string;
+  videoUrl: string;
+  visibilite: string;
+  categorie: string;
+  dateExpiration: string;
 };
+
+const VISIBILITE_OPTIONS = [
+  { value: "public", label: "Public", icon: Globe, color: "#16a34a", bg: "#dcfce7" },
+  { value: "communaute", label: "Communauté", icon: Users, color: "#d97706", bg: "#fef3c7" },
+  { value: "prive", label: "Privé", icon: Lock, color: "#dc2626", bg: "#fee2e2" },
+];
 
 export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: Props) {
   const router = useRouter();
@@ -36,11 +49,15 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
   const [error, setError] = useState("");
   const [form, setForm] = useState<FormData>({
     titre: "", contenu: "", priorite: "normale",
-    egliseId: "", publie: true,
+    egliseId: "", publie: true, imageUrl: "", videoUrl: "",
+    visibilite: "public", categorie: "", dateExpiration: "",
   });
 
   const resetForm = () => {
-    setForm({ titre: "", contenu: "", priorite: "normale", egliseId: "", publie: true });
+    setForm({
+      titre: "", contenu: "", priorite: "normale", egliseId: "", publie: true,
+      imageUrl: "", videoUrl: "", visibilite: "public", categorie: "", dateExpiration: "",
+    });
     setEditId(null);
     setError("");
   };
@@ -52,6 +69,11 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
       priorite: a.priorite,
       egliseId: a.egliseId?.toString() || "",
       publie: a.publie,
+      imageUrl: a.imageUrl ?? "",
+      videoUrl: a.videoUrl ?? "",
+      visibilite: a.visibilite ?? "public",
+      categorie: a.categorie ?? "",
+      dateExpiration: a.dateExpiration ? new Date(a.dateExpiration).toISOString().slice(0, 10) : "",
     });
     setEditId(a.id);
     setShowForm(true);
@@ -79,8 +101,16 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
         method: editId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          titre: form.titre,
+          contenu: form.contenu,
+          priorite: form.priorite,
           egliseId: form.egliseId ? parseInt(form.egliseId) : null,
+          publie: form.publie,
+          imageUrl: form.imageUrl || null,
+          videoUrl: form.videoUrl || null,
+          visibilite: form.visibilite,
+          categorie: form.categorie || null,
+          dateExpiration: form.dateExpiration || null,
         }),
       });
       if (!response.ok) {
@@ -108,6 +138,8 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
     return { bg: "#e0f2fe", color: "#0369a1", label: "Information" };
   };
 
+  const selectedEgliseId = form.egliseId ? parseInt(form.egliseId) : undefined;
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
@@ -129,10 +161,12 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
           </h3>
           {error && <div style={{ padding: "1rem", borderRadius: 10, background: "#fee2e2", color: "#dc2626", marginBottom: 16 }}>{error}</div>}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
             <div>
               <label style={labelStyle}>Titre *</label>
               <input type="text" required value={form.titre} onChange={e => setForm(f => ({ ...f, titre: e.target.value }))} style={inputStyle} />
             </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
                 <label style={labelStyle}>Priorité</label>
@@ -150,14 +184,70 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
                 </select>
               </div>
             </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <label style={labelStyle}>Catégorie</label>
+                <input type="text" value={form.categorie} onChange={e => setForm(f => ({ ...f, categorie: e.target.value }))} placeholder="Ex: culte, jeunesse…" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Date d'expiration</label>
+                <input type="date" value={form.dateExpiration} onChange={e => setForm(f => ({ ...f, dateExpiration: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+
             <div>
               <label style={labelStyle}>Contenu *</label>
               <textarea required rows={5} value={form.contenu} onChange={e => setForm(f => ({ ...f, contenu: e.target.value }))} style={{ ...inputStyle, resize: "vertical" }} />
             </div>
+
+            <div>
+              <label style={labelStyle}>Visibilité</label>
+              <div style={{ display: "flex", gap: 10 }}>
+                {VISIBILITE_OPTIONS.map(opt => {
+                  const Icon = opt.icon;
+                  const active = form.visibilite === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, visibilite: opt.value }))}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6, padding: "8px 14px",
+                        borderRadius: 8, border: `2px solid ${active ? opt.color : "#e2e8f0"}`,
+                        background: active ? opt.bg : "white", cursor: "pointer",
+                        fontWeight: 600, fontSize: 13, color: active ? opt.color : "#64748b",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <Icon size={14} />
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <ImagePicker
+                label="Image (optionnel)"
+                value={form.imageUrl}
+                onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
+                egliseId={selectedEgliseId}
+              />
+              <VideoPicker
+                label="Vidéo (optionnel)"
+                value={form.videoUrl}
+                onChange={url => setForm(f => ({ ...f, videoUrl: url }))}
+                egliseId={selectedEgliseId}
+              />
+            </div>
+
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input type="checkbox" id="publie" checked={form.publie} onChange={e => setForm(f => ({ ...f, publie: e.target.checked }))} />
               <label htmlFor="publie" style={{ fontSize: 14, fontWeight: 500, color: "#374151", cursor: "pointer" }}>Publier immédiatement</label>
             </div>
+
             <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
               <button type="button" onClick={() => { setShowForm(false); resetForm(); }} style={{ padding: "10px 24px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontWeight: 600 }}>
                 Annuler
@@ -189,6 +279,9 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
                     <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: 15 }}>{a.titre}</h3>
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+                    {a.imageUrl && (
+                      <img src={a.imageUrl} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", border: "1px solid #e2e8f0" }} />
+                    )}
                     <span style={{ fontSize: 12, color: "#94a3b8" }}>
                       {new Date(a.datePublication).toLocaleDateString("fr-FR")}
                     </span>
@@ -201,7 +294,16 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
                   </div>
                 </div>
                 <p style={{ color: "#475569", fontSize: 14, lineHeight: 1.7 }}>{a.contenu}</p>
-                {!a.publie && <span style={{ marginTop: 8, display: "inline-block", fontSize: 12, padding: "2px 8px", borderRadius: 100, background: "#f1f5f9", color: "#64748b" }}>Non publié</span>}
+                <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" as const }}>
+                  {!a.publie && <span style={{ display: "inline-block", fontSize: 12, padding: "2px 8px", borderRadius: 100, background: "#f1f5f9", color: "#64748b" }}>Non publié</span>}
+                  {a.visibilite && a.visibilite !== "public" && (
+                    <span style={{ display: "inline-block", fontSize: 12, padding: "2px 8px", borderRadius: 100, background: "#fef3c7", color: "#92400e" }}>
+                      {a.visibilite === "communaute" ? "Communauté" : "Privé"}
+                    </span>
+                  )}
+                  {a.categorie && <span style={{ display: "inline-block", fontSize: 12, padding: "2px 8px", borderRadius: 100, background: "#f0f9ff", color: "#0369a1" }}>{a.categorie}</span>}
+                  {a.videoUrl && <span style={{ display: "inline-block", fontSize: 12, padding: "2px 8px", borderRadius: 100, background: "#f0fdf4", color: "#166534" }}>Vidéo</span>}
+                </div>
               </div>
             );
           })}

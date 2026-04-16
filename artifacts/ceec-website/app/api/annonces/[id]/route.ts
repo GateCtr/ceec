@@ -59,6 +59,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         publie,
         statutContenu: publie ? "publie" as const : "brouillon" as const,
         dateExpiration: body.dateExpiration ? new Date(body.dateExpiration) : null,
+        imageUrl: body.imageUrl !== undefined ? body.imageUrl : existing.imageUrl,
+        videoUrl: body.videoUrl !== undefined ? body.videoUrl : existing.videoUrl,
+        visibilite: body.visibilite ?? existing.visibilite,
+        categorie: body.categorie !== undefined ? body.categorie : existing.categorie,
       },
     });
     return NextResponse.json(updated);

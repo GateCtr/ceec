@@ -36,7 +36,16 @@ export async function GET(req: NextRequest) {
     const platformAdmin = superAdmin || (await isAdminPlatteforme(userId));
     if (!platformAdmin) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
+    const platformAdminIds = await prisma.userRole.findMany({
+      where: { egliseId: null },
+      select: { clerkUserId: true },
+    });
+    const excludedClerkIds = platformAdminIds.map((r) => r.clerkUserId);
+
     const membres = await prisma.membre.findMany({
+      where: excludedClerkIds.length > 0
+        ? { clerkUserId: { notIn: excludedClerkIds } }
+        : undefined,
       include: { eglise: { select: { nom: true, slug: true } } },
       orderBy: [{ eglise: { nom: "asc" } }, { nom: "asc" }],
     });

@@ -12,8 +12,17 @@ export default async function AdminMembresPage() {
   if (!userId) redirect("/sign-in");
   if (!await isAdminPlatteforme(userId)) redirect("/admin");
 
+  const platformAdminIds = await prisma.userRole.findMany({
+    where: { egliseId: null },
+    select: { clerkUserId: true },
+  });
+  const excludedClerkIds = platformAdminIds.map((r) => r.clerkUserId);
+
   const [membresList, eglisesList] = await Promise.all([
     prisma.membre.findMany({
+      where: excludedClerkIds.length > 0
+        ? { clerkUserId: { notIn: excludedClerkIds } }
+        : undefined,
       include: { eglise: true },
       orderBy: { nom: "asc" },
     }),

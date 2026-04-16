@@ -1,11 +1,26 @@
+import React from "react";
 import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { Users, Megaphone, Calendar, FileText, User, Church, Lock, Tag, Pin, MapPin } from "lucide-react";
 
-const ENTITY_ICONS: Record<string, string> = { annonce: "📢", evenement: "🗓️", page: "📄", membre: "👤", eglise: "⛪", admin: "🔐" };
+function EntityIcon({ type, color, size = 16 }: { type: string; color: string; size?: number }) {
+  const props = { size, color };
+  switch (type) {
+    case "annonce":   return <Megaphone {...props} />;
+    case "evenement": return <Calendar {...props} />;
+    case "page":      return <FileText {...props} />;
+    case "membre":    return <User {...props} />;
+    case "eglise":    return <Church {...props} />;
+    case "admin":     return <Lock {...props} />;
+    case "role":      return <Tag {...props} />;
+    default:          return <Pin {...props} />;
+  }
+}
+
 const ACTION_LABELS: Record<string, string> = { creer: "créé", modifier: "modifié", supprimer: "supprimé", suspendre: "suspendu", reactiver: "réactivé", inviter: "invité", revoquer: "révoqué" };
 const ACTIVITY_COLORS: Record<string, { bg: string; color: string }> = {
   creer: { bg: "#dcfce7", color: "#15803d" },
@@ -74,23 +89,23 @@ export default async function GestionDashboardPage() {
   type StatCard = {
     label: string;
     count: number;
-    icon: string;
+    icon: React.ReactElement;
     color: string;
     href: string;
   };
 
   const stats: StatCard[] = [
     ...(canMembres && membresCount !== null
-      ? [{ label: "Membres actifs", count: membresCount, icon: "👥", color: "#1e3a8a", href: "/gestion/membres" }]
+      ? [{ label: "Membres actifs", count: membresCount, icon: <Users size={22} color="#1e3a8a" />, color: "#1e3a8a", href: "/gestion/membres" }]
       : []),
     ...(canContenus && annoncesCount !== null
-      ? [{ label: "Annonces publiées", count: annoncesCount, icon: "📢", color: "#0891b2", href: "/gestion/annonces" }]
+      ? [{ label: "Annonces publiées", count: annoncesCount, icon: <Megaphone size={22} color="#0891b2" />, color: "#0891b2", href: "/gestion/annonces" }]
       : []),
     ...(canContenus && evenementsCount !== null
-      ? [{ label: "Événements à venir", count: evenementsCount, icon: "🗓️", color: "#c59b2e", href: "/gestion/evenements" }]
+      ? [{ label: "Événements à venir", count: evenementsCount, icon: <Calendar size={22} color="#c59b2e" />, color: "#c59b2e", href: "/gestion/evenements" }]
       : []),
     ...(canPages && pagesCount !== null
-      ? [{ label: "Pages publiées", count: pagesCount, icon: "📄", color: "#7c3aed", href: "/gestion/pages" }]
+      ? [{ label: "Pages publiées", count: pagesCount, icon: <FileText size={22} color="#7c3aed" />, color: "#7c3aed", href: "/gestion/pages" }]
       : []),
   ];
 
@@ -137,7 +152,7 @@ export default async function GestionDashboardPage() {
                       {s.count.toLocaleString("fr-FR")}
                     </div>
                   </div>
-                  <span style={{ fontSize: 26, opacity: 0.6 }}>{s.icon}</span>
+                  <div style={{ opacity: 0.7 }}>{s.icon}</div>
                 </div>
               </div>
             </Link>
@@ -207,9 +222,10 @@ export default async function GestionDashboardPage() {
                 {prochainEvenements.map((e) => (
                   <div key={e.id} style={{ padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>{e.titre}</div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 3 }}>
-                      📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                      {e.lieu && <> — 📍 {e.lieu}</>}
+                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 3, display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+                      <Calendar size={11} color="#94a3b8" />
+                      {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      {e.lieu && <><span style={{ color: "#cbd5e1" }}>—</span><MapPin size={11} color="#94a3b8" />{e.lieu}</>}
                     </div>
                   </div>
                 ))}
@@ -266,8 +282,8 @@ export default async function GestionDashboardPage() {
               const ac = ACTIVITY_COLORS[log.action] ?? { bg: "#f1f5f9", color: "#64748b" };
               return (
                 <div key={log.id} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
-                    {ENTITY_ICONS[log.entiteType] ?? "📌"}
+                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <EntityIcon type={log.entiteType} color={ac.color} size={14} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>

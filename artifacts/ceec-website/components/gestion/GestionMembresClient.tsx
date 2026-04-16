@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CHURCH_ROLE_LABELS } from "@/lib/membre-role";
+import { CHURCH_ROLE_LABELS } from "@/lib/membre-role-constants";
 
 interface MembreEnrichi {
   id: number;

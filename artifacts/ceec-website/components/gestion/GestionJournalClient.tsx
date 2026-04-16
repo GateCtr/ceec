@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Megaphone, Calendar, FileText, User, Church, Lock, Tag, Pin } from "lucide-react";
 
 interface LogEntry {
   id: number;
@@ -25,15 +26,19 @@ const ACTION_LABELS: Record<string, string> = {
   depublier: "a dépublié",
 };
 
-const ENTITY_ICONS: Record<string, string> = {
-  annonce: "📢",
-  evenement: "🗓️",
-  page: "📄",
-  membre: "👤",
-  eglise: "⛪",
-  admin: "🔐",
-  role: "🏷️",
-};
+function EntityIcon({ type, color }: { type: string; color: string }) {
+  const props = { size: 16, color };
+  switch (type) {
+    case "annonce":   return <Megaphone {...props} />;
+    case "evenement": return <Calendar {...props} />;
+    case "page":      return <FileText {...props} />;
+    case "membre":    return <User {...props} />;
+    case "eglise":    return <Church {...props} />;
+    case "admin":     return <Lock {...props} />;
+    case "role":      return <Tag {...props} />;
+    default:          return <Pin {...props} />;
+  }
+}
 
 const ACTION_COLORS: Record<string, { bg: string; color: string }> = {
   creer: { bg: "#dcfce7", color: "#15803d" },
@@ -158,7 +163,6 @@ export default function GestionJournalClient({
           <div style={{ display: "flex", flexDirection: "column" }}>
             {logs.map((log, i) => {
               const ac = ACTION_COLORS[log.action] ?? { bg: "#f1f5f9", color: "#64748b" };
-              const icon = ENTITY_ICONS[log.entiteType] ?? "📌";
               return (
                 <div
                   key={log.id}
@@ -171,9 +175,8 @@ export default function GestionJournalClient({
                   <div style={{
                     width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
                     background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 16,
                   }}>
-                    {icon}
+                    <EntityIcon type={log.entiteType} color={ac.color} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.5 }}>

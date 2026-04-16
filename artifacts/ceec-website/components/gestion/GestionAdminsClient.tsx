@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle } from "lucide-react";
 
 interface UserRoleItem {
   id: number;
@@ -89,8 +90,9 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
       {successMsg && (
-        <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14 }}>
-          ✅ {successMsg}
+        <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+          <CheckCircle size={16} color="#15803d" />
+          {successMsg}
         </div>
       )}
 
@@ -203,7 +205,7 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
                       onClick={() => copyToken(inv.token)}
                       style={{ padding: "6px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 12, cursor: "pointer" }}
                     >
-                      {copiedToken === inv.token ? "✅ Copié !" : "Copier le lien"}
+                      {copiedToken === inv.token ? "Copié !" : "Copier le lien"}
                     </button>
                   </div>
                 </div>

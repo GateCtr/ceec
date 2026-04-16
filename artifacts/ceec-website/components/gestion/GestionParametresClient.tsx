@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle } from "lucide-react";
 
 interface EgliseData {
   id: number;
@@ -75,7 +76,7 @@ export default function GestionParametresClient({ eglise }: Props) {
       )}
 
       {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{error}</div>}
-      {success && <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 14 }}>✅ Informations mises à jour avec succès.</div>}
+      {success && <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}><CheckCircle size={16} color="#15803d" /> Informations mises à jour avec succès.</div>}
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div>

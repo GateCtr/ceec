@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mail, Trash2, Phone } from "lucide-react";
 
 type Message = {
   id: number;
@@ -141,7 +142,9 @@ export default function ContactMessagesClient({
           <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>Chargement…</div>
         ) : messages.length === 0 ? (
           <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8", background: "white", borderRadius: 12, border: "1px solid #e2e8f0" }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>✉️</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+              <Mail size={40} color="#e2e8f0" />
+            </div>
             <p style={{ fontWeight: 600 }}>Aucun message{filterNonLu ? " non lu" : ""}</p>
           </div>
         ) : (
@@ -185,10 +188,10 @@ export default function ContactMessagesClient({
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteMessage(msg.id); }}
                     disabled={deleting === msg.id}
-                    style={{ background: "none", border: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 16, padding: "0 4px", flexShrink: 0 }}
+                    style={{ background: "none", border: "none", color: "#cbd5e1", cursor: "pointer", padding: "0 4px", flexShrink: 0, display: "flex", alignItems: "center" }}
                     title="Supprimer"
                   >
-                    🗑
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
@@ -224,7 +227,9 @@ export default function ContactMessagesClient({
               <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{selected.nom}</div>
               <a href={`mailto:${selected.email}`} style={{ fontSize: 14, color: "#1e3a8a", textDecoration: "none" }}>{selected.email}</a>
               {selected.telephone && (
-                <div style={{ fontSize: 14, color: "#475569", marginTop: 4 }}>📞 {selected.telephone}</div>
+                <div style={{ fontSize: 14, color: "#475569", marginTop: 4, display: "flex", alignItems: "center", gap: 5 }}>
+                  <Phone size={13} color="#94a3b8" />{selected.telephone}
+                </div>
               )}
             </div>
 
@@ -245,9 +250,9 @@ export default function ContactMessagesClient({
             <div style={{ display: "flex", gap: 10, paddingTop: 8 }}>
               <a
                 href={`mailto:${selected.email}?subject=${encodeURIComponent("Re: " + (selected.sujet ?? "Votre message"))}`}
-                style={{ flex: 1, padding: "9px 16px", borderRadius: 8, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 13, textAlign: "center" }}
+                style={{ flex: 1, padding: "9px 16px", borderRadius: 8, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 13, textAlign: "center", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
               >
-                ✉️ Répondre
+                <Mail size={14} color="white" /> Répondre
               </a>
               <button
                 onClick={() => markAsRead(selected.id, !selected.lu)}
@@ -258,9 +263,9 @@ export default function ContactMessagesClient({
               <button
                 onClick={() => deleteMessage(selected.id)}
                 disabled={deleting === selected.id}
-                style={{ padding: "9px 16px", borderRadius: 8, background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                style={{ padding: "9px 16px", borderRadius: 8, background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
               >
-                🗑
+                <Trash2 size={14} color="#b91c1c" />
               </button>
             </div>
           </div>

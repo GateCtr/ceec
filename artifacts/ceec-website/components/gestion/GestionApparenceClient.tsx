@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle } from "lucide-react";
 
 type NavLink = { label: string; href: string; externe?: boolean };
 type FooterLink = { label: string; href: string };
@@ -171,8 +172,9 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
   return (
     <form onSubmit={handleSubmit}>
       {success && (
-        <div style={{ background: "#dcfce7", color: "#15803d", padding: "12px 16px", borderRadius: 10, marginBottom: 20, fontSize: 14, fontWeight: 600 }}>
-          ✓ Apparence sauvegardée avec succès
+        <div style={{ background: "#dcfce7", color: "#15803d", padding: "12px 16px", borderRadius: 10, marginBottom: 20, fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+          <CheckCircle size={16} color="#15803d" />
+          Apparence sauvegardée avec succès
         </div>
       )}
       {error && (

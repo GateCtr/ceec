@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { LiveStream } from "@prisma/client";
+import { Play, Pin, Radio } from "lucide-react";
 
 function getYoutubeId(url: string): string | null {
   try {
@@ -160,7 +161,7 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
               <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 22 }}>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
                   <input type="checkbox" checked={form.estEnDirect} onChange={(e) => updateField("estEnDirect", e.target.checked)} />
-                  <span style={{ color: "#b91c1c", fontWeight: 600 }}>🔴 En direct</span>
+                  <span style={{ color: "#b91c1c", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><Radio size={13} color="#b91c1c" /> En direct</span>
                 </label>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
                   <input type="checkbox" checked={form.epingle} onChange={(e) => updateField("epingle", e.target.checked)} />
@@ -188,7 +189,9 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
 
       {videos.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>▶️</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <Play size={40} color="#e2e8f0" />
+          </div>
           <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune vidéo</h3>
           <p style={{ color: "#64748b", fontSize: 14 }}>Ajoutez vos lives et replays YouTube pour les afficher sur votre site.</p>
         </div>
@@ -203,12 +206,14 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
                     <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt={v.titre} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                 ) : (
-                  <div style={{ aspectRatio: "16/9", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>▶</div>
+                  <div style={{ aspectRatio: "16/9", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Play size={32} color="#94a3b8" />
+                  </div>
                 )}
                 <div style={{ padding: "12px 14px" }}>
                   <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
-                    {v.epingle && <span style={{ fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: 99 }}>📌 Épinglé</span>}
-                    {v.estEnDirect && <span style={{ fontSize: 10, fontWeight: 700, background: "#fee2e2", color: "#b91c1c", padding: "2px 8px", borderRadius: 99 }}>🔴 En direct</span>}
+                    {v.epingle && <span style={{ fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: 99, display: "inline-flex", alignItems: "center", gap: 3 }}><Pin size={9} color="#b45309" /> Épinglé</span>}
+                    {v.estEnDirect && <span style={{ fontSize: 10, fontWeight: 700, background: "#fee2e2", color: "#b91c1c", padding: "2px 8px", borderRadius: 99, display: "inline-flex", alignItems: "center", gap: 3 }}><Radio size={9} color="#b91c1c" /> En direct</span>}
                     {!v.publie && <span style={{ fontSize: 10, fontWeight: 700, background: "#f1f5f9", color: "#64748b", padding: "2px 8px", borderRadius: 99 }}>Brouillon</span>}
                   </div>
                   <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 14, marginBottom: 4, lineHeight: 1.3 }}>{v.titre}</div>

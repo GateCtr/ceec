@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
+import { AlertTriangle, LayoutGrid, GripVertical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -149,7 +150,9 @@ function ConfirmDeleteDialog({
         background: "white", borderRadius: 16, padding: "2rem", maxWidth: 400, width: "100%",
         boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
       }}>
-        <div style={{ fontSize: 36, textAlign: "center", marginBottom: 12 }}>⚠️</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <AlertTriangle size={36} color="#f59e0b" />
+        </div>
         <h3 style={{ fontWeight: 800, fontSize: "1.1rem", color: "#0f172a", textAlign: "center", marginBottom: 8 }}>
           Supprimer cette section ?
         </h3>
@@ -230,15 +233,15 @@ function SortableSectionCard({
           style={{
             cursor: isDragging ? "grabbing" : "grab",
             color: "#94a3b8",
-            fontSize: 16,
-            lineHeight: 1,
             padding: "4px 6px",
             borderRadius: 6,
             userSelect: "none",
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
           }}
         >
-          ⠿
+          <GripVertical size={16} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <span style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{sectionLabel(section.type)}</span>
@@ -506,7 +509,9 @@ export default function GestionPageDetailClient({
 
       {page.sections.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🧩</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <LayoutGrid size={40} color="#e2e8f0" />
+          </div>
           <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune section</h3>
           <p style={{ color: "#64748b", fontSize: 14 }}>Ajoutez des sections pour composer le contenu de cette page.</p>
         </div>

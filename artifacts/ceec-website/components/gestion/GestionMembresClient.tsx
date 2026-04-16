@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Users } from "lucide-react";
 import { CHURCH_ROLE_LABELS } from "@/lib/membre-role-constants";
 
 interface MembreEnrichi {
@@ -125,7 +126,9 @@ export default function GestionMembresClient({ initialMembres }: Props) {
 
       {filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <Users size={40} color="#cbd5e1" />
+          </div>
           <p style={{ color: "#64748b" }}>Aucun membre dans cette catégorie.</p>
         </div>
       ) : (

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { FileText } from "lucide-react";
 
 type Page = {
   id: number;
@@ -117,7 +118,9 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
 
       {pages.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📄</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <FileText size={40} color="#e2e8f0" />
+          </div>
           <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune page configurée</h3>
           <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Créez votre première page personnalisée pour enrichir votre site public.</p>
           <Link href="/gestion/pages/nouveau" style={{ padding: "10px 24px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14 }}>Créer une page</Link>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { Annonce } from "@prisma/client";
+import { Megaphone } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
@@ -231,7 +232,9 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
 
       {annonces.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📢</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <Megaphone size={40} color="#cbd5e1" />
+          </div>
           <p style={{ color: "#64748b" }}>Aucune annonce pour l&apos;instant.</p>
         </div>
       ) : (

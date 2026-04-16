@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { Evenement } from "@prisma/client";
+import { Calendar as CalendarIcon, MapPin } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface Props {
@@ -239,7 +240,9 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
 
       {evenements.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🗓️</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <CalendarIcon size={40} color="#cbd5e1" />
+          </div>
           <p style={{ color: "#64748b" }}>Aucun événement pour l&apos;instant.</p>
         </div>
       ) : (
@@ -264,9 +267,10 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
                         {e.categorie && <span style={{ ...s.badge, background: "#eff6ff", color: "#1e40af" }}>{e.categorie}</span>}
                         {past && <span style={{ ...s.badge, background: "#f1f5f9", color: "#94a3b8" }}>Passé</span>}
                       </div>
-                      <div style={{ fontSize: 13, color: "#64748b" }}>
-                        📅 {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                        {e.lieu && <> — 📍 {e.lieu}</>}
+                      <div style={{ fontSize: 13, color: "#64748b", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <CalendarIcon size={13} color="#94a3b8" />
+                        {new Date(e.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        {e.lieu && <><span style={{ color: "#cbd5e1" }}>—</span><MapPin size={13} color="#94a3b8" />{e.lieu}</>}
                       </div>
                       {e.description && <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{e.description}</p>}
                       {(e.statutContenu as string) === "rejete" && (e as Evenement & { commentaireRejet?: string | null }).commentaireRejet && (

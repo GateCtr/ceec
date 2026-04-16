@@ -2,14 +2,33 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import type { NavItem } from "./DashboardSidebar";
+import { Menu, LucideIcon, LayoutDashboard, Church, Users, Megaphone, CalendarDays, ScrollText, Settings, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock } from "lucide-react";
+import type { NavItem, IconName } from "./DashboardSidebar";
+
+const ICON_MAP: Record<IconName, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  church: Church,
+  users: Users,
+  megaphone: Megaphone,
+  calendar: CalendarDays,
+  logs: ScrollText,
+  settings: Settings,
+  shield: Shield,
+  "user-cog": UserCog,
+  "file-text": FileText,
+  message: MessageSquare,
+  palette: Palette,
+  video: Video,
+  lock: Lock,
+};
 
 interface Props {
   items: NavItem[];
   contextLabel: string;
+  onMobileMenuOpen?: () => void;
 }
 
-export default function DashboardHeader({ items, contextLabel }: Props) {
+export default function DashboardHeader({ items, contextLabel, onMobileMenuOpen }: Props) {
   const pathname = usePathname();
   const { user } = useUser();
 
@@ -25,6 +44,7 @@ export default function DashboardHeader({ items, contextLabel }: Props) {
     : "";
 
   const initial = displayName.trim()[0]?.toUpperCase() ?? "U";
+  const IconComp = current ? (ICON_MAP[current.icon as IconName] ?? LayoutDashboard) : null;
 
   return (
     <header
@@ -32,25 +52,41 @@ export default function DashboardHeader({ items, contextLabel }: Props) {
         position: "sticky",
         top: 0,
         zIndex: 30,
-        background: "rgba(255,255,255,0.95)",
+        background: "rgba(255,255,255,0.97)",
         backdropFilter: "blur(8px)",
         borderBottom: "1px solid #e2e8f0",
         height: 56,
         display: "flex",
         alignItems: "center",
-        paddingLeft: "1.5rem",
+        paddingLeft: onMobileMenuOpen ? "0.75rem" : "1.5rem",
         paddingRight: "1.25rem",
         justifyContent: "space-between",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
         flexShrink: 0,
       }}
     >
-      {/* Titre de la section */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {current && (
+        {onMobileMenuOpen && (
+          <button
+            onClick={onMobileMenuOpen}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#64748b",
+              padding: "6px",
+              borderRadius: 6,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
+        {current && IconComp && (
           <>
-            <span style={{ fontSize: 20, lineHeight: 1 }}>{current.icon}</span>
-            <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>
+            <IconComp size={18} style={{ color: "#1e3a8a", opacity: 0.8 }} />
+            <span style={{ fontWeight: 700, fontSize: 14.5, color: "#0f172a" }}>
               {current.label}
             </span>
           </>
@@ -58,8 +94,8 @@ export default function DashboardHeader({ items, contextLabel }: Props) {
         <span
           style={{
             color: "#94a3b8",
-            fontSize: 13,
-            marginLeft: 4,
+            fontSize: 12.5,
+            marginLeft: 2,
             display: "inline-block",
           }}
         >
@@ -67,10 +103,20 @@ export default function DashboardHeader({ items, contextLabel }: Props) {
         </span>
       </div>
 
-      {/* Profil utilisateur */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {displayName && (
-          <span style={{ fontSize: 13, color: "#64748b", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontSize: 13,
+              color: "#64748b",
+              maxWidth: 160,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              display: "none",
+            }}
+            className="sm-show"
+          >
             {displayName}
           </span>
         )}

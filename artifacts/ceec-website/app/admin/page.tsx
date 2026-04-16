@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin } from "@/lib/auth/rbac";
+import { isPlatformAdmin, getUserRoles, ROLES } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import AdminLogsClient from "@/components/admin/AdminLogsClient";
 import AdminValidationQueue from "@/components/admin/AdminValidationQueue";
@@ -11,9 +11,15 @@ import { getDateFrom } from "@/lib/date-filter";
 
 export const metadata = { title: "Administration Plateforme | CEEC" };
 
-async function getDashboardData(egliseFilter?: string, actionFilter?: string, dateFilter?: string) {
+async function getDashboardData(
+  egliseFilter?: string,
+  actionFilter?: string,
+  dateFilter?: string
+) {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
   const logWhere: {
     egliseId?: number;
@@ -23,7 +29,10 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
 
   try {
     if (egliseFilter) {
-      const eg = await prisma.eglise.findUnique({ where: { slug: egliseFilter }, select: { id: true } });
+      const eg = await prisma.eglise.findUnique({
+        where: { slug: egliseFilter },
+        select: { id: true },
+      });
       logWhere.egliseId = eg?.id ?? -1;
     }
     if (actionFilter) logWhere.action = actionFilter;
@@ -35,7 +44,9 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       eglises,
       totalMembres,
       annoncesduMois,
+      annoncesLastMonth,
       evenementsAVenir,
+      pendingEglises,
       logs,
       eglisesForFilter,
       annoncesEnAttente,
@@ -44,21 +55,39 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       prisma.eglise.groupBy({ by: ["statut"], _count: { _all: true } }),
       prisma.eglise.findMany({
         orderBy: { createdAt: "desc" },
+        take: 10,
         select: {
-          id: true, nom: true, slug: true, ville: true, statut: true, createdAt: true,
+          id: true,
+          nom: true,
+          slug: true,
+          ville: true,
+          statut: true,
+          createdAt: true,
           _count: { select: { membres: true } },
         },
       }),
       prisma.membre.count(),
       prisma.annonce.count({ where: { createdAt: { gte: startOfMonth } } }),
-      prisma.evenement.count({ where: { dateDebut: { gte: now }, statutContenu: "publie" } }),
+      prisma.annonce.count({
+        where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
+      }),
+      prisma.evenement.count({
+        where: { dateDebut: { gte: now }, statutContenu: "publie" },
+      }),
+      prisma.eglise.count({ where: { statut: "en_attente" } }),
       prisma.activityLog.findMany({
         where: logWhere,
         orderBy: { createdAt: "desc" },
         take: 50,
         select: {
-          id: true, acteurNom: true, action: true, entiteType: true,
-          entiteId: true, entiteLabel: true, egliseNom: true, createdAt: true,
+          id: true,
+          acteurNom: true,
+          action: true,
+          entiteType: true,
+          entiteId: true,
+          entiteLabel: true,
+          egliseNom: true,
+          createdAt: true,
         },
       }),
       prisma.eglise.findMany({
@@ -84,8 +113,20 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
       eglisesByStatut.total += g._count._all;
     }
 
+    const annoncesTrend =
+      annoncesLastMonth > 0
+        ? Math.round(((annoncesduMois - annoncesLastMonth) / annoncesLastMonth) * 100)
+        : 0;
+
     return {
-      stats: { eglises: eglisesByStatut, membres: totalMembres, annoncesduMois, evenementsAVenir },
+      stats: {
+        eglises: eglisesByStatut,
+        membres: totalMembres,
+        annoncesduMois,
+        annoncesTrend,
+        evenementsAVenir,
+        pendingEglises,
+      },
       eglises: eglises.map((e) => ({
         id: e.id,
         nom: e.nom,
@@ -105,7 +146,11 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
         egliseNom: l.egliseNom,
         createdAt: l.createdAt.toISOString(),
       })),
-      eglisesForFilter: eglisesForFilter.map((e) => ({ id: e.id, nom: e.nom, slug: e.slug ?? "" })),
+      eglisesForFilter: eglisesForFilter.map((e) => ({
+        id: e.id,
+        nom: e.nom,
+        slug: e.slug ?? "",
+      })),
       validationQueue: [
         ...annoncesEnAttente.map((a) => ({
           id: a.id,
@@ -125,11 +170,21 @@ async function getDashboardData(egliseFilter?: string, actionFilter?: string, da
           contenu: e.description,
           dateDebut: e.dateDebut.toISOString(),
         })),
-      ].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+      ].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      ),
     };
   } catch {
     return {
-      stats: { eglises: { actif: 0, en_attente: 0, suspendu: 0, total: 0 }, membres: 0, annoncesduMois: 0, evenementsAVenir: 0 },
+      stats: {
+        eglises: { actif: 0, en_attente: 0, suspendu: 0, total: 0 },
+        membres: 0,
+        annoncesduMois: 0,
+        annoncesTrend: 0,
+        evenementsAVenir: 0,
+        pendingEglises: 0,
+      },
       eglises: [],
       logs: [],
       eglisesForFilter: [],
@@ -145,131 +200,297 @@ export default async function AdminPage({
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!await isSuperAdmin(userId)) redirect("/sign-in");
+  if (!(await isPlatformAdmin(userId))) redirect("/sign-in");
+
+  const userRoles = await getUserRoles(userId);
+  const roleNames = userRoles.map((ur) => ur.role.nom);
+  const isSuperAdmin = roleNames.includes(ROLES.SUPER_ADMIN);
 
   const sp = await searchParams;
-  const { stats, eglises, logs, eglisesForFilter, validationQueue } = await getDashboardData(sp.eglise, sp.action, sp.date);
+  const { stats, eglises, logs, eglisesForFilter, validationQueue } =
+    await getDashboardData(sp.eglise, sp.action, sp.date);
 
-  const statCards = [
-    {
-      label: "Églises (total)",
-      value: stats.eglises.total,
-      color: "#1e3a8a",
-      sub: (
-        <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <span style={{ ...badge, background: "#dcfce7", color: "#15803d" }}>{stats.eglises.actif} actives</span>
-          <span style={{ ...badge, background: "#fef3c7", color: "#b45309" }}>{stats.eglises.en_attente} en attente</span>
-          <span style={{ ...badge, background: "#fee2e2", color: "#b91c1c" }}>{stats.eglises.suspendu} suspendues</span>
-        </div>
-      ),
-      href: "/admin/eglises",
-    },
-    { label: "Membres inscrits", value: stats.membres, color: "#0891b2", icon: "👥", href: null },
-    { label: "Annonces ce mois", value: stats.annoncesduMois, color: "#16a34a", icon: "📢", href: null },
-    { label: "Événements à venir", value: stats.evenementsAVenir, color: "#d97706", icon: "🗓️", href: null },
-  ];
+  const totalValidation = validationQueue.length;
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
-          Vue globale de la plateforme CEEC
-        </h1>
-        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>
-          Statistiques et gestion centralisée de toutes les églises membres
-        </p>
+    <div style={{ padding: "1.75rem 2rem", maxWidth: 1280, margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.01em" }}>
+            Vue globale de la plateforme
+          </h1>
+          <p style={{ color: "#64748b", marginTop: 4, fontSize: 13.5 }}>
+            Gestion centralisée de toutes les églises membres CEEC
+          </p>
+        </div>
+        {isSuperAdmin && (
+          <Link href="/admin/eglises/nouveau" style={primaryBtn}>
+            + Inviter une église
+          </Link>
+        )}
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 36 }}>
-        {statCards.map((card) => (
-          <div key={card.label} style={statCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 500 }}>{card.label}</div>
-              {"icon" in card && card.icon && <span style={{ fontSize: 22, opacity: 0.6 }}>{card.icon}</span>}
-            </div>
-            <div style={{ fontSize: 40, fontWeight: 900, color: card.color, lineHeight: 1.1, marginTop: 6 }}>
-              {card.value.toLocaleString("fr-FR")}
-            </div>
-            {"sub" in card && card.sub ? card.sub : null}
-          </div>
-        ))}
-      </div>
-
-      {/* Validation queue */}
-      <div style={{ marginBottom: 36 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>
-              Validation du contenu
-              {validationQueue.length > 0 && (
-                <span style={{ marginLeft: 8, display: "inline-block", fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: "#fef9c3", color: "#a16207" }}>
-                  {validationQueue.length} en attente
-                </span>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(195px, 1fr))", gap: 14, marginBottom: 28 }}>
+        <StatCard
+          label="Églises actives"
+          value={stats.eglises.actif}
+          total={stats.eglises.total}
+          color="#1e3a8a"
+          href="/admin/eglises"
+          sub={
+            <div style={{ marginTop: 8, display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {stats.eglises.en_attente > 0 && (
+                <Badge bg="#fef3c7" color="#b45309">{stats.eglises.en_attente} en attente</Badge>
               )}
-            </h2>
-            <p style={{ color: "#64748b", fontSize: 13, marginTop: 3 }}>
-              Annonces et événements soumis par les gestionnaires d&apos;église
-            </p>
-          </div>
-        </div>
-        <AdminValidationQueue items={validationQueue} />
-      </div>
-
-      {/* Church list */}
-      <div style={{ marginBottom: 36 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>Toutes les églises</h2>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Link href="/admin/eglises" style={secondaryBtn}>Gérer les églises →</Link>
-            <Link href="/admin/eglises/nouveau" style={primaryBtn}>+ Ajouter une église</Link>
-          </div>
-        </div>
-        <AdminDashboardClient eglises={eglises} />
-      </div>
-
-      {/* Activity log — full filterable view directly in /admin */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 16, margin: 0 }}>
-              Journal d&apos;activité global
-            </h2>
-            <p style={{ color: "#64748b", fontSize: 13, marginTop: 3 }}>
-              50 dernières actions de toutes les églises — filtrez par église, action et période
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Link href="/admin/annonces" style={secondaryBtn}>Superviser annonces →</Link>
-          </div>
-        </div>
-        <AdminLogsClient
-          logs={logs}
-          eglises={eglisesForFilter}
-          selectedEglise={sp.eglise ?? ""}
-          selectedAction={sp.action ?? ""}
-          selectedDate={sp.date ?? ""}
+              {stats.eglises.suspendu > 0 && (
+                <Badge bg="#fee2e2" color="#b91c1c">{stats.eglises.suspendu} suspendues</Badge>
+              )}
+            </div>
+          }
         />
+        <StatCard
+          label="Membres inscrits"
+          value={stats.membres}
+          color="#0891b2"
+          href="/admin/membres"
+        />
+        <StatCard
+          label="Annonces ce mois"
+          value={stats.annoncesduMois}
+          color="#16a34a"
+          trend={stats.annoncesTrend}
+          href="/admin/annonces"
+        />
+        <StatCard
+          label="Événements à venir"
+          value={stats.evenementsAVenir}
+          color="#d97706"
+          href="/admin/evenements"
+        />
+        {totalValidation > 0 && (
+          <StatCard
+            label="En attente de validation"
+            value={totalValidation}
+            color="#dc2626"
+            urgent
+          />
+        )}
+      </div>
+
+      {/* Validation queue — toujours en premier si contenu en attente */}
+      {totalValidation > 0 && (
+        <section style={{ marginBottom: 28 }}>
+          <SectionHeader
+            title="Validation du contenu"
+            badge={`${totalValidation} en attente`}
+            badgeColor="#dc2626"
+            description="Annonces et événements soumis par les gestionnaires d'église"
+          />
+          <AdminValidationQueue items={validationQueue} />
+        </section>
+      )}
+
+      {/* Main grid : Églises + Journal */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }}>
+        {/* Églises récentes */}
+        <section>
+          <SectionHeader
+            title="Dernières églises enregistrées"
+            action={
+              <div style={{ display: "flex", gap: 8 }}>
+                <Link href="/admin/eglises" style={secondaryBtn}>Toutes les églises →</Link>
+                {isSuperAdmin && (
+                  <Link href="/admin/eglises/nouveau" style={primaryBtnSm}>+ Inviter</Link>
+                )}
+              </div>
+            }
+          />
+          <AdminDashboardClient eglises={eglises} />
+        </section>
+
+        {/* Journal d'activité */}
+        <section>
+          <SectionHeader
+            title="Journal d'activité"
+            description={`${logs.length} dernières actions — filtrez par église, type et période`}
+            action={
+              <Link href="/admin/annonces" style={secondaryBtn}>
+                Superviser annonces →
+              </Link>
+            }
+          />
+          <AdminLogsClient
+            logs={logs}
+            eglises={eglisesForFilter}
+            selectedEglise={sp.eglise ?? ""}
+            selectedAction={sp.action ?? ""}
+            selectedDate={sp.date ?? ""}
+          />
+        </section>
       </div>
     </div>
   );
 }
 
-const statCard: React.CSSProperties = {
-  background: "white", borderRadius: 14, padding: "1.25rem 1.5rem",
-  border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-};
+function StatCard({
+  label,
+  value,
+  total,
+  color,
+  trend,
+  href,
+  urgent,
+  sub,
+}: {
+  label: string;
+  value: number;
+  total?: number;
+  color: string;
+  trend?: number;
+  href?: string;
+  urgent?: boolean;
+  sub?: React.ReactNode;
+}) {
+  const inner = (
+    <div
+      style={{
+        background: "white",
+        borderRadius: 14,
+        padding: "1.15rem 1.35rem",
+        border: urgent ? `1.5px solid #fca5a5` : "1px solid #e2e8f0",
+        boxShadow: urgent
+          ? "0 2px 12px rgba(220,38,38,0.08)"
+          : "0 1px 4px rgba(0,0,0,0.04)",
+        cursor: href ? "pointer" : "default",
+        transition: "border-color 0.15s, box-shadow 0.15s",
+        textDecoration: "none",
+        display: "block",
+      }}
+    >
+      <div style={{ fontSize: 11.5, color: urgent ? "#b91c1c" : "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        {label}
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, marginTop: 6 }}>
+        <div style={{ fontSize: 38, fontWeight: 900, color, lineHeight: 1.05 }}>
+          {value.toLocaleString("fr-FR")}
+        </div>
+        {total != null && total !== value && (
+          <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 4 }}>
+            / {total} total
+          </div>
+        )}
+      </div>
+      {trend != null && trend !== 0 && (
+        <div style={{ marginTop: 5, fontSize: 12, color: trend > 0 ? "#15803d" : "#b91c1c", fontWeight: 600 }}>
+          {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}% vs mois dernier
+        </div>
+      )}
+      {sub}
+    </div>
+  );
 
-const badge: React.CSSProperties = {
-  padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600,
-};
+  if (href) {
+    return (
+      <Link href={href} style={{ textDecoration: "none" }}>
+        {inner}
+      </Link>
+    );
+  }
+  return inner;
+}
+
+function Badge({ children, bg, color }: { children: React.ReactNode; bg: string; color: string }) {
+  return (
+    <span style={{ padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: bg, color }}>
+      {children}
+    </span>
+  );
+}
+
+function SectionHeader({
+  title,
+  badge,
+  badgeColor,
+  description,
+  action,
+}: {
+  title: string;
+  badge?: string;
+  badgeColor?: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: 14,
+        gap: 12,
+        flexWrap: "wrap",
+      }}
+    >
+      <div>
+        <h2 style={{ fontWeight: 700, color: "#0f172a", fontSize: 15, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          {title}
+          {badge && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "2px 9px",
+                borderRadius: 100,
+                background: badgeColor ? `${badgeColor}18` : "#fef9c3",
+                color: badgeColor ?? "#a16207",
+                border: `1px solid ${badgeColor ? `${badgeColor}40` : "#fde68a"}`,
+              }}
+            >
+              {badge}
+            </span>
+          )}
+        </h2>
+        {description && (
+          <p style={{ color: "#64748b", fontSize: 13, marginTop: 2, marginBottom: 0 }}>
+            {description}
+          </p>
+        )}
+      </div>
+      {action && <div>{action}</div>}
+    </div>
+  );
+}
 
 const primaryBtn: React.CSSProperties = {
-  padding: "8px 18px", borderRadius: 8, background: "#1e3a8a", color: "white",
-  fontWeight: 600, fontSize: 13, textDecoration: "none",
+  padding: "9px 20px",
+  borderRadius: 9,
+  background: "#1e3a8a",
+  color: "white",
+  fontWeight: 700,
+  fontSize: 13.5,
+  textDecoration: "none",
+  display: "inline-block",
+};
+
+const primaryBtnSm: React.CSSProperties = {
+  padding: "7px 14px",
+  borderRadius: 8,
+  background: "#1e3a8a",
+  color: "white",
+  fontWeight: 600,
+  fontSize: 13,
+  textDecoration: "none",
 };
 
 const secondaryBtn: React.CSSProperties = {
-  padding: "8px 16px", borderRadius: 8, background: "white", color: "#1e3a8a",
-  fontWeight: 600, fontSize: 13, textDecoration: "none", border: "1px solid #e2e8f0",
+  padding: "7px 14px",
+  borderRadius: 8,
+  background: "white",
+  color: "#1e3a8a",
+  fontWeight: 600,
+  fontSize: 13,
+  textDecoration: "none",
+  border: "1px solid #e2e8f0",
 };

@@ -61,21 +61,21 @@ export default async function GestionLayout({
   const canParametres = superAdmin || pEglise;
 
   const navItems: NavItem[] = [
-    { label: "Tableau de bord", href: "/gestion", icon: "📊", matchExact: true },
+    { label: "Tableau de bord", href: "/gestion", icon: "dashboard", matchExact: true },
     ...(superAdmin || pContenus ? [
-      { label: "Annonces", href: "/gestion/annonces", icon: "📢" },
-      { label: "Événements", href: "/gestion/evenements", icon: "🗓️" },
+      { label: "Annonces", href: "/gestion/annonces", icon: "megaphone" },
+      { label: "Événements", href: "/gestion/evenements", icon: "calendar" },
     ] : []),
     ...(canParametres ? [
-      { label: "Pages", href: "/gestion/pages", icon: "📄" },
-      { label: "Vidéos", href: "/gestion/videos", icon: "▶️" },
-      { label: "Apparence", href: "/gestion/apparence", icon: "🎨" },
+      { label: "Pages", href: "/gestion/pages", icon: "file-text" },
+      { label: "Vidéos", href: "/gestion/videos", icon: "video" },
+      { label: "Apparence", href: "/gestion/apparence", icon: "palette" },
     ] : []),
-    ...(canMembres ? [{ label: "Membres", href: "/gestion/membres", icon: "👥" }] : []),
-    ...(canAdmins ? [{ label: "Admins", href: "/gestion/admins", icon: "🔐" }] : []),
-    ...(canParametres ? [{ label: "Paramètres", href: "/gestion/parametres", icon: "⚙️" }] : []),
-    { label: "Messages", href: "/gestion/contact", icon: "✉️" },
-    { label: "Journal", href: "/gestion/journal", icon: "📋" },
+    ...(canMembres ? [{ label: "Membres", href: "/gestion/membres", icon: "users" }] : []),
+    ...(canAdmins ? [{ label: "Admins", href: "/gestion/admins", icon: "lock" }] : []),
+    ...(canParametres ? [{ label: "Paramètres", href: "/gestion/parametres", icon: "settings" }] : []),
+    { label: "Messages", href: "/gestion/contact", icon: "message" },
+    { label: "Journal", href: "/gestion/journal", icon: "logs" },
   ];
 
   const initial = eglise.nom.charAt(0).toUpperCase();

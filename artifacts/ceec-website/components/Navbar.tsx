@@ -57,7 +57,13 @@ export default function Navbar({ initialNavInfo }: Props) {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const isHeroPage =
-    pathname === "/" || pathname === "/a-propos" || pathname === "/historique";
+    pathname === "/" ||
+    pathname === "/a-propos" ||
+    pathname === "/historique" ||
+    pathname === "/paroisses" ||
+    pathname === "/evenements" ||
+    pathname === "/annonces" ||
+    pathname === "/contact";
 
   const navLinkClass = (href: string) =>
     `px-3 py-1.5 rounded-md text-sm text-white transition-all duration-150 ${

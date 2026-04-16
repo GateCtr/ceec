@@ -36,8 +36,21 @@ export default async function EvenementDetailPage({ params }: Props) {
   const eglise = await prisma.eglise.findUnique({ where: { slug } });
   if (!eglise) notFound();
 
+  let visibiliteFilter: string[] = ["public"];
+  if (userId) {
+    const [memberOfThis, memberOfAny] = await Promise.all([
+      prisma.membre.findFirst({ where: { clerkUserId: userId, egliseId: eglise.id, statut: "actif" } }),
+      prisma.membre.findFirst({ where: { clerkUserId: userId, statut: "actif" } }),
+    ]);
+    if (memberOfThis) {
+      visibiliteFilter = ["public", "communaute", "prive"];
+    } else if (memberOfAny) {
+      visibiliteFilter = ["public", "communaute"];
+    }
+  }
+
   const evt = await prisma.evenement.findFirst({
-    where: { id: evtId, egliseId: eglise.id, statutContenu: "publie" },
+    where: { id: evtId, egliseId: eglise.id, statutContenu: "publie", visibilite: { in: visibiliteFilter } },
   });
   if (!evt) notFound();
 
@@ -61,9 +74,15 @@ export default async function EvenementDetailPage({ params }: Props) {
   const isMembre = !!membre;
   const initialParticipe = !!participation;
 
-  // Other upcoming events
+  // Other upcoming events (respect same visibility filter)
   const autres = await prisma.evenement.findMany({
-    where: { egliseId: eglise.id, statutContenu: "publie", id: { not: evtId }, dateDebut: { gte: new Date() } },
+    where: {
+      egliseId: eglise.id,
+      statutContenu: "publie",
+      visibilite: { in: visibiliteFilter },
+      id: { not: evtId },
+      dateDebut: { gte: new Date() },
+    },
     orderBy: { dateDebut: "asc" },
     take: 3,
   });

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, MapPin, Link2, User, FileText, Users, Megaphone, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin } from "@/lib/auth/rbac";
 import { enrichMembresWithRoles } from "@/lib/membre-role";
@@ -52,7 +53,7 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
         href="/admin/eglises"
         style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}
       >
-        ← Toutes les églises
+        <ArrowLeft size={14} /> Toutes les églises
       </Link>
 
       <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap", justifyContent: "space-between", marginBottom: 28 }}>
@@ -63,10 +64,10 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
               {statut.label}
             </span>
           </div>
-          <div style={{ color: "#64748b", fontSize: 14, display: "flex", gap: 20, flexWrap: "wrap" }}>
-            <span>📍 {eglise.ville}</span>
-            {eglise.slug && <span>🔗 {eglise.slug}</span>}
-            {eglise.pasteur && <span>👤 {eglise.pasteur}</span>}
+          <div style={{ color: "#64748b", fontSize: 14, display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><MapPin size={14} /> {eglise.ville}</span>
+            {eglise.slug && <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><Link2 size={14} /> {eglise.slug}</span>}
+            {eglise.pasteur && <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><User size={14} /> {eglise.pasteur}</span>}
           </div>
         </div>
         {eglise.slug && (
@@ -74,24 +75,24 @@ export default async function AdminEgliseDetailPage({ params }: { params: Promis
             href={`/admin/eglises/${eglise.slug}/contenu`}
             style={{ padding: "9px 18px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            📄 Superviser le contenu
+            <FileText size={15} /> Superviser le contenu
           </Link>
         )}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 32 }}>
         {[
-          { label: "Membres", count: eglise._count.membres, icon: "👥", color: "#1e3a8a" },
-          { label: "Annonces", count: eglise._count.annonces, icon: "📢", color: "#0891b2" },
-          { label: "Événements", count: eglise._count.evenements, icon: "🗓️", color: "#c59b2e" },
+          { label: "Membres", icon: <Users size={22} />, count: eglise._count.membres, color: "#1e3a8a" },
+          { label: "Annonces", icon: <Megaphone size={22} />, count: eglise._count.annonces, color: "#0891b2" },
+          { label: "Événements", icon: <CalendarDays size={22} />, count: eglise._count.evenements, color: "#c59b2e" },
         ].map((s) => (
           <div key={s.label} style={{ background: "white", borderRadius: 12, padding: "1.25rem", border: "1px solid #e2e8f0", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ fontSize: 12, color: "#64748b" }}>{s.label}</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: s.color }}>{s.count}</div>
               </div>
-              <span style={{ fontSize: 24 }}>{s.icon}</span>
+              <span style={{ color: s.color }}>{s.icon}</span>
             </div>
           </div>
         ))}

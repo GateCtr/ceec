@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Eglise } from "@prisma/client";
+import { Users, AlertTriangle, Download } from "lucide-react";
 
 interface MembreAvecEglise {
   id: number;
@@ -196,7 +197,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
                 <div style={{ color: "#64748b", fontSize: 13 }}>{m.email}</div>
                 {eg
                   ? <div style={{ color: "#c59b2e", fontSize: 12, fontWeight: 600 }}>{eg.nom}</div>
-                  : <div style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>⚠ Sans paroisse</div>
+                  : <div style={{ color: "#dc2626", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><AlertTriangle size={12} /> Sans paroisse</div>
                 }
               </div>
             </div>
@@ -231,7 +232,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
           download
           style={{ padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
         >
-          ↓ Exporter CSV
+          <Download size={14} /> Exporter CSV
         </a>
       </div>
 
@@ -239,7 +240,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
 
       {membres.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>👥</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Users size={48} style={{ color: "#1e3a8a" }} /></div>
           <p style={{ color: "#64748b" }}>Aucun membre inscrit pour le moment.</p>
         </div>
       ) : (
@@ -247,7 +248,7 @@ export default function AdminMembresClient({ initialMembres, paroissesList }: Pr
           {sansParoisse.length > 0 && (
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#dc2626" }}>⚠ Membres sans paroisse ({sansParoisse.length})</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#dc2626", display: "inline-flex", alignItems: "center", gap: 5 }}><AlertTriangle size={13} /> Membres sans paroisse ({sansParoisse.length})</span>
                 <span style={{ fontSize: 12, color: "#64748b" }}>— Ces enregistrements n'ont pas d'église associée</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

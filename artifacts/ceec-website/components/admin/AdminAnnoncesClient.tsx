@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Annonce, Eglise } from "@prisma/client";
+import { Megaphone } from "lucide-react";
 
 interface Props {
   initialAnnonces: Annonce[];
@@ -171,7 +172,7 @@ export default function AdminAnnoncesClient({ initialAnnonces, paroissesList }: 
 
       {annonces.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>📢</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Megaphone size={48} style={{ color: "#94a3b8" }} /></div>
           <p style={{ color: "#64748b" }}>Aucune annonce publiée. Créez votre première annonce.</p>
         </div>
       ) : (

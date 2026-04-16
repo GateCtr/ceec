@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 
 type InviteData = {
   email: string;
@@ -165,7 +166,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
               Contactez votre administrateur pour obtenir un nouveau lien d&apos;invitation.
             </p>
             <Link href="/" style={{ display: "inline-block", marginTop: 20, color: "#1e3a8a", fontWeight: 700, textDecoration: "none" }}>
-              ← Retour à l&apos;accueil
+              <ArrowLeft size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Retour à l&apos;accueil
             </Link>
           </div>
         </Card>
@@ -239,7 +240,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
                 {errors?.fields?.emailAddress && <ErrorBox>{errors.fields.emailAddress.message}</ErrorBox>}
 
                 <button type="submit" style={submitBtn} disabled={isLoading || !prenom || !nom || !password}>
-                  {isLoading ? "Création…" : "Continuer →"}
+                  {isLoading ? "Création…" : <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Continuer <ChevronRight size={14} /></span>}
                 </button>
               </form>
             </>
@@ -269,7 +270,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
                 </FieldWrap>
 
                 <button type="submit" style={submitBtn} disabled={isLoading || code.length < 6}>
-                  {isLoading ? "Vérification…" : "Confirmer →"}
+                  {isLoading ? "Vérification…" : <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Confirmer <ChevronRight size={14} /></span>}
                 </button>
                 <button
                   type="button"
@@ -297,7 +298,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
               </div>
 
               <button style={submitBtn} onClick={handleFinalize} disabled={finalizing}>
-                {finalizing ? "Création…" : "Créer mon espace →"}
+                {finalizing ? "Création…" : <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Créer mon espace <ChevronRight size={14} /></span>}
               </button>
             </>
           )}

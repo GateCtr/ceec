@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
-import { Users, Megaphone, Calendar, FileText, User, Church, Lock, Tag, Pin, MapPin } from "lucide-react";
+import { Users, Megaphone, Calendar, FileText, User, Church, Lock, Tag, Pin, MapPin, ChevronRight } from "lucide-react";
 
 function EntityIcon({ type, color, size = 16 }: { type: string; color: string; size?: number }) {
   const props = { size, color };
@@ -167,8 +167,8 @@ export default async function GestionDashboardPage() {
           <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>Annonces récentes</h2>
-              <Link href="/gestion/annonces" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
-                Voir tout →
+              <Link href="/gestion/annonces" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                Voir tout <ChevronRight size={13} />
               </Link>
             </div>
             {recentAnnonces.length === 0 ? (
@@ -211,8 +211,8 @@ export default async function GestionDashboardPage() {
           <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>Prochains événements</h2>
-              <Link href="/gestion/evenements" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
-                Voir tout →
+              <Link href="/gestion/evenements" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                Voir tout <ChevronRight size={13} />
               </Link>
             </div>
             {prochainEvenements.length === 0 ? (
@@ -268,8 +268,8 @@ export default async function GestionDashboardPage() {
           <h2 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", margin: 0 }}>
             Activité récente
           </h2>
-          <Link href="/gestion/journal" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600 }}>
-            Voir le journal complet →
+          <Link href="/gestion/journal" style={{ fontSize: 12, color: "#1e3a8a", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+            Voir le journal complet <ChevronRight size={13} />
           </Link>
         </div>
         {recentActivity.length === 0 ? (

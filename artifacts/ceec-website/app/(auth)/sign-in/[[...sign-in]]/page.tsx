@@ -4,6 +4,7 @@ import { useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 type Step = "password" | "mfa_email" | "mfa_phone";
 
@@ -210,7 +211,7 @@ export default function SignInPage() {
             onClick={() => { setStep("password"); setErrorMsg(""); setInfoMsg(""); setCode(""); }}
             style={styles.backButton}
           >
-            ← Retour
+            <ArrowLeft size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Retour
           </button>
         </form>
       )}

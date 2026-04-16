@@ -4,6 +4,7 @@ import { useSignIn, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useEglise } from "@/lib/church-context";
+import { ArrowLeft } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -201,7 +202,7 @@ export default function ChurchConnexionPage() {
           </button>
           <button type="button" style={s.outlineBtn}
             onClick={() => { setStep("password"); setErrorMsg(""); setInfoMsg(""); setCode(""); }}>
-            ← Retour
+            <ArrowLeft size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Retour
           </button>
         </form>
       )}

@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Users, Megaphone, Calendar, AlertCircle } from "lucide-react";
+import { Building2, Users, Megaphone, Calendar, AlertCircle, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin, getUserRoles, ROLES } from "@/lib/auth/rbac";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
@@ -312,7 +312,7 @@ export default async function AdminPage({
               title="Dernières églises enregistrées"
               action={
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Link href="/admin/eglises" style={secondaryBtn}>Toutes les églises →</Link>
+                  <Link href="/admin/eglises" style={{ ...secondaryBtn, display: "inline-flex", alignItems: "center", gap: 5 }}>Toutes les églises <ChevronRight size={14} /></Link>
                   {isSuperAdmin && (
                     <Link href="/admin/eglises/nouveau" style={primaryBtnSm}>+ Inviter</Link>
                   )}
@@ -328,8 +328,8 @@ export default async function AdminPage({
               title="Journal d'activité"
               description={`${logs.length} dernières actions — filtrez par église, type et période`}
               action={
-                <Link href="/admin/annonces" style={secondaryBtn}>
-                  Superviser annonces →
+                <Link href="/admin/annonces" style={{ ...secondaryBtn, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  Superviser annonces <ChevronRight size={14} />
                 </Link>
               }
             />

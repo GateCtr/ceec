@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
+import { ChevronRight } from "lucide-react";
 
 export const metadata = {
   title: "Notre Histoire | CEEC",
@@ -142,7 +143,7 @@ export default function HistoriquePage() {
                 padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
                 color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
               }}>
-                À propos de la CEEC →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>À propos de la CEEC <ChevronRight size={16} /></span>
               </Link>
             </div>
           </div>

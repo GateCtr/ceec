@@ -1,6 +1,7 @@
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
+import { MapPin, Mail, Phone, Clock, ChevronRight } from "lucide-react";
 
 export const metadata = {
   title: "Contact | CEEC",
@@ -57,7 +58,7 @@ export default function ContactPage() {
                 padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
                 color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
               }}>
-                Écrire un message →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Écrire un message <ChevronRight size={16} /></span>
               </a>
               <a href="/paroisses" style={{
                 padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",
@@ -77,17 +78,17 @@ export default function ContactPage() {
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {[
-                  { label: "Siège social", value: "Kinshasa, République Démocratique du Congo", icon: "📍" },
-                  { label: "Email", value: "contact@ceec-rdc.org", icon: "✉️" },
-                  { label: "Téléphone", value: "+243 xxx xxx xxx", icon: "📞" },
-                  { label: "Heures d'ouverture", value: "Lundi - Vendredi : 8h00 - 17h00", icon: "🕐" },
+                  { label: "Siège social", value: "Kinshasa, République Démocratique du Congo", icon: <MapPin size={22} /> },
+                  { label: "Email", value: "contact@ceec-rdc.org", icon: <Mail size={22} /> },
+                  { label: "Téléphone", value: "+243 xxx xxx xxx", icon: <Phone size={22} /> },
+                  { label: "Heures d'ouverture", value: "Lundi - Vendredi : 8h00 - 17h00", icon: <Clock size={22} /> },
                 ].map((info) => (
                   <div key={info.label} style={{
                     display: "flex", gap: 16, alignItems: "flex-start",
                     background: "white", padding: "1.25rem",
                     borderRadius: 12, border: "1px solid #e2e8f0"
                   }}>
-                    <span style={{ fontSize: 24, flexShrink: 0 }}>{info.icon}</span>
+                    <span style={{ flexShrink: 0, color: "#1e3a8a" }}>{info.icon}</span>
                     <div>
                       <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" as const, marginBottom: 4 }}>
                         {info.label}

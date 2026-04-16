@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight, MapPin } from "lucide-react";
 
 type EvenementConfig = {
   titre?: string;
@@ -24,7 +25,7 @@ export default function SectionEvenementsAVenir({
   config: EvenementConfig;
   evenements: Evenement[];
 }) {
-  const { titre = "Prochains événements", voirPlusLabel = "Voir tous →", bgColor = "#ffffff" } = config;
+  const { titre = "Prochains événements", voirPlusLabel = "Voir tous", bgColor = "#ffffff" } = config;
 
   if (evenements.length === 0) return null;
 
@@ -35,8 +36,8 @@ export default function SectionEvenementsAVenir({
           <h2 style={{ fontWeight: 800, color: "var(--church-primary, #1e3a8a)", fontSize: "clamp(1.5rem,3vw,1.85rem)", margin: 0 }}>
             {titre}
           </h2>
-          <Link href="/c/evenements" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            {voirPlusLabel}
+          <Link href="/c/evenements" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+            {voirPlusLabel} <ChevronRight size={14} />
           </Link>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -77,8 +78,8 @@ export default function SectionEvenementsAVenir({
                 <div style={{ padding: "1.25rem", flex: 1 }}>
                   <h3 style={{ fontWeight: 700, color: "#0f172a", margin: "0 0 6px", fontSize: 16 }}>{evt.titre}</h3>
                   {evt.lieu && (
-                    <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 6px" }}>
-                      📍 {evt.lieu}
+                    <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 4 }}>
+                      <MapPin size={12} /> {evt.lieu}
                     </p>
                   )}
                   {evt.description && (

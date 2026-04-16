@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Pin, Radio } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -500,8 +501,8 @@ export default function AdminContenuClient({ egliseSlug, initialAnnonces, initia
                   <div style={{ padding: "10px 12px" }}>
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 }}>
                       <Badge pub={v.publie} />
-                      {v.epingle && <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 99, background: "#fef3c7", color: "#b45309" }}>📌</span>}
-                      {v.estEnDirect && <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 99, background: "#fee2e2", color: "#dc2626" }}>🔴 DIRECT</span>}
+                      {v.epingle && <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 99, background: "#fef3c7", color: "#b45309", display: "inline-flex", alignItems: "center", gap: 4 }}><Pin size={10} /> Épinglé</span>}
+                      {v.estEnDirect && <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 99, background: "#fee2e2", color: "#dc2626", display: "inline-flex", alignItems: "center", gap: 4 }}><Radio size={10} /> DIRECT</span>}
                     </div>
                     <div style={{ fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 8 }}>{v.titre}</div>
                     {busy === v.id ? <span style={{ fontSize: 12, color: "#94a3b8" }}>…</span> : (

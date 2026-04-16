@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 interface EgliseRow {
   id: number;
@@ -146,7 +147,7 @@ export default function AdminDashboardClient({ eglises: initialEglises }: { egli
                           rel="noopener noreferrer"
                           style={{ padding: "5px 10px", borderRadius: 6, background: "#e0e7ff", color: "#3730a3", fontSize: 12, fontWeight: 600, textDecoration: "none" }}
                         >
-                          Accéder →
+                          Accéder <ExternalLink size={12} style={{ display: "inline", verticalAlign: "middle" }} />
                         </a>
                         {eglise.statut === "actif" && (
                           <button

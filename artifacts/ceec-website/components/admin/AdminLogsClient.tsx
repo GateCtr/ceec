@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Megaphone, CalendarDays, FileText, User, Church, Lock, Tag, Pin } from "lucide-react";
 
 interface LogEntry {
   id: number;
@@ -32,14 +33,14 @@ const ACTION_LABELS: Record<string, string> = {
   depublier: "a dépublié",
 };
 
-const ENTITY_ICONS: Record<string, string> = {
-  annonce: "📢",
-  evenement: "🗓️",
-  page: "📄",
-  membre: "👤",
-  eglise: "⛪",
-  admin: "🔐",
-  role: "🏷️",
+const ENTITY_ICONS: Record<string, React.ReactNode> = {
+  annonce: <Megaphone size={16} />,
+  evenement: <CalendarDays size={16} />,
+  page: <FileText size={16} />,
+  membre: <User size={16} />,
+  eglise: <Church size={16} />,
+  admin: <Lock size={16} />,
+  role: <Tag size={16} />,
 };
 
 const ACTION_COLORS: Record<string, { bg: string; color: string }> = {
@@ -166,7 +167,7 @@ export default function AdminLogsClient({
           <div style={{ display: "flex", flexDirection: "column" }}>
             {logs.map((log, i) => {
               const ac = ACTION_COLORS[log.action] ?? { bg: "#f1f5f9", color: "#64748b" };
-              const icon = ENTITY_ICONS[log.entiteType] ?? "📌";
+              const icon = ENTITY_ICONS[log.entiteType] ?? <Pin size={16} />;
               return (
                 <div
                   key={log.id}
@@ -179,7 +180,7 @@ export default function AdminLogsClient({
                   <div style={{
                     width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
                     background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 16,
+                    color: ac.color,
                   }}>
                     {icon}
                   </div>
@@ -197,8 +198,8 @@ export default function AdminLogsClient({
                       )}
                     </div>
                     {log.egliseNom && (
-                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>
-                        ⛪ {log.egliseNom}
+                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
+                        <Church size={11} /> {log.egliseNom}
                       </div>
                     )}
                   </div>

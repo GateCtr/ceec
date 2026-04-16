@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Church, MapPin } from "lucide-react";
 
 type Eglise = {
   id: number;
@@ -34,7 +35,7 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
         color: "#64748b",
         fontSize: 14,
       }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>⛪</div>
+        <div style={{ marginBottom: 8, display: "flex", justifyContent: "center" }}><Church size={32} style={{ color: "#94a3b8" }} /></div>
         <p style={{ margin: 0, fontWeight: 600 }}>Aucune paroisse disponible pour le moment.</p>
         <p style={{ margin: "6px 0 0", fontSize: 13 }}>Contactez la CEEC pour rejoindre une paroisse.</p>
       </div>
@@ -151,10 +152,10 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
                   }}>
                     {eglise.nom}
                   </div>
-                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                    📍 {eglise.ville}
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
+                    <MapPin size={11} />{eglise.ville}
                     {eglise.pasteur && (
-                      <span style={{ marginLeft: 10 }}>· Pst. {eglise.pasteur}</span>
+                      <span style={{ marginLeft: 6 }}>· Pst. {eglise.pasteur}</span>
                     )}
                   </div>
                 </div>
@@ -201,8 +202,8 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, color: "#64748b" }}>{eglise.nom}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
-                    📍 {eglise.ville} · Portail non configuré
+                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
+                    <MapPin size={11} />{eglise.ville} · Portail non configuré
                   </div>
                 </div>
               </div>

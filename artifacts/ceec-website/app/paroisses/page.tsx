@@ -2,6 +2,7 @@ import Link from "next/link";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
+import { ChevronRight } from "lucide-react";
 
 async function getEglises() {
   try {
@@ -68,7 +69,7 @@ export default async function ParoissesPage() {
                 padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
                 color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
               }}>
-                Voir les églises →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Voir les églises <ChevronRight size={16} /></span>
               </a>
               <a href="/contact" style={{
                 padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",

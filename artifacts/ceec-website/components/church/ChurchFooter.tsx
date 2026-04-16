@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { EgliseData } from "@/lib/church-context";
 import { safeUrl } from "@/lib/sanitize-url";
+import { MapPin, Phone, Mail, Globe, Clock, ChevronRight } from "lucide-react";
 
 type SocialLinks = {
   facebook?: string | null;
@@ -119,16 +120,16 @@ export default function ChurchFooter({
               Contact
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
-              {eglise.adresse && <p style={{ margin: 0 }}>📍 {eglise.adresse}</p>}
-              {eglise.ville && <p style={{ margin: 0 }}>🇨🇩 {eglise.ville}, RDC</p>}
+              {eglise.adresse && <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6 }}><MapPin size={13} color="#94a3b8" />{eglise.adresse}</p>}
+              {eglise.ville && <p style={{ margin: 0 }}>{eglise.ville}, RDC</p>}
               {eglise.telephone && (
-                <a href={`tel:${eglise.telephone}`} style={{ color: "#94a3b8", textDecoration: "none" }}>
-                  📞 {eglise.telephone}
+                <a href={`tel:${eglise.telephone}`} style={{ color: "#94a3b8", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Phone size={13} color="#94a3b8" />{eglise.telephone}
                 </a>
               )}
               {eglise.email && (
-                <a href={`mailto:${eglise.email}`} style={{ color: "#94a3b8", textDecoration: "none" }}>
-                  ✉️ {eglise.email}
+                <a href={`mailto:${eglise.email}`} style={{ color: "#94a3b8", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Mail size={13} color="#94a3b8" />{eglise.email}
                 </a>
               )}
               {eglise.pasteur && (
@@ -137,13 +138,13 @@ export default function ChurchFooter({
                 </p>
               )}
               {social?.horaires && (
-                <p style={{ margin: "8px 0 0", lineHeight: 1.6 }}>
-                  🕐 {social.horaires}
+                <p style={{ margin: "8px 0 0", lineHeight: 1.6, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Clock size={13} color="#94a3b8" />{social.horaires}
                 </p>
               )}
               {social?.siteWeb && (
-                <a href={safeUrl(social.siteWeb)} target="_blank" rel="noopener noreferrer" style={{ color: accent, textDecoration: "none", marginTop: 4 }}>
-                  🌐 {social.siteWeb.replace(/^https?:\/\//, "")}
+                <a href={safeUrl(social.siteWeb)} target="_blank" rel="noopener noreferrer" style={{ color: accent, textDecoration: "none", marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Globe size={13} />{social.siteWeb.replace(/^https?:\/\//, "")}
                 </a>
               )}
             </div>
@@ -156,7 +157,7 @@ export default function ChurchFooter({
               Membre de la Communauté des Églises Évangéliques au Congo.
             </p>
             <Link href="/" style={{ display: "inline-block", fontSize: 13, color: accent, textDecoration: "none" }}>
-              ceec.cd →
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>ceec.cd <ChevronRight size={12} /></span>
             </Link>
           </div>
         </div>

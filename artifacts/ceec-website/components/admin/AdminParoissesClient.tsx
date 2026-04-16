@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Eglise } from "@prisma/client";
+import { Church } from "lucide-react";
 
 interface Props {
   initialParoisses: Eglise[];
@@ -165,7 +166,7 @@ export default function AdminParoissesClient({ initialParoisses }: Props) {
 
       {paroisses.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⛪</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Church size={48} style={{ color: "#1e3a8a" }} /></div>
           <h3 style={{ color: "#1e3a8a", fontWeight: 700, marginBottom: 8 }}>Aucune eglise enregistree</h3>
           <p style={{ color: "#64748b" }}>Ajoutez la premiere eglise de la plateforme.</p>
         </div>

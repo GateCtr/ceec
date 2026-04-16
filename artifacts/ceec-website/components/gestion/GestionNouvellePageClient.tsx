@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 
 const TYPE_OPTIONS = [
   { value: "custom", label: "Page libre" },
@@ -119,7 +119,7 @@ export default function GestionNouvellePageClient() {
               type="submit" disabled={loading}
               style={{ padding: "10px 24px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? "Création…" : "Créer et configurer les sections →"}
+              {loading ? "Création…" : <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Créer et configurer les sections <ChevronRight size={14} /></span>}
             </button>
           </div>
         </form>

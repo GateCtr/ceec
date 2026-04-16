@@ -4,6 +4,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRef, useState, useEffect, CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import type { NavInfo } from "./Navbar";
+import { Church, Shield } from "lucide-react";
 
 type Props = { navInfo: NavInfo };
 
@@ -215,10 +216,10 @@ export function UserMenuMobile({ navInfo, onClose }: Props & { onClose: () => vo
 
       {/* Actions */}
       {navInfo.isSuperAdmin && (
-        <MobileItem icon="🛡" label="Administration CEEC" onClick={() => go("/admin")} accent />
+        <MobileItem icon={<Shield size={16} />} label="Administration CEEC" onClick={() => go("/admin")} accent />
       )}
       {churchLink && (
-        <MobileItem icon="⛪" label="Gérer ma paroisse" onClick={() => go(churchLink)} accent />
+        <MobileItem icon={<Church size={16} />} label="Gérer ma paroisse" onClick={() => go(churchLink)} accent />
       )}
       <MobileItem
         icon={<AccountIconSm />}

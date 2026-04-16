@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle, CalendarDays } from "lucide-react";
 
 type ContenuEnAttente = {
   id: number;
@@ -55,7 +56,7 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
   if (items.length === 0) {
     return (
       <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", padding: "2rem", textAlign: "center" }}>
-        <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+        <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}><CheckCircle size={36} style={{ color: "#15803d" }} /></div>
         <p style={{ color: "#64748b", fontSize: 14 }}>Aucun contenu en attente de validation.</p>
       </div>
     );
@@ -92,8 +93,8 @@ export default function AdminValidationQueue({ items: initialItems }: Props) {
                   </p>
                 )}
                 {item.dateDebut && (
-                  <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0" }}>
-                    📅 {new Date(item.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
+                    <CalendarDays size={13} /> {new Date(item.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 )}
               </div>

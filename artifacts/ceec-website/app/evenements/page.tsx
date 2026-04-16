@@ -1,6 +1,7 @@
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
+import { CalendarDays, MapPin, ChevronRight } from "lucide-react";
 
 async function getEvenements() {
   try {
@@ -69,7 +70,7 @@ export default async function EvenementsPage() {
                 padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
                 color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
               }}>
-                Voir les événements →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Voir les événements <ChevronRight size={16} /></span>
               </a>
               <a href="/paroisses" style={{
                 padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",
@@ -88,7 +89,7 @@ export default async function EvenementsPage() {
                 textAlign: "center", padding: "4rem",
                 background: "white", borderRadius: 16, border: "1px dashed #e2e8f0"
               }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🗓️</div>
+                <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><CalendarDays size={48} style={{ color: "#94a3b8" }} /></div>
                 <h3 style={{ color: "#1e3a8a", fontWeight: 700, marginBottom: 8 }}>Aucun événement à venir</h3>
                 <p style={{ color: "#64748b" }}>Les prochains événements seront affichés ici.</p>
               </div>
@@ -121,8 +122,8 @@ export default async function EvenementsPage() {
                         {evt.titre}
                       </h2>
                       {evt.lieu && (
-                        <p style={{ color: "#64748b", fontSize: 14, marginBottom: 8 }}>
-                          📍 {evt.lieu}
+                        <p style={{ color: "#64748b", fontSize: 14, marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
+                          <MapPin size={13} /> {evt.lieu}
                         </p>
                       )}
                       {evt.description && (

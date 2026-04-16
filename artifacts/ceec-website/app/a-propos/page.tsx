@@ -2,6 +2,7 @@ import Link from "next/link";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
+import { Cross, Handshake, Globe, BookOpen, Feather, Sprout, Building2, Settings, BookMarked, FolderOpen, CalendarDays, Church, MapPin, Users, ChevronRight } from "lucide-react";
 
 export const metadata = {
   title: "À propos | CEEC",
@@ -29,37 +30,37 @@ async function getStats() {
 
 const valeurs = [
   {
-    icon: "✝️",
+    icon: <Cross size={28} />,
     titre: "Foi biblique",
     description:
       "Nous nous appuyons sur la Parole de Dieu comme fondement inébranlable de notre foi, notre éthique et notre pratique communautaire.",
   },
   {
-    icon: "🤝",
+    icon: <Handshake size={28} />,
     titre: "Fraternité",
     description:
       "L'unité entre toutes les églises membres est au cœur de notre identité. Nous sommes une famille unie dans la diversité.",
   },
   {
-    icon: "🌍",
+    icon: <Globe size={28} />,
     titre: "Service",
     description:
       "Servir Dieu, c'est servir notre prochain. Nous œuvrons activement pour le développement social et spirituel des communautés congolaises.",
   },
   {
-    icon: "📖",
+    icon: <BookOpen size={28} />,
     titre: "Intégrité",
     description:
       "Nous valorisons la transparence, la responsabilité et l'honnêteté dans toute notre gestion institutionnelle et pastorale.",
   },
   {
-    icon: "🕊️",
+    icon: <Feather size={28} />,
     titre: "Paix",
     description:
       "Acteurs de paix dans notre nation, nous promouvons la réconciliation, le dialogue et la cohésion sociale au sein de nos communautés.",
   },
   {
-    icon: "🌱",
+    icon: <Sprout size={28} />,
     titre: "Croissance",
     description:
       "Nous croyons à la croissance continue — spirituelle, numérique, structurelle — pour mieux répondre aux besoins de nos fidèles.",
@@ -71,25 +72,25 @@ const organes = [
     titre: "Assemblée Générale",
     description:
       "Organe souverain de la CEEC, elle regroupe les délégués de toutes les églises membres et se réunit périodiquement pour les décisions stratégiques majeures.",
-    icon: "🏛️",
+    icon: <Building2 size={28} />,
   },
   {
     titre: "Comité Exécutif",
     description:
       "Instance dirigeante permanente chargée de la mise en œuvre des décisions de l'Assemblée Générale et de la gestion courante de la communauté.",
-    icon: "⚙️",
+    icon: <Settings size={28} />,
   },
   {
     titre: "Conseil des Anciens",
     description:
       "Organe consultatif spirituel composé des pasteurs et anciens expérimentés, garant de la doctrine et de la tradition évangélique de la CEEC.",
-    icon: "📿",
+    icon: <BookMarked size={28} />,
   },
   {
     titre: "Commissions Spécialisées",
     description:
       "Des commissions thématiques (évangélisation, éducation, santé, femmes, jeunesse) portent les différentes dimensions du ministère de la CEEC.",
-    icon: "🗂️",
+    icon: <FolderOpen size={28} />,
   },
 ];
 
@@ -150,7 +151,7 @@ export default async function AProposPage() {
                 padding: "12px 28px", borderRadius: 8, background: "#c59b2e",
                 color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
               }}>
-                Notre histoire →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Notre histoire <ChevronRight size={16} /></span>
               </Link>
               <Link href="/contact" style={{
                 padding: "12px 28px", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.35)",
@@ -169,16 +170,16 @@ export default async function AProposPage() {
             display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 0,
           }}>
             {[
-              { valeur: stats.anneeFondation, label: "Année de fondation", icon: "📅" },
-              { valeur: String(stats.nbEglises), label: "Églises membres", icon: "⛪" },
-              { valeur: stats.nbProvinces, label: "Provinces couvertes", icon: "📍" },
-              { valeur: stats.nbFideles, label: "Fidèles", icon: "🙏" },
+              { valeur: stats.anneeFondation, label: "Année de fondation", icon: <CalendarDays size={28} /> },
+              { valeur: String(stats.nbEglises), label: "Églises membres", icon: <Church size={28} /> },
+              { valeur: stats.nbProvinces, label: "Provinces couvertes", icon: <MapPin size={28} /> },
+              { valeur: stats.nbFideles, label: "Fidèles", icon: <Users size={28} /> },
             ].map((s, i) => (
               <div key={i} style={{
                 textAlign: "center", padding: "2rem 1rem",
                 borderRight: i < 3 ? "1px solid #f1f5f9" : "none",
               }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{s.icon}</div>
+                <div style={{ marginBottom: 8, display: "flex", justifyContent: "center", color: "#1e3a8a" }}>{s.icon}</div>
                 <div style={{ fontSize: 32, fontWeight: 900, color: "#1e3a8a", lineHeight: 1 }}>{s.valeur}</div>
                 <div style={{ fontSize: 13, color: "#64748b", marginTop: 6, fontWeight: 500 }}>{s.label}</div>
               </div>
@@ -272,7 +273,7 @@ export default async function AProposPage() {
                   border: "1px solid #e8edf5",
                   display: "flex", flexDirection: "column", gap: 10,
                 }}>
-                  <span style={{ fontSize: 32 }}>{v.icon}</span>
+                  <span style={{ color: "#1e3a8a" }}>{v.icon}</span>
                   <h3 style={{ fontSize: 17, fontWeight: 800, color: "#1e3a8a", margin: 0 }}>{v.titre}</h3>
                   <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, margin: 0 }}>{v.description}</p>
                 </div>
@@ -300,7 +301,7 @@ export default async function AProposPage() {
                   border: "1px solid #e2e8f0",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                 }}>
-                  <div style={{ fontSize: 32, marginBottom: 14 }}>{o.icon}</div>
+                  <div style={{ marginBottom: 14, color: "#1e3a8a" }}>{o.icon}</div>
                   <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1e3a8a", margin: "0 0 10px" }}>{o.titre}</h3>
                   <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, margin: 0 }}>{o.description}</p>
                 </div>

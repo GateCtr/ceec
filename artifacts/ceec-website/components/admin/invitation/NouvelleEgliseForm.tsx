@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, AlertCircle, Copy, Check, RefreshCw, Clock } from "lucide-react";
+import { CheckCircle, AlertCircle, Copy, Check, RefreshCw, Clock, ArrowLeft, ChevronRight } from "lucide-react";
 
 function slugify(text: string): string {
   return text
@@ -161,7 +161,7 @@ export default function NouvelleEgliseForm({ initialPending }: Props) {
           <button style={btnOutline} onClick={() => { setSuccess(null); setForm({ nom: "", slug: "", ville: "", emailAdmin: "", sousDomaine: "" }); setSlugEdited(false); }}>
             Inviter une autre église
           </button>
-          <button style={btn} onClick={() => router.push("/admin/eglises")}>Voir la liste →</button>
+          <button style={{ ...btn, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }} onClick={() => router.push("/admin/eglises")}>Voir la liste <ChevronRight size={15} /></button>
         </div>
       </div>
     );
@@ -172,7 +172,7 @@ export default function NouvelleEgliseForm({ initialPending }: Props) {
       <div style={card}>
         <div style={{ marginBottom: 24 }}>
           <Link href="/admin/eglises" style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            ← Retour à la liste
+            <ArrowLeft size={14} /> Retour à la liste
           </Link>
           <h1 style={{ margin: "10px 0 4px", fontSize: 20, fontWeight: 800, color: "#0f172a" }}>
             Inviter une nouvelle église
@@ -218,7 +218,7 @@ export default function NouvelleEgliseForm({ initialPending }: Props) {
           </Section>
 
           <button type="submit" style={{ ...btn, marginTop: 8 }} disabled={loading || !form.nom || !form.slug || !form.ville || !form.emailAdmin}>
-            {loading ? "Création en cours…" : "Envoyer l'invitation →"}
+            {loading ? "Création en cours…" : <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Envoyer l&apos;invitation <ChevronRight size={15} /></span>}
           </button>
         </form>
       </div>

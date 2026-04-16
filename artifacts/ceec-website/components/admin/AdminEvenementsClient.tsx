@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Evenement, Eglise } from "@prisma/client";
+import { CalendarDays, MapPin } from "lucide-react";
 
 interface Props {
   initialEvenements: Evenement[];
@@ -179,7 +180,7 @@ export default function AdminEvenementsClient({ initialEvenements, paroissesList
 
       {evenements.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🗓️</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><CalendarDays size={48} style={{ color: "#1e3a8a" }} /></div>
           <p style={{ color: "#64748b" }}>Aucun événement créé. Ajoutez le premier événement.</p>
         </div>
       ) : (
@@ -192,7 +193,7 @@ export default function AdminEvenementsClient({ initialEvenements, paroissesList
               </div>
               <div style={{ flex: 1 }}>
                 <h4 style={{ fontWeight: 700, color: "#0f172a", marginBottom: 4, fontSize: 16 }}>{e.titre}</h4>
-                {e.lieu && <p style={{ color: "#64748b", fontSize: 13 }}>📍 {e.lieu}</p>}
+                {e.lieu && <p style={{ color: "#64748b", fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}><MapPin size={13} /> {e.lieu}</p>}
                 {e.description && <p style={{ color: "#475569", fontSize: 13, marginTop: 4 }}>{e.description}</p>}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>

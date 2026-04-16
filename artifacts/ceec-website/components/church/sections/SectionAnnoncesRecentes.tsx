@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 type AnnonceConfig = {
   titre?: string;
@@ -29,7 +30,7 @@ export default function SectionAnnoncesRecentes({
   config: AnnonceConfig;
   annonces: Annonce[];
 }) {
-  const { titre = "Dernières annonces", voirPlusLabel = "Voir toutes →", bgColor = "#f8fafc" } = config;
+  const { titre = "Dernières annonces", voirPlusLabel = "Voir toutes", bgColor = "#f8fafc" } = config;
 
   if (annonces.length === 0) return null;
 
@@ -40,8 +41,8 @@ export default function SectionAnnoncesRecentes({
           <h2 style={{ fontWeight: 800, color: "var(--church-primary, #1e3a8a)", fontSize: "clamp(1.5rem,3vw,1.85rem)", margin: 0 }}>
             {titre}
           </h2>
-          <Link href="/c/annonces" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            {voirPlusLabel}
+          <Link href="/c/annonces" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+            {voirPlusLabel} <ChevronRight size={14} />
           </Link>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

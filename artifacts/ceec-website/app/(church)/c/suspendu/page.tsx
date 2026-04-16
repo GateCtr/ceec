@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { AlertTriangle } from "lucide-react";
 
 export default async function ChurchSuspenduPage() {
   const headersList = await headers();
@@ -49,10 +50,10 @@ export default async function ChurchSuspenduPage() {
             alignItems: "center",
             justifyContent: "center",
             margin: "0 auto 24px",
-            fontSize: 36,
+            color: "#b45309",
           }}
         >
-          ⚠️
+          <AlertTriangle size={36} />
         </div>
 
         <h1

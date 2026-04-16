@@ -3,6 +3,7 @@ import Image from "next/image";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
+import { Church, MapPin, Users, BookOpen, ChevronRight, AlertCircle, CalendarDays } from "lucide-react";
 
 async function getData() {
   try {
@@ -20,22 +21,22 @@ async function getData() {
       {
         valeur: String(nbEglises),
         label: "Églises membres",
-        icon: "⛪",
+        icon: <Church size={30} />,
       },
       {
         valeur: cfg["nb_provinces"]?.valeur ?? "26",
         label: cfg["nb_provinces"]?.label ?? "Provinces couvertes",
-        icon: cfg["nb_provinces"]?.icone ?? "📍",
+        icon: <MapPin size={30} />,
       },
       {
         valeur: cfg["nb_fideles"]?.valeur ?? "100 000+",
         label: cfg["nb_fideles"]?.label ?? "Fidèles",
-        icon: cfg["nb_fideles"]?.icone ?? "🙏",
+        icon: <Users size={30} />,
       },
       {
         valeur: cfg["annee_fondation"]?.valeur ?? "1960",
         label: cfg["annee_fondation"]?.label ?? "Année de fondation",
-        icon: cfg["annee_fondation"]?.icone ?? "📖",
+        icon: <CalendarDays size={30} />,
       },
     ];
 
@@ -46,10 +47,10 @@ async function getData() {
       annoncesList: [],
       evenementsList: [],
       stats: [
-        { valeur: "0",        label: "Églises membres",    icon: "⛪" },
-        { valeur: "26",       label: "Provinces couvertes", icon: "📍" },
-        { valeur: "100 000+", label: "Fidèles",             icon: "🙏" },
-        { valeur: "1960",     label: "Année de fondation",  icon: "📖" },
+        { valeur: "0",        label: "Églises membres",    icon: <Church size={30} /> },
+        { valeur: "26",       label: "Provinces couvertes", icon: <MapPin size={30} /> },
+        { valeur: "100 000+", label: "Fidèles",             icon: <Users size={30} /> },
+        { valeur: "1960",     label: "Année de fondation",  icon: <CalendarDays size={30} /> },
       ],
     };
   }
@@ -398,7 +399,7 @@ export default async function HomePage() {
                 <div key={stat.label}
                   className="flex flex-col items-center text-center py-8 px-4 rounded-2xl"
                   style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <span className="text-3xl mb-3">{stat.icon}</span>
+                  <span className="mb-3" style={{ display: "flex", justifyContent: "center" }}>{stat.icon}</span>
                   <span className="font-extrabold text-3xl md:text-4xl leading-none mb-2"
                     style={{ color: "var(--color-secondary)", fontFamily: "var(--font-display)" }}>
                     {stat.valeur}
@@ -672,8 +673,8 @@ export default async function HomePage() {
                     Annonces
                   </h3>
                   <Link href="/annonces" className="text-sm font-semibold transition-colors"
-                    style={{ color: "var(--color-secondary)" }}>
-                    Tout voir →
+                    style={{ color: "var(--color-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    Tout voir <ChevronRight size={14} />
                   </Link>
                 </div>
 
@@ -694,7 +695,7 @@ export default async function HomePage() {
                               ? { background: "var(--color-accent-100)", color: "var(--color-accent-700)" }
                               : { background: "var(--color-primary-100)", color: "var(--color-primary-700)" }
                             }>
-                            {annonce.priorite === "urgente" ? "🔴 Urgent" : "ℹ Info"}
+                            {annonce.priorite === "urgente" ? <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><AlertCircle size={11} /> Urgent</span> : "Info"}
                           </span>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm mb-1"
@@ -723,8 +724,8 @@ export default async function HomePage() {
                     Événements à venir
                   </h3>
                   <Link href="/evenements" className="text-sm font-semibold transition-colors"
-                    style={{ color: "var(--color-secondary)" }}>
-                    Tout voir →
+                    style={{ color: "var(--color-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    Tout voir <ChevronRight size={14} />
                   </Link>
                 </div>
 

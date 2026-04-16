@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { Church, Link2, Users, CalendarDays, ChevronRight, MapPin } from "lucide-react";
 
 interface Eglise {
   id: number;
@@ -61,7 +62,7 @@ export default function AdminEglisesClient({ initialEglises }: Props) {
 
       {eglises.length === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem 2rem", background: "white", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⛪</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Church size={48} style={{ color: "#1e3a8a" }} /></div>
           <h3 style={{ color: "#1e3a8a", margin: "0 0 8px" }}>Aucune église enregistrée</h3>
           <p style={{ color: "#64748b" }}>Commencez par inviter la première église à rejoindre la plateforme.</p>
           <Link href="/admin/eglises/nouveau" style={{ display: "inline-block", marginTop: 16, background: "#1e3a8a", color: "white", padding: "12px 28px", borderRadius: 8, fontWeight: 700, textDecoration: "none" }}>
@@ -94,10 +95,10 @@ export default function AdminEglisesClient({ initialEglises }: Props) {
                     )}
                   </div>
                   <div style={{ color: "#64748b", fontSize: 13, display: "flex", gap: 16, flexWrap: "wrap" }}>
-                    <span>📍 {eglise.ville}</span>
-                    {eglise.slug && <span>🔗 {eglise.slug}</span>}
-                    <span>👥 {eglise.membresCount} membre{eglise.membresCount !== 1 ? "s" : ""}</span>
-                    <span>📅 {new Date(eglise.createdAt).toLocaleDateString("fr-FR")}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><MapPin size={13} /> {eglise.ville}</span>
+                    {eglise.slug && <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Link2 size={13} /> {eglise.slug}</span>}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Users size={13} /> {eglise.membresCount} membre{eglise.membresCount !== 1 ? "s" : ""}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><CalendarDays size={13} /> {new Date(eglise.createdAt).toLocaleDateString("fr-FR")}</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -133,8 +134,8 @@ export default function AdminEglisesClient({ initialEglises }: Props) {
                     </button>
                   )}
                   {eglise.slug && (
-                    <Link href={`/gestion?eglise=${eglise.slug}`} style={{ padding: "7px 14px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
-                      Gérer →
+                    <Link href={`/gestion?eglise=${eglise.slug}`} style={{ padding: "7px 14px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      Gérer <ChevronRight size={14} />
                     </Link>
                   )}
                 </div>

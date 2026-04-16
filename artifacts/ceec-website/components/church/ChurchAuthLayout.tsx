@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { EgliseData } from "@/lib/church-context";
+import { MapPin } from "lucide-react";
 
 export default function ChurchAuthLayout({
   eglise,
@@ -81,8 +82,8 @@ export default function ChurchAuthLayout({
         </div>
 
         {eglise.ville && (
-          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
-            📍 {eglise.ville}
+          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+            <MapPin size={12} /> {eglise.ville}
           </div>
         )}
       </Link>

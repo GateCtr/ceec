@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MapPin, Phone, Mail } from "lucide-react";
 
 type ContactConfig = {
   titre?: string;
@@ -126,19 +127,19 @@ export default function SectionContact({
           <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", fontSize: 15, marginBottom: 36 }}>
             {eglise.adresse && (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor }}>
-                <span style={{ fontSize: 20 }}>📍</span>
+                <MapPin size={18} />
                 <span>{eglise.adresse}{eglise.ville ? `, ${eglise.ville}` : ""}</span>
               </div>
             )}
             {eglise.telephone && (
               <a href={`tel:${eglise.telephone}`} style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor, textDecoration: "none" }}>
-                <span style={{ fontSize: 20 }}>📞</span>
+                <Phone size={18} />
                 <span>{eglise.telephone}</span>
               </a>
             )}
             {eglise.email && (
               <a href={`mailto:${eglise.email}`} style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor, textDecoration: "none" }}>
-                <span style={{ fontSize: 20 }}>✉️</span>
+                <Mail size={18} />
                 <span>{eglise.email}</span>
               </a>
             )}

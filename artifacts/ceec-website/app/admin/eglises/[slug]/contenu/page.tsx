@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, FileText, Layers, Megaphone, CalendarDays, Play } from "lucide-react";
 import { prisma } from "@/lib/db/index";
 import { isAdminPlatteforme } from "@/lib/auth/rbac";
 import AdminContenuClient from "@/components/admin/AdminContenuClient";
@@ -60,7 +61,7 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
         href={`/admin/eglises/${slug}`}
         style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}
       >
-        ← Retour à {eglise.nom}
+        <ArrowLeft size={14} /> Retour à {eglise.nom}
       </Link>
 
       <div style={{ marginBottom: 28 }}>
@@ -74,14 +75,14 @@ export default async function AdminEgliseContenuPage({ params }: Props) {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14, marginBottom: 32 }}>
         {[
-          { label: "Pages", count: pages.length, color: "#1e3a8a", bg: "#eff6ff", icon: "📄" },
-          { label: "Sections", count: sections.length, color: "#0369a1", bg: "#f0f9ff", icon: "🧩" },
-          { label: "Annonces", count: annonces.length, color: "#15803d", bg: "#f0fdf4", icon: "📢" },
-          { label: "Événements", count: evenements.length, color: "#b45309", bg: "#fef3c7", icon: "🗓️" },
-          { label: "Vidéos", count: videos.length, color: "#7c3aed", bg: "#f5f3ff", icon: "▶️" },
+          { label: "Pages", count: pages.length, color: "#1e3a8a", bg: "#eff6ff", icon: <FileText size={22} /> },
+          { label: "Sections", count: sections.length, color: "#0369a1", bg: "#f0f9ff", icon: <Layers size={22} /> },
+          { label: "Annonces", count: annonces.length, color: "#15803d", bg: "#f0fdf4", icon: <Megaphone size={22} /> },
+          { label: "Événements", count: evenements.length, color: "#b45309", bg: "#fef3c7", icon: <CalendarDays size={22} /> },
+          { label: "Vidéos", count: videos.length, color: "#7c3aed", bg: "#f5f3ff", icon: <Play size={22} /> },
         ].map((stat) => (
           <div key={stat.label} style={{ background: stat.bg, borderRadius: 12, padding: "1.25rem 1.5rem" }}>
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{stat.icon}</div>
+            <div style={{ marginBottom: 6, color: stat.color }}>{stat.icon}</div>
             <div style={{ fontSize: "1.75rem", fontWeight: 900, color: stat.color }}>{stat.count}</div>
             <div style={{ fontSize: 13, color: stat.color, fontWeight: 600 }}>{stat.label}</div>
           </div>

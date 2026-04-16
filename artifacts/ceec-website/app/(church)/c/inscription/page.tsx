@@ -4,6 +4,7 @@ import { useSignUp, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useEglise } from "@/lib/church-context";
+import { CheckCircle, ArrowLeft } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -141,7 +142,7 @@ export default function ChurchInscriptionPage() {
     return (
       <Card maxWidth={440}>
         <div style={{ textAlign: "center", padding: "1rem 0" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><CheckCircle size={48} style={{ color: "#15803d" }} /></div>
           <h2 style={s.heading}>Bienvenue !</h2>
           <p style={{ color: "#64748b", marginTop: 8, lineHeight: 1.6 }}>
             Votre compte a été créé avec succès. Vous êtes maintenant membre de{" "}
@@ -192,7 +193,7 @@ export default function ChurchInscriptionPage() {
             type="button" style={s.ghostBtn}
             onClick={() => { setStep("form"); setCode(""); setErrorMsg(""); }}
           >
-            ← Modifier mes informations
+            <ArrowLeft size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Modifier mes informations
           </button>
         </form>
       </Card>

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
+import { Church } from "lucide-react";
 import { prisma } from "@/lib/db/index";
 import SectionRenderer from "@/components/church/sections/SectionRenderer";
 import SectionHero from "@/components/church/sections/SectionHero";
@@ -100,7 +101,7 @@ export default async function ChurchHomePage() {
 
       {annonces.length === 0 && evenements.length === 0 && liveStreams.length === 0 && (
         <section style={{ padding: "5rem 1rem", background: "#f8fafc", textAlign: "center" }}>
-          <div style={{ fontSize: 52, marginBottom: 16 }}>⛪</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Church size={52} style={{ color: "var(--church-primary, #1e3a8a)" }} /></div>
           <h2 style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 800, fontSize: "1.75rem", marginBottom: 12 }}>
             Bienvenue à {eglise.nom}
           </h2>

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db/index";
 import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
 import GestionPageDetailClient from "@/components/gestion/GestionPageDetailClient";
@@ -48,7 +49,7 @@ export default async function GestionPageSectionsPage({ params }: Props) {
         href="/gestion/pages"
         style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 20 }}
       >
-        ← Retour aux pages
+        <ArrowLeft size={14} /> Retour aux pages
       </Link>
       <GestionPageDetailClient
         egliseSlug={eglise?.slug ?? ""}

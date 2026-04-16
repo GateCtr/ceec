@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { Users, Megaphone, CalendarDays } from "lucide-react";
 
 export default async function ChurchParoissePage() {
   const headersList = await headers();
@@ -85,16 +86,16 @@ export default async function ChurchParoissePage() {
             }}
           >
             {[
-              { label: "Membres", value: eglise._count.membres, icon: "👥" },
+              { label: "Membres", value: eglise._count.membres, icon: <Users size={32} /> },
               {
                 label: "Annonces",
                 value: eglise._count.annonces,
-                icon: "📢",
+                icon: <Megaphone size={32} />,
               },
               {
                 label: "Événements",
                 value: eglise._count.evenements,
-                icon: "🗓️",
+                icon: <CalendarDays size={32} />,
               },
             ].map((stat) => (
               <div
@@ -108,7 +109,7 @@ export default async function ChurchParoissePage() {
                   boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 }}
               >
-                <div style={{ fontSize: 32, marginBottom: 8 }}>{stat.icon}</div>
+                <div style={{ marginBottom: 8, display: "flex", justifyContent: "center", color: "#1e3a8a" }}>{stat.icon}</div>
                 <div
                   style={{
                     fontSize: "1.75rem",

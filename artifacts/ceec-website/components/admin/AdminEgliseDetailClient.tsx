@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { CheckCircle, ExternalLink } from "lucide-react";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
 
@@ -125,7 +126,7 @@ export default function AdminEgliseDetailClient({ eglise, admins: initialAdmins,
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, fontSize: 14 }}>{error}</div>}
-      {success && <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14 }}>✅ {success}</div>}
+      {success && <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}><CheckCircle size={16} /> {success}</div>}
 
       <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 20 }}>
@@ -155,7 +156,7 @@ export default function AdminEgliseDetailClient({ eglise, admins: initialAdmins,
               rel="noopener noreferrer"
               style={{ padding: "8px 16px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 600, fontSize: 13, textDecoration: "none" }}
             >
-              Accéder à la gestion →
+              Accéder à la gestion <ExternalLink size={13} style={{ display: "inline", verticalAlign: "middle" }} />
             </a>
           </div>
         </div>

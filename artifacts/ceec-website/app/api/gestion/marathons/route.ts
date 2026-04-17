@@ -5,8 +5,8 @@ import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 import { generateQrToken, formatNumeroId, getElapsedDayNumbers, toDateString } from "@/lib/marathon-utils";
 
-async function getEgliseId(req: NextRequest): Promise<number | null> {
-  const h = req.headers.get("x-eglise-id");
+function getEgliseIdSync(req: NextRequest): number | null {
+  const h = req.headers.get("x-eglise-id") ?? new URL(req.url).searchParams.get("egliseId");
   if (!h) return null;
   const id = parseInt(h, 10);
   return isNaN(id) ? null : id;
@@ -17,15 +17,15 @@ export async function GET(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-    const egliseId = await getEgliseId(req);
-    if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
-
     const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
-    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    const egliseId = getEgliseIdSync(req);
+    if (!egliseId && !superAdmin) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
+    if (!superAdmin && egliseId && !(await hasPermission(userId, "eglise_creer_evenement", egliseId))) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
 
     const marathons = await prisma.marathon.findMany({
-      where: { egliseId },
+      where: egliseId ? { egliseId } : {},
       orderBy: { dateDebut: "desc" },
       include: { _count: { select: { participants: true } } },
     });
@@ -41,12 +41,12 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-    const egliseId = await getEgliseId(req);
-    if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
-
     const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
-    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    const egliseId = getEgliseIdSync(req);
+    if (!egliseId) return NextResponse.json({ error: "Église introuvable — requis pour créer un marathon" }, { status: 400 });
+    if (!superAdmin && !(await hasPermission(userId, "eglise_creer_evenement", egliseId))) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
 
     const body = await req.json();
     if (!body.titre || !body.dateDebut || !body.nombreJours) {

@@ -62,7 +62,8 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   const lastScannedTimeRef = useRef<number>(0);
   const codeAccesRef = useRef<string>("");
 
-  const storageKey = `marathon_code_${marathonId}`;
+  const today = new Date().toISOString().split("T")[0];
+  const storageKey = `marathon_code_${marathonId}_${today}`;
 
   const fetchSessionInfo = useCallback(async () => {
     const res = await fetch(`/api/marathons/${marathonId}/session`);
@@ -74,12 +75,21 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
         const storedCode = typeof window !== "undefined"
           ? sessionStorage.getItem(storageKey) : null;
         if (storedCode) {
-          setCodeAcces(storedCode);
-          codeAccesRef.current = storedCode;
-          setPhase("scanning");
-        } else {
-          setPhase("join");
+          const checkRes = await fetch(`/api/marathons/${marathonId}/session?code=${storedCode}`);
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            if (checkData.valid) {
+              setCodeAcces(storedCode);
+              codeAccesRef.current = storedCode;
+              setNomControleur(checkData.session?.nomControleur ?? "");
+              setPresents(checkData.presents ?? 0);
+              setPhase("scanning");
+              return;
+            }
+          }
+          if (typeof window !== "undefined") sessionStorage.removeItem(storageKey);
         }
+        setPhase("join");
       } else if (data.requiresSetup) {
         setPhase("setup");
       }
@@ -297,8 +307,16 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
               Une session est déjà ouverte pour aujourd&apos;hui. Entrez le code d&apos;accès pour rejoindre.
             </p>
             {error && <div style={{ background: "#fef2f2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 13 }}>{error}</div>}
-            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Code d&apos;accès du jour</label>
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Votre nom <span style={{ color: GOLD }}>*</span></label>
+            <input
+              value={nomControleur}
+              onChange={(e) => setNomControleur(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleJoinSession()}
+              placeholder="ex: Frère Joël"
+              style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "none", fontSize: 14, marginBottom: 12, boxSizing: "border-box", outline: "none" }}
+            />
+            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Code d&apos;accès du jour <span style={{ color: GOLD }}>*</span></label>
+            <div style={{ display: "flex", gap: 8, marginBottom: 0 }}>
               <input
                 value={inputCode}
                 onChange={(e) => setInputCode(e.target.value.toUpperCase())}
@@ -311,13 +329,6 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
                 {loading ? "..." : "Rejoindre"}
               </button>
             </div>
-            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Votre nom (optionnel)</label>
-            <input
-              value={nomControleur}
-              onChange={(e) => setNomControleur(e.target.value)}
-              placeholder="ex: Frère Joël"
-              style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "none", fontSize: 14, marginBottom: 0, boxSizing: "border-box", outline: "none" }}
-            />
           </div>
         )}
 
@@ -362,6 +373,19 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
         {/* ── Scanning Phase ── */}
         {phase === "scanning" && (
           <div>
+            {/* Quitter la session */}
+            <div style={{ textAlign: "right", marginBottom: 10 }}>
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") sessionStorage.removeItem(storageKey);
+                  setCodeAcces(""); codeAccesRef.current = "";
+                  setPhase("join"); setLastResult(null); setError("");
+                }}
+                style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 8, color: "rgba(255,255,255,0.7)", fontSize: 12, padding: "6px 12px", cursor: "pointer" }}
+              >
+                ⟵ Changer de code / Quitter la session
+              </button>
+            </div>
             {/* Mode toggle */}
             <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: 4 }}>
               {([["camera", Camera, "Caméra QR"], ["manual", Keyboard, "Manuel"]] as const).map(([m, Icon, label]) => (

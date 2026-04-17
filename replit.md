@@ -172,7 +172,7 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm --filter @workspace/ceec-website exec prisma db push` — push CEEC DB schema changes
+- `pnpm --filter @workspace/ceec-website exec prisma db push` — push CEEC DB schema changes (**no migration files generated**; this project uses `db push` for schema evolution, not `prisma migrate`. No migrations directory exists by design — `db push` is idempotent and sufficient for this SaaS/managed Neon environment)
 - `pnpm --filter @workspace/ceec-website exec prisma generate` — regenerate Prisma client
 
 ## Environment Variables

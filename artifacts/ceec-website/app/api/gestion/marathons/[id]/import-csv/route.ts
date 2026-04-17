@@ -17,17 +17,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-    const egliseId = await getEgliseId(req);
-    if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
-
     const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
-    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    const egliseId = await getEgliseId(req);
+    if (!egliseId && !superAdmin) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
+    if (!superAdmin && egliseId && !(await hasPermission(userId, "eglise_creer_evenement", egliseId))) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
 
     const { id } = await params;
     const marathonId = parseInt(id, 10);
 
-    const marathon = await prisma.marathon.findFirst({ where: { id: marathonId, egliseId } });
+    const marathon = await prisma.marathon.findFirst({
+      where: { id: marathonId, ...(superAdmin || !egliseId ? {} : { egliseId }) },
+    });
     if (!marathon) return NextResponse.json({ error: "Marathon introuvable" }, { status: 404 });
 
     const text = await req.text();
@@ -40,10 +42,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const elapsedDays = getElapsedDayNumbers(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);
     const allDays = computeMarathonDays(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);
 
+    const resolvedEgliseId = egliseId ?? marathon.egliseId;
     let added = 0;
     let skipped = 0;
-    const acteurNom = await getActeurNom(userId, egliseId);
-    const eglise = await prisma.eglise.findUnique({ where: { id: egliseId }, select: { nom: true } });
+    const acteurNom = await getActeurNom(userId, resolvedEgliseId);
+    const eglise = await prisma.eglise.findUnique({ where: { id: resolvedEgliseId }, select: { nom: true } });
 
     for (const line of dataLines) {
       const parts = line.split(",").map((s) => s.trim().replace(/^"|"$/g, ""));
@@ -76,7 +79,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           acteurId: userId, acteurNom, action: "creer",
           entiteType: "membre", entiteId: participant.id,
           entiteLabel: `Import CSV Marathon: ${prenom} ${nom}`,
-          egliseId, egliseNom: eglise?.nom,
+          egliseId: resolvedEgliseId, egliseNom: eglise?.nom,
           metadata: { source: "csv_import", marathonId, participantId: participant.id },
         });
 

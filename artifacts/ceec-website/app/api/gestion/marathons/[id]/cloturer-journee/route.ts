@@ -16,19 +16,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-    const egliseId = await getEgliseId(req);
-    if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
-
     const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
-    const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
-    if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    const egliseId = await getEgliseId(req);
+    if (!egliseId && !superAdmin) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
+    if (!superAdmin && egliseId && !(await hasPermission(userId, "eglise_creer_evenement", egliseId))) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
 
     const { id } = await params;
     const marathonId = parseInt(id, 10);
     const body = await req.json();
     const { numeroJour } = body;
 
-    const marathon = await prisma.marathon.findFirst({ where: { id: marathonId, egliseId } });
+    const marathon = await prisma.marathon.findFirst({
+      where: { id: marathonId, ...(superAdmin || !egliseId ? {} : { egliseId }) },
+    });
     if (!marathon) return NextResponse.json({ error: "Marathon introuvable" }, { status: 404 });
 
     const allDays = computeMarathonDays(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);

@@ -128,11 +128,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
         sessionStorage.setItem(storageKey, code);
         sessionStorage.setItem(nomStorageKey, nomControleur.trim());
       }
-      await fetchSessionInfo();
       setPhase("ready");
     } else {
-      const d = await res.json();
-      setError(d.error ?? "Erreur");
+      const d = await res.json().catch(() => ({}));
+      setError(d.error ?? "Erreur lors de l'ouverture de la session");
     }
     setLoading(false);
   };

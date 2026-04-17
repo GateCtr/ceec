@@ -119,6 +119,7 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `MarathonParticipant` — Marathon participant with QR token (marathonId, membreId?, nom, prenom, email, numeroId, qrToken)
 - `MarathonPresence` — Daily attendance record (participantId, marathonId, numeroJour, date, statut, scanneParNom, scannedAt)
 - `MarathonSession` — Daily volunteer session (marathonId, date, numeroJour, codeAcces, nomControleur)
+- `MarathonJour` — *Reserved for future extension*: persisted day record (numeroJour, date, statut, totalPresents, cloture). Currently calendar days are computed dynamically via `computeMarathonDays()` in `marathon-utils.ts`; this model is in place for future caching or per-day extra metadata.
 
 #### Marathon System Pages
 - `/gestion/marathons` — Admin list with inline create modal (no `/gestion/marathons/nouveau` sub-route; creation is handled via modal on the list page for UX simplicity)

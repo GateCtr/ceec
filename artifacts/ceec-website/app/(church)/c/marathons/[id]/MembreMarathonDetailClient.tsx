@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, ArrowLeft, CheckCircle, XCircle, Download, Plus, Calendar } from "lucide-react";
+import { Trophy, ArrowLeft, CheckCircle, XCircle, Download, Plus, Calendar, ExternalLink } from "lucide-react";
 import QRCode from "qrcode";
 
 const PRIMARY = "#1e3a8a";
@@ -163,6 +163,9 @@ export default function MembreMarathonDetailClient({
               <button onClick={handlePrintBadge} disabled={printingBadge || !qrDataUrl} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 16px", background: "#f0fdf4", color: "#15803d", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
                 <Download size={14} /> {printingBadge ? "..." : "Imprimer ma carte"}
               </button>
+              <a href={`/c/marathons/${marathon.id}/ma-carte`} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 16px", background: "#eff6ff", color: PRIMARY, borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+                <ExternalLink size={14} /> Carte pleine page
+              </a>
             </div>
           </div>
 

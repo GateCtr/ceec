@@ -458,6 +458,12 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                 </span>
               )}
               <button
+                onClick={() => window.open(`/api/gestion/marathons/${marathonId}/liste-attente-pdf?egliseId=${egliseId}`, "_blank")}
+                style={{ ...btn({ background: "#eff6ff", color: PRIMARY, padding: "6px 12px", border: "1px solid #bfdbfe" }) }}
+              >
+                <Download size={13} /> Télécharger liste d&apos;attente
+              </button>
+              <button
                 onClick={handleSendAlert}
                 disabled={sendingAlert}
                 style={{ ...btn({ background: sendingAlert ? "#e5e7eb" : "#fef3c7", color: "#b45309", padding: "6px 12px", border: "1px solid #fcd34d" }) }}

@@ -263,7 +263,46 @@ export async function sendNewChurchNotificationEmail(
   return sendEmail(toArr, `Nouvelle église — ${egliseNom} (${ville})`, html);
 }
 
-// ─── Template 7 : Message de contact reçu ───────────────────────────────────
+// ─── Template 7 : Alerte présence marathon ───────────────────────────────────
+
+export async function sendMarathonAlertEmail({
+  to,
+  marathonTitre,
+  numeroJour,
+  scanned,
+  expected,
+  taux,
+  seuil,
+  marathonId,
+}: {
+  to: string | string[];
+  marathonTitre: string;
+  numeroJour: number;
+  scanned: number;
+  expected: number;
+  taux: number;
+  seuil: number;
+  marathonId: number;
+}): Promise<{ success: boolean; error?: string }> {
+  const toArr = Array.isArray(to) ? to : [to];
+  if (toArr.length === 0) return { success: true };
+  const dashboardUrl = `${BASE_URL}/gestion/marathons/${marathonId}?tab=live`;
+  const html = emailWrapper(
+    `⚠️ Alerte présence — ${marathonTitre}`,
+    p("Bonjour,") +
+    p(`Le taux de présence du <strong>Jour ${numeroJour}</strong> du marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est en dessous du seuil d&apos;alerte configuré.`) +
+    callout("#b45309", "#fffbeb",
+      `<strong>Scannés :</strong> ${scanned} / ${expected} participants<br>` +
+      `<strong>Taux de présence :</strong> <span style="color:#b91c1c;font-weight:700">${taux}%</span><br>` +
+      `<strong>Seuil d&apos;alerte :</strong> ${seuil}%`
+    ) +
+    p("Des participants n&apos;ont pas encore été scannés. Vérifiez le tableau de bord en direct pour voir la liste des absents.") +
+    cta(dashboardUrl, "Voir le suivi en direct")
+  );
+  return sendEmail(toArr, `⚠️ Alerte présence J${numeroJour} — ${marathonTitre}`, html);
+}
+
+// ─── Template 8 : Message de contact reçu ───────────────────────────────────
 
 export async function sendContactEmail({
   to,

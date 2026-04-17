@@ -333,6 +333,7 @@ model Marathon {
   nombreJours       Int      @map("nombre_jours")
   joursExclus       String[] @map("jours_exclus")
   statut            String   @default("ouvert") @db.VarChar(20)
+  alerteSeuil       Int      @default(60) @map("alerte_seuil")
   logoUrl           String?  @map("logo_url")
   denomination      String?  @db.VarChar(255)
   createdByUserId   String   @map("created_by_user_id") @db.VarChar(255)

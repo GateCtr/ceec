@@ -16,6 +16,7 @@ const GOLD = "#c59b2e";
 interface Marathon {
   id: number; titre: string; theme: string | null; referenceBiblique: string | null;
   dateDebut: string; nombreJours: number; statut: string; denomination: string | null;
+  alerteSeuil: number;
   eglise: { nom: string; logoUrl: string | null }; _count: { participants: number; presences: number };
 }
 interface Participant {
@@ -59,10 +60,41 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [liveData, setLiveData] = useState<LiveData | null>(null);
   const [liveLoading, setLiveLoading] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [alerteSeuil, setAlerteSeuil] = useState(60);
+  const [alerteSeuilInput, setAlerteSeuilInput] = useState("60");
+  const [alertBanner, setAlertBanner] = useState<string | null>(null);
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertSendResult, setAlertSendResult] = useState<string | null>(null);
+  const alertSentRef = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
+
+  const handleSendAlert = useCallback(async () => {
+    setSendingAlert(true);
+    setAlertSendResult(null);
+    try {
+      const res = await fetch(`/api/gestion/marathons/${marathonId}/alert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers() },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.sent) {
+          setAlertSendResult(`Alerte envoyée à ${data.recipients} coordinateur(s). (${data.scanned}/${data.expected} scannés — ${data.taux}%)`);
+        } else {
+          setAlertSendResult(data.reason ?? "Alerte non envoyée");
+        }
+      } else {
+        setAlertSendResult(data.error ?? "Erreur lors de l'envoi");
+      }
+    } catch {
+      setAlertSendResult("Erreur réseau");
+    } finally {
+      setSendingAlert(false);
+    }
+  }, [marathonId, headers]);
 
   const fetchLive = useCallback(async () => {
     setLiveLoading(true);
@@ -75,6 +107,19 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
           setStats((prev) => prev ? { ...prev, byDay: data.byDay, todayDayNum: data.todayDayNum ?? prev.todayDayNum, totalParticipants: data.totalParticipants ?? prev.totalParticipants } : prev);
         }
         setLastRefreshed(new Date());
+        if (data.liveToday) {
+          const { scanned, expected } = data.liveToday;
+          if (expected > 0) {
+            const taux = Math.round((scanned / expected) * 100);
+            setAlerteSeuil((seuil) => {
+              if (taux < seuil && !alertSentRef.current) {
+                alertSentRef.current = true;
+                setAlertBanner(`Taux de présence (${taux}%) en dessous du seuil d'alerte (${seuil}%). ${scanned}/${expected} participants scannés.`);
+              }
+              return seuil;
+            });
+          }
+        }
       }
     } catch {
     } finally {
@@ -111,6 +156,8 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       const m = await mRes.json();
       setMarathon(m);
       setEditForm({ titre: m.titre, theme: m.theme ?? "", referenceBiblique: m.referenceBiblique ?? "", denomination: m.denomination ?? "", statut: m.statut });
+      setAlerteSeuil(m.alerteSeuil ?? 60);
+      setAlerteSeuilInput(String(m.alerteSeuil ?? 60));
     }
     if (pRes.ok) setParticipants(await pRes.json());
     if (sRes.ok) setStats(await sRes.json());
@@ -321,16 +368,23 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       {tab === "live" && (
         <div>
           {/* Refresh header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: PRIMARY, display: "flex", alignItems: "center", gap: 8 }}>
               <Radio size={16} color="#dc2626" /> Suivi en direct
             </h3>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               {lastRefreshed && (
                 <span style={{ fontSize: 11.5, color: "#9ca3af", display: "flex", alignItems: "center", gap: 5 }}>
                   <Clock size={12} /> Actualisé à {lastRefreshed.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
               )}
+              <button
+                onClick={handleSendAlert}
+                disabled={sendingAlert}
+                style={{ ...btn({ background: sendingAlert ? "#e5e7eb" : "#fef3c7", color: "#b45309", padding: "6px 12px", border: "1px solid #fcd34d" }) }}
+              >
+                {sendingAlert ? "Envoi..." : "⚠ Envoyer alerte"}
+              </button>
               <button
                 onClick={fetchLive}
                 disabled={liveLoading}
@@ -341,9 +395,73 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
               </button>
             </div>
           </div>
-          <p style={{ fontSize: 12, color: "#9ca3af", marginTop: -10, marginBottom: 16 }}>
+          <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 12 }}>
             Actualisation automatique toutes les 30 secondes
           </p>
+
+          {/* Alert threshold config */}
+          <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 13, color: "#92400e", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+              ⚠ Seuil d&apos;alerte :
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={alerteSeuilInput}
+                onChange={(e) => setAlerteSeuilInput(e.target.value)}
+                style={{ width: 64, padding: "4px 8px", border: "1.5px solid #fcd34d", borderRadius: 6, fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none" }}
+              />
+              <span style={{ fontSize: 13, color: "#92400e" }}>%</span>
+              <button
+                onClick={async () => {
+                  const val = Math.min(100, Math.max(0, parseInt(alerteSeuilInput) || 60));
+                  setAlerteSeuil(val);
+                  setAlerteSeuilInput(String(val));
+                  alertSentRef.current = false;
+                  setAlertBanner(null);
+                  await fetch(`/api/gestion/marathons/${marathonId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json", ...headers() },
+                    body: JSON.stringify({ alerteSeuil: val }),
+                  });
+                }}
+                style={{ ...btn({ background: "#b45309", color: "white", padding: "4px 10px" }), fontSize: 12 }}
+              >
+                Enregistrer
+              </button>
+            </div>
+            <span style={{ fontSize: 12, color: "#92400e" }}>— Une alerte est déclenchée si le taux de présence est inférieur à ce seuil lors du suivi automatique.</span>
+          </div>
+
+          {/* Alert banner */}
+          {alertBanner && (
+            <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: 10, padding: "12px 16px", marginBottom: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, color: "#b91c1c", fontSize: 13.5, marginBottom: 4 }}>Alerte présence</div>
+                <div style={{ fontSize: 13, color: "#7f1d1d" }}>{alertBanner}</div>
+                <button
+                  onClick={handleSendAlert}
+                  disabled={sendingAlert}
+                  style={{ marginTop: 8, ...btn({ background: "#b91c1c", color: "white", padding: "5px 12px" }), fontSize: 12 }}
+                >
+                  {sendingAlert ? "Envoi en cours..." : "Envoyer alerte par email"}
+                </button>
+              </div>
+              <button onClick={() => setAlertBanner(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", flexShrink: 0, padding: 0 }}><X size={14} /></button>
+            </div>
+          )}
+
+          {/* Alert send result */}
+          {alertSendResult && (
+            <div style={{ background: alertSendResult.includes("Erreur") || alertSendResult.includes("non envoyée") ? "#fef2f2" : "#f0fdf4", border: `1.5px solid ${alertSendResult.includes("Erreur") || alertSendResult.includes("non envoyée") ? "#fca5a5" : "#bbf7d0"}`, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 13, color: alertSendResult.includes("Erreur") || alertSendResult.includes("non envoyée") ? "#b91c1c" : "#166534", fontWeight: 600 }}>{alertSendResult}</span>
+              <button onClick={() => setAlertSendResult(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", flexShrink: 0, padding: 0 }}><X size={14} /></button>
+            </div>
+          )}
+
 
           {liveLoading && !liveData ? (
             <div style={{ padding: "3rem", textAlign: "center", color: "#9ca3af" }}>Chargement...</div>

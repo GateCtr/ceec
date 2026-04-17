@@ -76,6 +76,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         nombreJours: body.nombreJours ? parseInt(body.nombreJours) : existing.nombreJours,
         joursExclus: body.joursExclus !== undefined ? body.joursExclus : existing.joursExclus,
         statut: body.statut ?? existing.statut,
+        alerteSeuil: body.alerteSeuil !== undefined ? Math.min(100, Math.max(0, parseInt(body.alerteSeuil))) : existing.alerteSeuil,
         logoUrl: body.logoUrl !== undefined ? (body.logoUrl || null) : existing.logoUrl,
         denomination: body.denomination !== undefined ? (body.denomination || null) : existing.denomination,
       },

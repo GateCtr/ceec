@@ -23,8 +23,8 @@ function formatDate(d: string) {
 }
 
 export default function MembreMarathonDetailClient({
-  marathon, participant, membreId,
-}: { marathon: Marathon; participant: Participant | null; membreId: number }) {
+  marathon, participant, membreId, joursEcoules, joursRestants,
+}: { marathon: Marathon; participant: Participant | null; membreId: number; joursEcoules: number; joursRestants: number }) {
   const router = useRouter();
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [inscrit, setInscrit] = useState(!!participant);
@@ -97,6 +97,7 @@ export default function MembreMarathonDetailClient({
 
   const presents = currentParticipant?.presences.filter((p) => p.statut === "present").length ?? 0;
   const total = currentParticipant?.presences.length ?? 0;
+  const absences = joursEcoules - presents;
 
   return (
     <div style={{ padding: "2rem", maxWidth: 800, margin: "0 auto" }}>
@@ -168,13 +169,38 @@ export default function MembreMarathonDetailClient({
           {/* Présences */}
           <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 16, padding: "1.25rem" }}>
             <h3 style={{ fontSize: 14, fontWeight: 600, color: PRIMARY, marginBottom: 14 }}>Mes présences</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+              <div style={{ background: "#f0fdf4", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#15803d" }}>{presents}</div>
+                <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase" }}>Présences</div>
+              </div>
+              <div style={{ background: absences > 0 ? "#fef2f2" : "#f9fafb", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: absences > 0 ? "#b91c1c" : "#9ca3af" }}>{Math.max(0, absences)}</div>
+                <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase" }}>Absences</div>
+              </div>
+              <div style={{ background: joursRestants > 0 ? "#eff6ff" : "#f9fafb", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: joursRestants > 0 ? PRIMARY : "#9ca3af" }}>{joursRestants}</div>
+                <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase" }}>Jours restants</div>
+              </div>
+            </div>
+            {joursEcoules > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: "#6b7280" }}>{presents}/{joursEcoules} jours écoulés</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: presents === joursEcoules ? "#15803d" : PRIMARY }}>{joursEcoules > 0 ? Math.round((presents / joursEcoules) * 100) : 0}%</span>
+                </div>
+                <div style={{ height: 6, background: "#f3f4f6", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: joursEcoules > 0 ? `${(presents / joursEcoules) * 100}%` : "0%", background: presents === joursEcoules ? "#16a34a" : PRIMARY, borderRadius: 3 }} />
+                </div>
+              </div>
+            )}
             {total === 0 ? (
               <div style={{ color: "#9ca3af", fontSize: 13, textAlign: "center", padding: "1rem" }}>Aucune journée enregistrée</div>
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                  <span style={{ fontSize: 13, color: "#6b7280" }}>{presents}/{total} journées</span>
-                  <div style={{ height: 6, width: 100, background: "#f3f4f6", borderRadius: 3, overflow: "hidden" }}>
+                  <span style={{ fontSize: 13, color: "#6b7280" }}>Historique détaillé</span>
+                  <div style={{ height: 6, width: 60, background: "#f3f4f6", borderRadius: 3, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: total > 0 ? `${(presents / total) * 100}%` : "0%", background: presents === total ? "#16a34a" : PRIMARY }} />
                   </div>
                 </div>

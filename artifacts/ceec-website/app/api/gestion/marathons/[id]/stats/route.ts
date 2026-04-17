@@ -67,6 +67,23 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const todayDayNum = allDays.findIndex((d) => toDateString(d) === today) + 1;
 
+    const { searchParams } = new URL(req.url);
+    const jourParam = searchParams.get("jour");
+    const jourNum = jourParam ? parseInt(jourParam, 10) : null;
+
+    let absentsDuJour: { id: number; nom: string; prenom: string; numeroId: string }[] = [];
+    if (jourNum && jourNum >= 1 && jourNum <= allDays.length) {
+      const presentIds = new Set(
+        presences.filter((p) => p.numeroJour === jourNum && p.statut === "present").map((p) => p.participantId)
+      );
+      const allParticipants = await prisma.marathonParticipant.findMany({
+        where: { marathonId },
+        select: { id: true, nom: true, prenom: true, numeroId: true },
+        orderBy: { numeroId: "asc" },
+      });
+      absentsDuJour = allParticipants.filter((p) => !presentIds.has(p.id));
+    }
+
     return NextResponse.json({
       totalParticipants,
       joursTotal: marathon.nombreJours,
@@ -75,6 +92,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       byDay,
       sansFaute: sansFauteList,
       todayDayNum: todayDayNum > 0 ? todayDayNum : null,
+      ...(jourNum ? { absentsDuJour, jourNum } : {}),
     });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

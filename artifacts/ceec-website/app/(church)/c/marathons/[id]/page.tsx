@@ -35,6 +35,9 @@ export default async function MembreMarathonDetailPage({
 
   const allDays = computeMarathonDays(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);
   const dateFin = allDays[allDays.length - 1] ?? marathon.dateDebut;
+  const today = new Date().toISOString().slice(0, 10);
+  const joursEcoules = allDays.filter((d) => d.toISOString().slice(0, 10) <= today).length;
+  const joursRestants = allDays.length - joursEcoules;
 
   const participant = await prisma.marathonParticipant.findFirst({
     where: { marathonId, membreId: membre.id },
@@ -53,6 +56,8 @@ export default async function MembreMarathonDetailPage({
         logoUrl: marathon.logoUrl ?? marathon.eglise.logoUrl,
         joursExclus: marathon.joursExclus,
       }}
+      joursEcoules={joursEcoules}
+      joursRestants={joursRestants}
       participant={participant ? {
         id: participant.id, nom: participant.nom, prenom: participant.prenom,
         email: participant.email, numeroId: participant.numeroId, qrToken: participant.qrToken,

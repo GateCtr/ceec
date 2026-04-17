@@ -94,26 +94,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: { marathonId, date: { gte: todayStart, lt: todayEnd } },
     });
 
-    if (existingSession) {
-      if (!codeAcces || codeAcces !== existingSession.codeAcces) {
-        return NextResponse.json(
-          { error: "Une session existe déjà aujourd'hui. Fournissez le code d'accès actuel pour rejoindre.", requiresCode: true },
-          { status: 409 }
-        );
-      }
-      const updated = await prisma.marathonSession.update({
-        where: { id: existingSession.id },
-        data: { nomControleur: nomControleur ?? existingSession.nomControleur },
-      });
-      return NextResponse.json({ session: { ...updated, codeAcces: existingSession.codeAcces }, numeroJour, date: today });
+    if (!existingSession) {
+      return NextResponse.json(
+        { error: "Aucune session n'est ouverte pour aujourd'hui. L'administrateur doit l'ouvrir depuis le tableau de bord.", noSession: true },
+        { status: 404 }
+      );
     }
 
-    const newCode = generateAccessCode();
-    const session = await prisma.marathonSession.create({
-      data: { marathonId, date: todayDate, numeroJour, codeAcces: newCode, nomControleur: nomControleur ?? null },
-    });
+    if (!codeAcces || codeAcces !== existingSession.codeAcces) {
+      return NextResponse.json(
+        { error: "Code d'accès incorrect. Demandez le code à l'administrateur ou au responsable.", requiresCode: true },
+        { status: 403 }
+      );
+    }
 
-    return NextResponse.json({ session: { ...session, codeAcces: newCode }, numeroJour, date: today });
+    const updated = await prisma.marathonSession.update({
+      where: { id: existingSession.id },
+      data: { nomControleur: nomControleur ?? existingSession.nomControleur },
+    });
+    return NextResponse.json({ session: { ...updated, codeAcces: existingSession.codeAcces }, numeroJour, date: today });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

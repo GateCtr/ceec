@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Trophy, ArrowLeft, Users, BarChart3, Upload, Settings,
   Plus, Search, Download, CheckCircle, XCircle, X,
-  Calendar, Link as LinkIcon, Copy, ClipboardList, Star
+  Calendar, Link as LinkIcon, Copy, ClipboardList, Star, Play
 } from "lucide-react";
 
 const PRIMARY = "#1e3a8a";
@@ -47,6 +47,8 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [editForm, setEditForm] = useState({ titre: "", theme: "", referenceBiblique: "", denomination: "", statut: "" });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [openingSession, setOpeningSession] = useState(false);
+  const [sessionMsg, setSessionMsg] = useState<{ text: string; color: string; code?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
@@ -143,6 +145,26 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
     navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
+  const handleOpenSession = async () => {
+    setOpeningSession(true); setSessionMsg(null);
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...headers() },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      const code = data.session?.codeAcces ?? "";
+      const msg = data.alreadyExists
+        ? `Session du jour déjà ouverte (J${data.numeroJour}). Code : ${code}`
+        : `Session du jour J${data.numeroJour} ouverte ! Code : ${code}`;
+      setSessionMsg({ text: msg, color: "#15803d", code });
+    } else {
+      setSessionMsg({ text: data.error ?? "Impossible d'ouvrir la session", color: "#b91c1c" });
+    }
+    setOpeningSession(false);
+  };
+
   const filtered = participants.filter((p) =>
     `${p.prenom} ${p.nom} ${p.numeroId}`.toLowerCase().includes(search.toLowerCase())
   );
@@ -185,6 +207,11 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {marathon.statut === "ouvert" && (
+              <button onClick={handleOpenSession} disabled={openingSession} style={{ ...btn({ background: openingSession ? "#e5e7eb" : "#7c3aed", color: "white" }) }}>
+                <Play size={14} /> {openingSession ? "..." : "Ouvrir session du jour"}
+              </button>
+            )}
             <button onClick={copyScanLink} style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }) }}>
               <LinkIcon size={14} /> {copied ? "Copié !" : "Lien scan"}
             </button>
@@ -193,6 +220,17 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
             </a>
           </div>
         </div>
+        {sessionMsg && (
+          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 8, background: sessionMsg.color === "#15803d" ? "#f0fdf4" : "#fef2f2", color: sessionMsg.color, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {sessionMsg.text}
+            {sessionMsg.code && (
+              <button onClick={() => { navigator.clipboard.writeText(sessionMsg.code!); }} style={{ padding: "3px 10px", background: "#e0e7ff", color: "#4338ca", border: "none", borderRadius: 6, fontFamily: "monospace", fontWeight: 700, cursor: "pointer", fontSize: 12 }}>
+                <Copy size={11} style={{ display: "inline", marginRight: 4 }} />{sessionMsg.code}
+              </button>
+            )}
+            <button onClick={() => setSessionMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0 }}><X size={14} /></button>
+          </div>
+        )}
       </div>
 
       {/* Stats mini-cards */}

@@ -320,46 +320,21 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
           </div>
         )}
 
-        {/* ── Setup Phase ── */}
+        {/* ── Setup Phase (no session yet) ── */}
         {phase === "setup" && sessionInfo?.requiresSetup && (
-          <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "1.75rem" }}>
-            <h2 style={{ color: "white", fontWeight: 700, fontSize: 18, marginBottom: 6 }}>Ouvrir la session du jour</h2>
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginBottom: "1.5rem" }}>
-              Identifiez-vous pour générer un code d&apos;accès unique pour aujourd&apos;hui.
+          <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "2rem", textAlign: "center" }}>
+            <AlertCircle size={40} color={GOLD} style={{ marginBottom: 16 }} />
+            <h2 style={{ color: "white", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Session non ouverte</h2>
+            <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, lineHeight: 1.6 }}>
+              Aucune session de scan n&apos;est encore ouverte pour aujourd&apos;hui.<br />
+              L&apos;administrateur doit l&apos;ouvrir depuis le <strong style={{ color: GOLD }}>tableau de bord de gestion</strong> du marathon.
             </p>
-
-            {error && (
-              <div style={{ background: "#fef2f2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 13 }}>{error}</div>
-            )}
-
-            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Votre nom (contrôleur)</label>
-            <input
-              value={nomControleur}
-              onChange={(e) => setNomControleur(e.target.value)}
-              placeholder="ex: Frère Joël"
-              onKeyDown={(e) => e.key === "Enter" && handleSetup()}
-              style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "none", fontSize: 15, marginBottom: 16, boxSizing: "border-box", outline: "none" }}
-            />
-
-            <button onClick={handleSetup} disabled={loading} style={{ width: "100%", padding: "12px", background: GOLD, color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer" }}>
-              {loading ? "..." : "Ouvrir la session"}
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, marginTop: 16 }}>
+              Une fois ouverte, l&apos;administrateur vous communiquera le code d&apos;accès du jour.
+            </p>
+            <button onClick={fetchSessionInfo} style={{ marginTop: 20, padding: "10px 20px", background: "rgba(255,255,255,0.12)", color: "white", border: "none", borderRadius: 10, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <RefreshCw size={14} /> Actualiser
             </button>
-
-            <div style={{ textAlign: "center", margin: "1rem 0", color: "rgba(255,255,255,0.4)", fontSize: 12 }}>— ou —</div>
-
-            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Rejoindre une session existante</label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                value={inputCode}
-                onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                placeholder="Code d'accès (ex: A1B2C3)"
-                maxLength={8}
-                style={{ flex: 1, padding: "11px 14px", borderRadius: 10, border: "none", fontSize: 15, boxSizing: "border-box", outline: "none", fontFamily: "monospace", letterSpacing: "0.1em" }}
-              />
-              <button onClick={handleJoinSession} disabled={loading} style={{ padding: "11px 16px", background: "rgba(255,255,255,0.15)", color: "white", border: "none", borderRadius: 10, fontWeight: 600, cursor: "pointer" }}>
-                Rejoindre
-              </button>
-            </div>
           </div>
         )}
 

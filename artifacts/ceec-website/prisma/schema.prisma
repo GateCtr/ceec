@@ -342,7 +342,6 @@ model Marathon {
   participants      MarathonParticipant[]
   presences         MarathonPresence[]
   sessions          MarathonSession[]
-  jours             MarathonJour[]
 
   @@index([egliseId])
   @@map("marathons")
@@ -386,21 +385,6 @@ model MarathonPresence {
   @@map("marathon_presences")
 }
 
-model MarathonJour {
-  id            Int      @id @default(autoincrement())
-  marathonId    Int      @map("marathon_id")
-  numeroJour    Int      @map("numero_jour")
-  date          DateTime @db.Date
-  statut        String   @default("ouvert") @db.VarChar(20)
-  totalPresents Int      @default(0) @map("total_presents")
-  cloture       Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at")
-  marathon      Marathon @relation(fields: [marathonId], references: [id], onDelete: Cascade)
-
-  @@unique([marathonId, numeroJour])
-  @@index([marathonId])
-  @@map("marathon_jours")
-}
 
 model MarathonSession {
   id            Int      @id @default(autoincrement())

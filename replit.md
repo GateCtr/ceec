@@ -173,6 +173,8 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm --filter @workspace/ceec-website exec prisma db push` — push CEEC DB schema changes (**no migration files generated**; this project uses `db push` for schema evolution, not `prisma migrate`. No migrations directory exists by design — `db push` is idempotent and sufficient for this SaaS/managed Neon environment)
+- **MarathonJour** model was removed from schema: days are computed dynamically via `computeMarathonDays()` in `lib/marathon-utils.ts`; no static per-day DB rows are needed. The `marathon_jours` table has been dropped from the Neon DB.
+- **Marathon admin creation**: uses an inline modal on `/gestion/marathons` list page (not a dedicated `/nouveau/page.tsx` route) — this is by design for single-page UX.
 - `pnpm --filter @workspace/ceec-website exec prisma generate` — regenerate Prisma client
 
 ## Environment Variables

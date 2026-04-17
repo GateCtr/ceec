@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { computeMarathonDays, toDateString, generateAccessCode } from "@/lib/marathon-utils";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -70,6 +71,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const rl = checkRateLimit(`session-join:${getClientIp(req)}`, 10, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Trop de tentatives. Réessayez dans quelques instants." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.resetIn / 1000)) } }
+    );
+  }
   try {
     const { id } = await params;
     const marathonId = parseInt(id, 10);

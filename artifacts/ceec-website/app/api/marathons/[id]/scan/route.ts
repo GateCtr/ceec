@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { computeMarathonDays, toDateString } from "@/lib/marathon-utils";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const rl = checkRateLimit(`scan:${getClientIp(req)}`, 60, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Trop de scans. Patientez quelques instants." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.resetIn / 1000)) } }
+    );
+  }
   try {
     const { id } = await params;
     const marathonId = parseInt(id, 10);

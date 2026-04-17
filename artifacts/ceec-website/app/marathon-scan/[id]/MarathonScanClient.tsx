@@ -64,6 +64,7 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
 
   const today = new Date().toISOString().split("T")[0];
   const storageKey = `marathon_code_${marathonId}_${today}`;
+  const nomStorageKey = `marathon_nom_${marathonId}_${today}`;
 
   const fetchSessionInfo = useCallback(async () => {
     const res = await fetch(`/api/marathons/${marathonId}/session`);
@@ -81,13 +82,17 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
             if (checkData.valid) {
               setCodeAcces(storedCode);
               codeAccesRef.current = storedCode;
-              setNomControleur(checkData.session?.nomControleur ?? "");
+              const storedNom = typeof window !== "undefined" ? sessionStorage.getItem(nomStorageKey) : null;
+              setNomControleur(storedNom ?? checkData.session?.nomControleur ?? "");
               setPresents(checkData.presents ?? 0);
               setPhase("scanning");
               return;
             }
           }
-          if (typeof window !== "undefined") sessionStorage.removeItem(storageKey);
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem(storageKey);
+            sessionStorage.removeItem(nomStorageKey);
+          }
         }
         setPhase("join");
       } else if (data.requiresSetup) {
@@ -119,7 +124,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
       const code = data.session.codeAcces;
       setCodeAcces(code);
       codeAccesRef.current = code;
-      if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(storageKey, code);
+        sessionStorage.setItem(nomStorageKey, nomControleur.trim());
+      }
       await fetchSessionInfo();
       setPhase("ready");
     } else {
@@ -144,7 +152,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
       setSessionInfo(data);
       setCodeAcces(code);
       codeAccesRef.current = code;
-      if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(storageKey, code);
+        sessionStorage.setItem(nomStorageKey, nomControleur.trim());
+      }
       setPresents(data.presents ?? 0);
       setPhase("scanning");
     } else {
@@ -377,7 +388,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
             <div style={{ textAlign: "right", marginBottom: 10 }}>
               <button
                 onClick={() => {
-                  if (typeof window !== "undefined") sessionStorage.removeItem(storageKey);
+                  if (typeof window !== "undefined") {
+                    sessionStorage.removeItem(storageKey);
+                    sessionStorage.removeItem(nomStorageKey);
+                  }
                   setCodeAcces(""); codeAccesRef.current = "";
                   setPhase("join"); setLastResult(null); setError("");
                 }}

@@ -47,6 +47,9 @@ export default async function AdminLayout({
       href: "/admin/evenements",
       icon: "calendar",
     },
+    ...(isSuperAdmin || isAdminPlateforme
+      ? [{ label: "Marathons", href: "/admin/marathons", icon: "trophy" as const }]
+      : []),
     ...(isSuperAdmin
       ? [
           {

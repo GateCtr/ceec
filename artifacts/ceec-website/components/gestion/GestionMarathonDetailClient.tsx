@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import {
   Trophy, ArrowLeft, Users, BarChart3, Upload, Settings,
   Plus, Search, Download, CheckCircle, XCircle, X,
-  Calendar, Link as LinkIcon, Copy, ClipboardList, Star, Play
+  Calendar, Link as LinkIcon, Copy, ClipboardList, Star, Play,
+  Radio, UserCheck, UserX, Clock, RefreshCw
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -25,6 +26,8 @@ interface Participant {
 }
 interface Stat { jour: number; date: string; presents: number; absents: number; tauxPresence: number; isPast: boolean }
 interface StatsData { totalParticipants: number; joursTotal: number; joursEcoules: number; byDay: Stat[]; sansFaute: { id: number; nom: string; prenom: string; numeroId: string }[]; todayDayNum: number | null }
+interface ScanEntry { participantNom: string; participantPrenom: string; participantNumeroId: string; scanneParNom: string | null; scannedAt: string | null }
+interface LiveData { liveToday: { scanned: number; expected: number; dayNum: number | null }; recentScans: ScanEntry[]; notYetScannedToday: { id: number; nom: string; prenom: string; numeroId: string }[] }
 
 function formatDate(d: string) { return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }); }
 function btn(extra?: object): React.CSSProperties { return { padding: "8px 16px", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6, ...extra }; }
@@ -34,7 +37,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [marathon, setMarathon] = useState<Marathon | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
-  const [tab, setTab] = useState<"participants" | "stats" | "import" | "config">("participants");
+  const [tab, setTab] = useState<"participants" | "stats" | "import" | "config" | "live">("participants");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showAddPart, setShowAddPart] = useState(false);
@@ -53,9 +56,49 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [selectedJour, setSelectedJour] = useState<number | null>(null);
   const [absentsDuJour, setAbsentsDuJour] = useState<{ id: number; nom: string; prenom: string; numeroId: string }[]>([]);
   const [loadingAbsents, setLoadingAbsents] = useState(false);
+  const [liveData, setLiveData] = useState<LiveData | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
+
+  const fetchLive = useCallback(async () => {
+    setLiveLoading(true);
+    try {
+      const res = await fetch(`/api/gestion/marathons/${marathonId}/stats?live=true`, { headers: headers() });
+      if (res.ok) {
+        const data = await res.json();
+        setLiveData({ liveToday: data.liveToday, recentScans: data.recentScans, notYetScannedToday: data.notYetScannedToday });
+        if (data.byDay) {
+          setStats((prev) => prev ? { ...prev, byDay: data.byDay, todayDayNum: data.todayDayNum ?? prev.todayDayNum, totalParticipants: data.totalParticipants ?? prev.totalParticipants } : prev);
+        }
+        setLastRefreshed(new Date());
+      }
+    } catch {
+    } finally {
+      setLiveLoading(false);
+    }
+  }, [marathonId, headers]);
+
+  useEffect(() => {
+    if (tab === "live") {
+      fetchLive();
+      liveIntervalRef.current = setInterval(fetchLive, 30000);
+    } else {
+      if (liveIntervalRef.current) {
+        clearInterval(liveIntervalRef.current);
+        liveIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (liveIntervalRef.current) {
+        clearInterval(liveIntervalRef.current);
+        liveIntervalRef.current = null;
+      }
+    };
+  }, [tab, fetchLive]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -187,11 +230,12 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   if (!marathon) return <div style={{ padding: "3rem", textAlign: "center", color: "#ef4444" }}>Marathon introuvable</div>;
 
   const TABS = [
-    { id: "participants", label: "Participants", icon: Users },
-    { id: "stats", label: "Statistiques", icon: BarChart3 },
-    { id: "import", label: "Import CSV", icon: Upload },
-    { id: "config", label: "Configuration", icon: Settings },
-  ] as const;
+    ...(marathon.statut === "ouvert" ? [{ id: "live" as const, label: "Suivi en direct", icon: Radio }] : []),
+    { id: "participants" as const, label: "Participants", icon: Users },
+    { id: "stats" as const, label: "Statistiques", icon: BarChart3 },
+    { id: "import" as const, label: "Import CSV", icon: Upload },
+    { id: "config" as const, label: "Configuration", icon: Settings },
+  ];
 
   const scanUrl = typeof window !== "undefined" ? `${window.location.origin}/marathon-scan/${marathonId}` : "";
 
@@ -272,6 +316,172 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
           </button>
         ))}
       </div>
+
+      {/* ── Suivi en direct Tab ── */}
+      {tab === "live" && (
+        <div>
+          {/* Refresh header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: PRIMARY, display: "flex", alignItems: "center", gap: 8 }}>
+              <Radio size={16} color="#dc2626" /> Suivi en direct
+            </h3>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {lastRefreshed && (
+                <span style={{ fontSize: 11.5, color: "#9ca3af", display: "flex", alignItems: "center", gap: 5 }}>
+                  <Clock size={12} /> Actualisé à {lastRefreshed.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                </span>
+              )}
+              <button
+                onClick={fetchLive}
+                disabled={liveLoading}
+                style={{ ...btn({ background: "#f0fdf4", color: "#15803d", padding: "6px 12px" }) }}
+              >
+                <RefreshCw size={13} style={{ animation: liveLoading ? "spin 1s linear infinite" : undefined }} />
+                {liveLoading ? "..." : "Actualiser"}
+              </button>
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: "#9ca3af", marginTop: -10, marginBottom: 16 }}>
+            Actualisation automatique toutes les 30 secondes
+          </p>
+
+          {liveLoading && !liveData ? (
+            <div style={{ padding: "3rem", textAlign: "center", color: "#9ca3af" }}>Chargement...</div>
+          ) : liveData ? (
+            <>
+              {/* Today's scan counter */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 20 }}>
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "18px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 36, fontWeight: 800, color: "#15803d" }}>{liveData.liveToday.scanned}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>scannés</div>
+                </div>
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "18px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 36, fontWeight: 800, color: PRIMARY }}>{liveData.liveToday.expected}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>attendus</div>
+                </div>
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "18px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 36, fontWeight: 800, color: liveData.liveToday.expected > 0 ? (liveData.liveToday.scanned / liveData.liveToday.expected >= 0.8 ? "#15803d" : liveData.liveToday.scanned / liveData.liveToday.expected >= 0.5 ? GOLD : "#dc2626") : "#9ca3af" }}>
+                    {liveData.liveToday.expected > 0 ? Math.round((liveData.liveToday.scanned / liveData.liveToday.expected) * 100) : 0}%
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>taux présence</div>
+                </div>
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "18px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 36, fontWeight: 800, color: "#b91c1c" }}>{liveData.notYetScannedToday.length}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>non encore scannés</div>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              {liveData.liveToday.expected > 0 && (
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "14px 16px", marginBottom: 20 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
+                    <span>{liveData.liveToday.dayNum ? `Jour ${liveData.liveToday.dayNum}` : "Aujourd'hui"}</span>
+                    <span>{liveData.liveToday.scanned} / {liveData.liveToday.expected}</span>
+                  </div>
+                  <div style={{ height: 10, background: "#f3f4f6", borderRadius: 5, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${Math.min(100, liveData.liveToday.expected > 0 ? (liveData.liveToday.scanned / liveData.liveToday.expected) * 100 : 0)}%`, background: "#15803d", borderRadius: 5, transition: "width 0.5s ease" }} />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                {/* Recent scan feed */}
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", gap: 8 }}>
+                    <UserCheck size={15} color="#15803d" />
+                    <span style={{ fontWeight: 600, fontSize: 13.5, color: PRIMARY }}>Derniers scans ({liveData.recentScans.length})</span>
+                  </div>
+                  {liveData.recentScans.length === 0 ? (
+                    <div style={{ padding: "2rem", textAlign: "center", color: "#9ca3af", fontSize: 13 }}>Aucun scan enregistré aujourd&apos;hui</div>
+                  ) : (
+                    <div style={{ maxHeight: 340, overflowY: "auto" }}>
+                      {liveData.recentScans.map((s, i) => (
+                        <div key={i} style={{ padding: "10px 16px", borderBottom: "1px solid #f9fafb", display: "flex", alignItems: "center", gap: 10 }}>
+                          <CheckCircle size={14} color="#15803d" style={{ flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, color: "#111827", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {s.participantPrenom} {s.participantNom}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#9ca3af", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                              <span style={{ fontFamily: "monospace" }}>{s.participantNumeroId}</span>
+                              {s.scanneParNom && <span>· par {s.scanneParNom}</span>}
+                            </div>
+                          </div>
+                          {s.scannedAt && (
+                            <span style={{ fontSize: 11, color: "#9ca3af", flexShrink: 0, whiteSpace: "nowrap" }}>
+                              {new Date(s.scannedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Not yet scanned */}
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", gap: 8 }}>
+                    <UserX size={15} color="#dc2626" />
+                    <span style={{ fontWeight: 600, fontSize: 13.5, color: PRIMARY }}>En attente ({liveData.notYetScannedToday.length})</span>
+                  </div>
+                  {liveData.notYetScannedToday.length === 0 ? (
+                    <div style={{ padding: "2rem", textAlign: "center", color: "#15803d", fontSize: 13, fontWeight: 600 }}>Tout le monde est scanné !</div>
+                  ) : (
+                    <div style={{ maxHeight: 340, overflowY: "auto" }}>
+                      {liveData.notYetScannedToday.map((p, i) => (
+                        <div key={p.id} style={{ padding: "10px 16px", borderBottom: "1px solid #f9fafb", display: "flex", alignItems: "center", gap: 10, background: i % 2 === 0 ? "white" : "#fafafa" }}>
+                          <XCircle size={14} color="#ef4444" style={{ flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{p.prenom} {p.nom}</div>
+                            <div style={{ fontSize: 11, color: "#9ca3af", fontFamily: "monospace" }}>{p.numeroId}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Per-session breakdown */}
+              {stats && stats.byDay.filter((d) => d.isPast).length > 0 && (
+                <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid #f3f4f6" }}>
+                    <span style={{ fontWeight: 600, fontSize: 13.5, color: PRIMARY }}>Récapitulatif par séance</span>
+                  </div>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+                      <thead>
+                        <tr style={{ background: "#f9fafb" }}>
+                          {["Séance", "Date", "Présents", "Absents", "Taux"].map((h) => (
+                            <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "#6b7280", fontWeight: 600, fontSize: 12, textTransform: "uppercase" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stats.byDay.filter((d) => d.isPast).map((d, i) => (
+                          <tr key={d.jour} style={{ borderTop: "1px solid #f3f4f6", background: i % 2 === 0 ? "white" : "#fafafa" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: PRIMARY }}>J{d.jour}</td>
+                            <td style={{ padding: "8px 14px", color: "#6b7280", fontSize: 12 }}>{formatDate(d.date)}</td>
+                            <td style={{ padding: "8px 14px", color: "#15803d", fontWeight: 600 }}>{d.presents}</td>
+                            <td style={{ padding: "8px 14px", color: d.absents > 0 ? "#b91c1c" : "#9ca3af" }}>{d.absents}</td>
+                            <td style={{ padding: "8px 14px" }}>
+                              <span style={{ fontWeight: 600, color: d.tauxPresence >= 80 ? "#15803d" : d.tauxPresence >= 50 ? GOLD : "#dc2626" }}>{d.tauxPresence}%</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ padding: "3rem", textAlign: "center", color: "#9ca3af" }}>
+              Impossible de charger les données en direct
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Participants Tab ── */}
       {tab === "participants" && (

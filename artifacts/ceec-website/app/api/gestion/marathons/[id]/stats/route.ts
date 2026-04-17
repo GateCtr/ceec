@@ -94,6 +94,58 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       absentsDuJour = allParticipants.filter((p) => !presentIds.has(p.id));
     }
 
+    const liveParam = searchParams.get("live");
+    let liveData: {
+      liveToday: { scanned: number; expected: number; dayNum: number | null };
+      recentScans: { participantNom: string; participantPrenom: string; participantNumeroId: string; scanneParNom: string | null; scannedAt: string | null }[];
+      notYetScannedToday: { id: number; nom: string; prenom: string; numeroId: string }[];
+    } | null = null;
+
+    if (liveParam === "true") {
+      const todayIdx = todayDayNum > 0 ? todayDayNum : null;
+
+      if (todayIdx) {
+        const todayPresences = presences.filter((p) => p.numeroJour === todayIdx && p.statut === "present");
+        const scannedIds = new Set(todayPresences.map((p) => p.participantId));
+
+        const [allParticipants, recentPresences] = await Promise.all([
+          prisma.marathonParticipant.findMany({
+            where: { marathonId },
+            select: { id: true, nom: true, prenom: true, numeroId: true },
+            orderBy: { numeroId: "asc" },
+          }),
+          prisma.marathonPresence.findMany({
+            where: { marathonId, numeroJour: todayIdx, statut: "present" },
+            include: { participant: { select: { nom: true, prenom: true, numeroId: true } } },
+            orderBy: { scannedAt: "desc" },
+            take: 30,
+          }),
+        ]);
+
+        const notYetScannedToday = allParticipants.filter((p) => !scannedIds.has(p.id));
+
+        const recentScans = recentPresences.map((p) => ({
+          participantNom: p.participant.nom,
+          participantPrenom: p.participant.prenom,
+          participantNumeroId: p.participant.numeroId,
+          scanneParNom: p.scanneParNom,
+          scannedAt: p.scannedAt ? p.scannedAt.toISOString() : null,
+        }));
+
+        liveData = {
+          liveToday: { scanned: todayPresences.length, expected: totalParticipants, dayNum: todayIdx },
+          recentScans,
+          notYetScannedToday,
+        };
+      } else {
+        liveData = {
+          liveToday: { scanned: 0, expected: totalParticipants, dayNum: null },
+          recentScans: [],
+          notYetScannedToday: [],
+        };
+      }
+    }
+
     return NextResponse.json({
       totalParticipants,
       joursTotal: marathon.nombreJours,
@@ -103,6 +155,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       sansFaute: sansFauteList,
       todayDayNum: todayDayNum > 0 ? todayDayNum : null,
       ...(jourNum ? { absentsDuJour, jourNum } : {}),
+      ...(liveData ? liveData : {}),
     });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

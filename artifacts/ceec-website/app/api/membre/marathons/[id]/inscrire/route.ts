@@ -26,20 +26,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     if (existing) return NextResponse.json({ error: "Déjà inscrit", participant: existing }, { status: 409 });
 
-    const count = await prisma.marathonParticipant.count({ where: { marathonId } });
-    const numeroId = formatNumeroId(marathonId, count + 1);
     const qrToken = generateQrToken();
-
-    const participant = await prisma.marathonParticipant.create({
-      data: {
-        marathonId,
-        membreId: membre.id,
-        nom: membre.nom,
-        prenom: membre.prenom,
-        email: membre.email,
-        numeroId,
-        qrToken,
-      },
+    const participant = await prisma.$transaction(async (tx) => {
+      const count = await tx.marathonParticipant.count({ where: { marathonId } });
+      const numeroId = formatNumeroId(marathonId, count + 1);
+      return tx.marathonParticipant.create({
+        data: {
+          marathonId,
+          membreId: membre.id,
+          nom: membre.nom,
+          prenom: membre.prenom,
+          email: membre.email,
+          numeroId,
+          qrToken,
+        },
+      });
     });
 
     const elapsedDays = getElapsedDayNumbers(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);

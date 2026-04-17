@@ -61,7 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           },
         });
         markedAbsent++;
-      } else if (existing.statut !== "present") {
+      } else if (existing.statut !== "present" && existing.statut !== "absent") {
         await prisma.marathonPresence.update({
           where: { participantId_numeroJour: { participantId: p.id, numeroJour } },
           data: { statut: "absent" },

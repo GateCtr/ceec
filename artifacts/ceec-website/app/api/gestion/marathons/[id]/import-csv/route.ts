@@ -74,12 +74,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (!nom || !prenom) { skipped++; continue; }
 
       try {
-        const count = await prisma.marathonParticipant.count({ where: { marathonId } });
-        const numeroId = formatNumeroId(marathonId, count + 1);
         const qrToken = generateQrToken();
-
-        const participant = await prisma.marathonParticipant.create({
-          data: { marathonId, nom, prenom, email: email || null, numeroId, qrToken },
+        const participant = await prisma.$transaction(async (tx) => {
+          const count = await tx.marathonParticipant.count({ where: { marathonId } });
+          const numeroId = formatNumeroId(marathonId, count + 1);
+          return tx.marathonParticipant.create({
+            data: { marathonId, nom, prenom, email: email || null, numeroId, qrToken },
+          });
         });
 
         if (elapsedDays.length > 0) {

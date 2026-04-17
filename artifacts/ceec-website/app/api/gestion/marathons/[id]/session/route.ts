@@ -26,12 +26,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const marathonId = parseInt(id, 10);
 
+  const marathon = await prisma.marathon.findFirst({
+    where: { id: marathonId, ...(superAdmin || !egliseId ? {} : { egliseId }) },
+  });
+  if (!marathon) return NextResponse.json({ error: "Marathon introuvable" }, { status: 404 });
+
   const today = toDateString(new Date());
   const todayStart = new Date(today);
   const todayEnd = new Date(todayStart.getTime() + 86400000);
 
   const session = await prisma.marathonSession.findFirst({
-    where: { marathonId, date: { gte: todayStart, lt: todayEnd } },
+    where: { marathonId: marathon.id, date: { gte: todayStart, lt: todayEnd } },
   });
 
   return NextResponse.json({ session: session ?? null, today });
@@ -105,12 +110,17 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id } = await params;
   const marathonId = parseInt(id, 10);
 
+  const marathon = await prisma.marathon.findFirst({
+    where: { id: marathonId, ...(superAdmin || !egliseId ? {} : { egliseId }) },
+  });
+  if (!marathon) return NextResponse.json({ error: "Marathon introuvable" }, { status: 404 });
+
   const today = toDateString(new Date());
   const todayStart = new Date(today);
   const todayEnd = new Date(todayStart.getTime() + 86400000);
 
   await prisma.marathonSession.deleteMany({
-    where: { marathonId, date: { gte: todayStart, lt: todayEnd } },
+    where: { marathonId: marathon.id, date: { gte: todayStart, lt: todayEnd } },
   });
 
   return NextResponse.json({ ok: true });

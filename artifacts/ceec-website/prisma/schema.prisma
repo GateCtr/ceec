@@ -331,7 +331,7 @@ model Marathon {
   referenceBiblique String?  @map("reference_biblique") @db.VarChar(255)
   dateDebut         DateTime @map("date_debut") @db.Date
   nombreJours       Int      @map("nombre_jours")
-  joursExclus       Int[]    @map("jours_exclus")
+  joursExclus       String[] @map("jours_exclus")
   statut            String   @default("ouvert") @db.VarChar(20)
   logoUrl           String?  @map("logo_url")
   denomination      String?  @db.VarChar(255)
@@ -342,6 +342,7 @@ model Marathon {
   participants      MarathonParticipant[]
   presences         MarathonPresence[]
   sessions          MarathonSession[]
+  jours             MarathonJour[]
 
   @@index([egliseId])
   @@map("marathons")
@@ -383,6 +384,22 @@ model MarathonPresence {
   @@unique([participantId, numeroJour])
   @@index([marathonId, numeroJour])
   @@map("marathon_presences")
+}
+
+model MarathonJour {
+  id            Int      @id @default(autoincrement())
+  marathonId    Int      @map("marathon_id")
+  numeroJour    Int      @map("numero_jour")
+  date          DateTime @db.Date
+  statut        String   @default("ouvert") @db.VarChar(20)
+  totalPresents Int      @default(0) @map("total_presents")
+  cloture       Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  marathon      Marathon @relation(fields: [marathonId], references: [id], onDelete: Cascade)
+
+  @@unique([marathonId, numeroJour])
+  @@index([marathonId])
+  @@map("marathon_jours")
 }
 
 model MarathonSession {

@@ -36,8 +36,13 @@ declare global {
   }
 }
 
+interface ScannedEntry {
+  participant: { nom: string; prenom: string; numeroId: string };
+  scannedAt: string | null;
+}
+
 export default function MarathonScanClient({ marathonId }: { marathonId: number }) {
-  const [phase, setPhase] = useState<"setup" | "ready" | "scanning">("setup");
+  const [phase, setPhase] = useState<"setup" | "join" | "ready" | "scanning">("setup");
   const [hasBarcodeDetector, setHasBarcodeDetector] = useState<boolean | null>(null);
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const [nomControleur, setNomControleur] = useState("");
@@ -49,11 +54,15 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [presents, setPresents] = useState(0);
+  const [scannedList, setScannedList] = useState<ScannedEntry[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scanningRef = useRef(false);
   const lastScannedRef = useRef<string>("");
   const lastScannedTimeRef = useRef<number>(0);
+  const codeAccesRef = useRef<string>("");
+
+  const storageKey = `marathon_code_${marathonId}`;
 
   const fetchSessionInfo = useCallback(async () => {
     const res = await fetch(`/api/marathons/${marathonId}/session`);
@@ -62,14 +71,22 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
       setSessionInfo(data);
       if (data.valid) {
         setPresents(data.presents ?? 0);
-        setPhase("scanning");
+        const storedCode = typeof window !== "undefined"
+          ? sessionStorage.getItem(storageKey) : null;
+        if (storedCode) {
+          setCodeAcces(storedCode);
+          codeAccesRef.current = storedCode;
+          setPhase("scanning");
+        } else {
+          setPhase("join");
+        }
       } else if (data.requiresSetup) {
         setPhase("setup");
       }
     } else {
       setError("Marathon introuvable ou pas de session aujourd'hui");
     }
-  }, [marathonId]);
+  }, [marathonId, storageKey]);
 
   useEffect(() => {
     fetchSessionInfo();
@@ -89,7 +106,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
     });
     if (res.ok) {
       const data = await res.json();
-      setCodeAcces(data.session.codeAcces);
+      const code = data.session.codeAcces;
+      setCodeAcces(code);
+      codeAccesRef.current = code;
+      if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
       await fetchSessionInfo();
       setPhase("ready");
     } else {
@@ -100,14 +120,17 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   };
 
   const handleJoinSession = async () => {
-    if (!inputCode.trim()) { setError("Entrez le code d'accès"); return; }
+    const code = inputCode.trim().toUpperCase();
+    if (!code) { setError("Entrez le code d'accès"); return; }
     setLoading(true); setError("");
-    const res = await fetch(`/api/marathons/${marathonId}/session?code=${inputCode.toUpperCase()}`);
+    const res = await fetch(`/api/marathons/${marathonId}/session?code=${code}`);
     if (res.ok) {
       const data = await res.json();
       if (data.valid) {
         setSessionInfo(data);
-        setCodeAcces(inputCode.toUpperCase());
+        setCodeAcces(code);
+        codeAccesRef.current = code;
+        if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
         setNomControleur(nomControleur || data.session?.nomControleur || "");
         setPresents(data.presents ?? 0);
         setPhase("scanning");
@@ -120,15 +143,33 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
     setLoading(false);
   };
 
+  const fetchScannedList = useCallback(async () => {
+    const code = codeAccesRef.current;
+    if (!code) return;
+    const res = await fetch(`/api/marathons/${marathonId}/scan?code=${code}`);
+    if (res.ok) {
+      const data = await res.json();
+      setScannedList((data.presences ?? []).slice(0, 20));
+    }
+  }, [marathonId]);
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
+    fetchScannedList();
+    const interval = setInterval(fetchScannedList, 8000);
+    return () => clearInterval(interval);
+  }, [phase, fetchScannedList]);
+
   const sendScan = useCallback(async (token: string, isManual = false) => {
     const now = Date.now();
     if (token === lastScannedRef.current && now - lastScannedTimeRef.current < 3000) return;
     lastScannedRef.current = token;
     lastScannedTimeRef.current = now;
 
+    const currentCode = codeAccesRef.current || codeAcces || inputCode.toUpperCase();
     const body = isManual
-      ? { numeroId: token, codeAcces: codeAcces || inputCode.toUpperCase(), nomControleur }
-      : { qrToken: token, codeAcces: codeAcces || inputCode.toUpperCase(), nomControleur };
+      ? { numeroId: token, codeAcces: currentCode, nomControleur }
+      : { qrToken: token, codeAcces: currentCode, nomControleur };
 
     const res = await fetch(`/api/marathons/${marathonId}/scan`, {
       method: "POST",
@@ -246,6 +287,38 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
       </div>
 
       <div style={{ flex: 1, padding: "1.5rem", maxWidth: 480, margin: "0 auto", width: "100%" }}>
+
+        {/* ── Join Phase (session exists, no code cached) ── */}
+        {phase === "join" && (
+          <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "1.75rem" }}>
+            <h2 style={{ color: "white", fontWeight: 700, fontSize: 18, marginBottom: 6 }}>Session en cours</h2>
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginBottom: "1.5rem" }}>
+              Une session est déjà ouverte pour aujourd&apos;hui. Entrez le code d&apos;accès pour rejoindre.
+            </p>
+            {error && <div style={{ background: "#fef2f2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 13 }}>{error}</div>}
+            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Code d&apos;accès du jour</label>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <input
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinSession()}
+                placeholder="ex: A1B2C3"
+                maxLength={8}
+                style={{ flex: 1, padding: "12px 14px", borderRadius: 10, border: "none", fontSize: 16, fontFamily: "monospace", letterSpacing: "0.15em", outline: "none", boxSizing: "border-box" }}
+              />
+              <button onClick={handleJoinSession} disabled={loading} style={{ padding: "12px 18px", background: GOLD, color: "white", border: "none", borderRadius: 10, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer" }}>
+                {loading ? "..." : "Rejoindre"}
+              </button>
+            </div>
+            <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Votre nom (optionnel)</label>
+            <input
+              value={nomControleur}
+              onChange={(e) => setNomControleur(e.target.value)}
+              placeholder="ex: Frère Joël"
+              style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "none", fontSize: 14, marginBottom: 0, boxSizing: "border-box", outline: "none" }}
+            />
+          </div>
+        )}
 
         {/* ── Setup Phase ── */}
         {phase === "setup" && sessionInfo?.requiresSetup && (
@@ -382,7 +455,7 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
             )}
 
             {/* Counter */}
-            <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "1rem", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "1rem", display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <Users size={20} color={GOLD} />
               <div>
                 <div style={{ color: "white", fontWeight: 700, fontSize: 18 }}>{presents} présents</div>
@@ -391,12 +464,35 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
                 </div>
               </div>
               <button
-                onClick={fetchSessionInfo}
+                onClick={() => { fetchSessionInfo(); fetchScannedList(); }}
                 style={{ marginLeft: "auto", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "7px 12px", color: "rgba(255,255,255,0.7)", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12 }}
               >
                 <RefreshCw size={13} /> Actualiser
               </button>
             </div>
+
+            {/* Real-time scanned list */}
+            {scannedList.length > 0 && (
+              <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+                  <CheckCircle size={14} color="#22c55e" />
+                  <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 600 }}>Derniers scans du jour</span>
+                </div>
+                {scannedList.map((entry, i) => (
+                  <div key={i} style={{ padding: "9px 14px", borderBottom: i < scannedList.length - 1 ? "1px solid rgba(255,255,255,0.05)" : undefined, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ color: "white", fontSize: 13, fontWeight: 600 }}>{entry.participant.prenom} {entry.participant.nom}</span>
+                      <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginLeft: 6 }}>{entry.participant.numeroId}</span>
+                    </div>
+                    {entry.scannedAt && (
+                      <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>
+                        {new Date(entry.scannedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -11,7 +11,7 @@ const GOLD = "#c59b2e";
 interface Marathon {
   id: number; titre: string; theme: string | null; referenceBiblique: string | null;
   dateDebut: string; dateFin: string; nombreJours: number; statut: string;
-  denomination: string; logoUrl: string | null; joursExclus: number[];
+  denomination: string; logoUrl: string | null; joursExclus: string[];
 }
 interface Participant {
   id: number; nom: string; prenom: string; email: string | null; numeroId: string; qrToken: string;

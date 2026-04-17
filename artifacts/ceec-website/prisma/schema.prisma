@@ -38,6 +38,7 @@ model Eglise {
   membres       Membre[]
   userRoles     UserRole[]
   activityLogs  ActivityLog[]
+  marathons     Marathon[]
 
   @@map("paroisses")
 }
@@ -135,6 +136,7 @@ model Membre {
   annonces          Annonce[]
   eglise            Eglise?         @relation(fields: [egliseId], references: [id])
   participations    Participation[]
+  marathonParticipations MarathonParticipant[]
 
   @@unique([clerkUserId, egliseId], name: "membre_clerk_eglise_unique")
   @@index([clerkUserId])
@@ -317,4 +319,83 @@ model ActivityLog {
   @@index([acteurId, createdAt(sort: Desc)])
   @@index([entiteType, action])
   @@map("activity_logs")
+}
+
+// ── Module Marathon ───────────────────────────────────────────────────────────
+
+model Marathon {
+  id                Int      @id @default(autoincrement())
+  egliseId          Int      @map("eglise_id")
+  titre             String   @db.VarChar(255)
+  theme             String?  @db.VarChar(500)
+  referenceBiblique String?  @map("reference_biblique") @db.VarChar(255)
+  dateDebut         DateTime @map("date_debut") @db.Date
+  nombreJours       Int      @map("nombre_jours")
+  joursExclus       Int[]    @map("jours_exclus")
+  statut            String   @default("ouvert") @db.VarChar(20)
+  logoUrl           String?  @map("logo_url")
+  denomination      String?  @db.VarChar(255)
+  createdByUserId   String   @map("created_by_user_id") @db.VarChar(255)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+  eglise            Eglise   @relation(fields: [egliseId], references: [id], onDelete: Cascade)
+  participants      MarathonParticipant[]
+  presences         MarathonPresence[]
+  sessions          MarathonSession[]
+
+  @@index([egliseId])
+  @@map("marathons")
+}
+
+model MarathonParticipant {
+  id              Int      @id @default(autoincrement())
+  marathonId      Int      @map("marathon_id")
+  membreId        Int?     @map("membre_id")
+  nom             String   @db.VarChar(100)
+  prenom          String   @db.VarChar(100)
+  email           String?  @db.VarChar(255)
+  numeroId        String   @map("numero_id") @db.VarChar(20)
+  qrToken         String   @unique @map("qr_token") @db.VarChar(255)
+  dateInscription DateTime @default(now()) @map("date_inscription")
+  marathon        Marathon @relation(fields: [marathonId], references: [id], onDelete: Cascade)
+  membre          Membre?  @relation(fields: [membreId], references: [id], onDelete: SetNull)
+  presences       MarathonPresence[]
+
+  @@unique([marathonId, membreId])
+  @@unique([marathonId, numeroId])
+  @@index([marathonId])
+  @@map("marathon_participants")
+}
+
+model MarathonPresence {
+  id            Int       @id @default(autoincrement())
+  participantId Int       @map("participant_id")
+  marathonId    Int       @map("marathon_id")
+  numeroJour    Int       @map("numero_jour")
+  date          DateTime  @db.Date
+  statut        String    @default("absent") @db.VarChar(20)
+  scanneParNom  String?   @map("scanne_par_nom") @db.VarChar(255)
+  scanneParId   String?   @map("scanne_par_id") @db.VarChar(255)
+  scannedAt     DateTime? @map("scanned_at")
+  participant   MarathonParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  marathon      Marathon  @relation(fields: [marathonId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, numeroJour])
+  @@index([marathonId, numeroJour])
+  @@map("marathon_presences")
+}
+
+model MarathonSession {
+  id            Int      @id @default(autoincrement())
+  marathonId    Int      @map("marathon_id")
+  date          DateTime @db.Date
+  numeroJour    Int      @map("numero_jour")
+  codeAcces     String   @map("code_acces") @db.VarChar(20)
+  nomControleur String?  @map("nom_controleur") @db.VarChar(255)
+  createdAt     DateTime @default(now()) @map("created_at")
+  marathon      Marathon @relation(fields: [marathonId], references: [id], onDelete: Cascade)
+
+  @@unique([marathonId, date])
+  @@index([marathonId])
+  @@map("marathon_sessions")
 }

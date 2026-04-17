@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { Menu, LucideIcon, LayoutDashboard, Church, Users, Megaphone, CalendarDays, ScrollText, Settings, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock } from "lucide-react";
+import { Menu, LucideIcon, LayoutDashboard, Church, Users, Megaphone, CalendarDays, ScrollText, Settings, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock, Trophy } from "lucide-react";
 import type { NavItem, IconName } from "./DashboardSidebar";
 
 const ICON_MAP: Record<IconName, LucideIcon> = {
@@ -20,6 +20,7 @@ const ICON_MAP: Record<IconName, LucideIcon> = {
   palette: Palette,
   video: Video,
   lock: Lock,
+  trophy: Trophy,
 };
 
 interface Props {

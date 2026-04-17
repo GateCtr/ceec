@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { Menu, LayoutDashboard, Church, Users, Settings, ScrollText, Megaphone, CalendarDays, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock, LucideIcon } from "lucide-react";
+import { Menu, LayoutDashboard, Church, Users, Settings, ScrollText, Megaphone, CalendarDays, Shield, UserCog, FileText, MessageSquare, Palette, Video, Lock, Trophy, LucideIcon } from "lucide-react";
 import DashboardSidebar, { type NavItem, type IconName } from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
 
@@ -23,6 +23,7 @@ const BOTTOM_NAV_ICON_MAP: Record<IconName, LucideIcon> = {
   palette: Palette,
   video: Video,
   lock: Lock,
+  trophy: Trophy,
 };
 
 interface Props {

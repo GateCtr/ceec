@@ -21,6 +21,7 @@ import {
   Palette,
   Video,
   Lock,
+  Trophy,
 } from "lucide-react";
 
 export type IconName =
@@ -37,7 +38,8 @@ export type IconName =
   | "message"
   | "palette"
   | "video"
-  | "lock";
+  | "lock"
+  | "trophy";
 
 const ICON_MAP: Record<IconName, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -54,6 +56,7 @@ const ICON_MAP: Record<IconName, LucideIcon> = {
   palette: Palette,
   video: Video,
   lock: Lock,
+  trophy: Trophy,
 };
 
 export interface NavItem {

@@ -76,6 +76,23 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `GET/PUT /api/gestion/config` — EgliseConfig upsert
 - `GET/POST /api/gestion/videos` — LiveStream CRUD (permission: `eglise_gerer_annonces`)
 - `PUT/DELETE /api/gestion/videos/[id]`
+- `GET/POST /api/gestion/marathons` — Marathon CRUD (permission: `eglise_creer_evenement`)
+- `GET/PATCH/DELETE /api/gestion/marathons/[id]`
+- `GET/POST /api/gestion/marathons/[id]/participants` — Participant management
+- `POST /api/gestion/marathons/[id]/import-csv` — Bulk CSV import
+- `GET /api/gestion/marathons/[id]/stats` — Presence statistics by day
+- `POST /api/gestion/marathons/[id]/cloturer-journee` — Mark absent all non-scanned for a day
+- `GET /api/gestion/marathons/[id]/badge/[participantId]` — Badge data with QR data URL (no auth)
+
+#### API Routes — Public Marathon (no auth required)
+- `GET /api/marathons/[id]/session` — Get today's session info (or setup required)
+- `POST /api/marathons/[id]/session` — Create/update today's session with access code
+- `POST /api/marathons/[id]/scan` — Record QR scan attendance (requires access code)
+- `GET /api/marathons/[id]/scan` — List today's presences (requires access code)
+
+#### API Routes — Member Marathon
+- `POST /api/membre/marathons/[id]/inscrire` — Self-register as participant
+- `DELETE /api/membre/marathons/[id]/inscrire` — Self-unregister
 
 #### RBAC System (`lib/auth/rbac.ts`)
 - 9 roles: `super_admin`, `admin_eglise`, `moderateur`, `secretaire`, `tresorier`, `diacre`, `ancien`, `responsable_dept`, `fidele`
@@ -94,6 +111,24 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `Role` — Role registry (nom)
 - `Annonce` — Announcements (titre, contenu, imageUrl, videoUrl, categorie, priorite, publie, dateExpiration, visibilite)
 - `Evenement` — Events (titre, description, imageUrl, videoUrl, categorie, lienInscription, dateDebut, dateFin, lieu, publie, visibilite)
+- `Marathon` — Multi-day spiritual retreat (egliseId, titre, theme, referenceBiblique, dateDebut, nombreJours, joursExclus[], statut, denomination, createdByUserId)
+- `MarathonParticipant` — Marathon participant with QR token (marathonId, membreId?, nom, prenom, email, numeroId, qrToken)
+- `MarathonPresence` — Daily attendance record (participantId, marathonId, numeroJour, date, statut, scanneParNom, scannedAt)
+- `MarathonSession` — Daily volunteer session (marathonId, date, numeroJour, codeAcces, nomControleur)
+
+#### Marathon System Pages
+- `/gestion/marathons` — Admin list with create modal, status toggle, delete
+- `/gestion/marathons/[id]` — Detail dashboard: participants table, stats by day, CSV import, config
+- `/c/marathons` — Member list of marathons with self-registration
+- `/c/marathons/[id]` — Member detail: QR badge card, print button, personal presence tracking
+- `/marathon-scan/[id]` — Public volunteer scan interface (no auth, camera QR + manual, access code system)
+
+#### Marathon Utilities (`lib/marathon-utils.ts`)
+- `computeMarathonDays(dateDebut, nombreJours, joursExclus)` — Compute actual calendar days (skipping excluded days)
+- `getMarathonDayNumber(dateDebut, nombreJours, joursExclus, targetDate)` — Day number for a given date
+- `generateQrToken()` — 24-byte hex unique token
+- `formatNumeroId(marathonId, seq)` — Format "M1-001" style ID
+- `generateAccessCode()` — 6-char hex uppercase code for daily sessions
 
 #### Key Components
 - `components/church/SectionRenderer.tsx` — Dispatches to 8 section type components

@@ -23,6 +23,8 @@ const CHURCH_REWRITE_BYPASS_PATHS = [
   "/api/admin",
   "/api/auth",
   "/api/setup",
+  "/marathon-scan",
+  "/api/marathons",
 ];
 
 function extractChurchSlug(req: Request): string | null {
@@ -118,6 +120,7 @@ const isPublicRoute = createRouteMatcher([
   "/setup(.*)",
   "/c(.*)",
   "/eglise-introuvable(.*)",
+  "/marathon-scan(.*)",
   "/api/paroisses(.*)",
   "/api/annonces(.*)",
   "/api/evenements(.*)",
@@ -125,6 +128,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/setup(.*)",
   "/api/church(.*)",
   "/api/webhooks/(.*)",
+  "/api/marathons(.*)",
   // Routes qui gèrent leur propre auth en interne
   "/api/me(.*)",
 ]);
@@ -177,7 +181,8 @@ export default clerkMiddleware(async (auth, req) => {
     url.pathname.startsWith("/c") ||
     url.pathname === "/gestion" ||
     url.pathname.startsWith("/gestion/") ||
-    url.pathname.startsWith("/api/gestion");
+    url.pathname.startsWith("/api/gestion") ||
+    url.pathname.startsWith("/marathon-scan");
 
   if (churchSlug && isChurchNativePrefix) {
     const baseUrl = `${url.protocol}//${url.host}`;

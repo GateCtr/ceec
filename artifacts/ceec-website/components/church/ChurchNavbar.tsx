@@ -37,6 +37,7 @@ export default function ChurchNavbar({
     { href: "/c", label: "Accueil" },
     { href: "/c/annonces", label: "Annonces" },
     { href: "/c/evenements", label: "Événements" },
+    { href: "/c/marathons", label: "Marathons" },
   ];
 
   const customLinks = pages.map((p) => ({

@@ -65,6 +65,7 @@ export default async function GestionLayout({
     ...(superAdmin || pContenus ? [
       { label: "Annonces", href: "/gestion/annonces", icon: "megaphone" },
       { label: "Événements", href: "/gestion/evenements", icon: "calendar" },
+      { label: "Marathons", href: "/gestion/marathons", icon: "trophy" },
     ] : []),
     ...(canParametres ? [
       { label: "Pages", href: "/gestion/pages", icon: "file-text" },

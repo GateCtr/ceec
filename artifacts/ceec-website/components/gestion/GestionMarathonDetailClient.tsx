@@ -7,6 +7,7 @@ import {
   Plus, Search, Download, CheckCircle, XCircle, X,
   Calendar, Link as LinkIcon, Copy, ClipboardList, Star, Play
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const PRIMARY = "#1e3a8a";
 const GOLD = "#c59b2e";
@@ -49,6 +50,9 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [saveMsg, setSaveMsg] = useState("");
   const [openingSession, setOpeningSession] = useState(false);
   const [sessionMsg, setSessionMsg] = useState<{ text: string; color: string; code?: string } | null>(null);
+  const [selectedJour, setSelectedJour] = useState<number | null>(null);
+  const [absentsDuJour, setAbsentsDuJour] = useState<{ id: number; nom: string; prenom: string; numeroId: string }[]>([]);
+  const [loadingAbsents, setLoadingAbsents] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
@@ -143,6 +147,16 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const copyScanLink = () => {
     const url = `${window.location.origin}/marathon-scan/${marathonId}`;
     navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  const fetchAbsentsDuJour = async (jour: number) => {
+    setSelectedJour(jour); setLoadingAbsents(true);
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/stats?jour=${jour}`, { headers: headers() });
+    if (res.ok) {
+      const data = await res.json();
+      setAbsentsDuJour(data.absentsDuJour ?? []);
+    }
+    setLoadingAbsents(false);
   };
 
   const handleOpenSession = async () => {
@@ -339,7 +353,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       {tab === "stats" && stats && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: PRIMARY }}>Présence par jour</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: PRIMARY }}>Taux de présence par jour</h3>
             <button
               onClick={() => window.open(`/api/gestion/marathons/${marathonId}/badges-planche?egliseId=${egliseId}`, "_blank")}
               style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }), fontSize: 12 }}
@@ -347,18 +361,51 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
               <Download size={13} /> Planche badges (PDF)
             </button>
           </div>
-          <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden", marginBottom: 24 }}>
+
+          {/* ── Recharts bar chart ── */}
+          {stats.byDay.filter((d) => d.isPast).length > 0 && (
+            <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, padding: "1.25rem", marginBottom: 20 }}>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={stats.byDay.filter((d) => d.isPast)} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="jour" tickFormatter={(v: number) => `J${v}`} tick={{ fontSize: 11, fill: "#6b7280" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} domain={[0, 100]} unit="%" />
+                  <Tooltip
+                    formatter={(value) => [`${value}%`, "Taux présence"]}
+                    labelFormatter={(label) => `Jour ${label}`}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  />
+                  <Bar dataKey="tauxPresence" name="Taux présence" radius={[4, 4, 0, 0]}
+                    fill={PRIMARY}
+                    label={{ position: "top", fontSize: 10, fill: "#374151", formatter: (v: unknown) => `${v}%` }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 8 }}>
+                <span style={{ fontSize: 11, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: PRIMARY, display: "inline-block" }} /> Taux de présence (%)
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Day table ── */}
+          <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden", marginBottom: 20 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
               <thead>
                 <tr style={{ background: "#f9fafb" }}>
-                  {["Jour", "Date", "Présents", "Absents", "Taux", "Rapport"].map((h) => (
+                  {["Jour", "Date", "Présents", "Absents", "Taux", "Actions"].map((h) => (
                     <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: "#6b7280", fontWeight: 600, fontSize: 12, textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {stats.byDay.map((d, i) => (
-                  <tr key={d.jour} style={{ borderTop: "1px solid #f3f4f6", background: i % 2 === 0 ? "white" : "#fafafa", opacity: d.isPast ? 1 : 0.5 }}>
+                  <tr
+                    key={d.jour}
+                    style={{ borderTop: "1px solid #f3f4f6", background: selectedJour === d.jour ? "#eff6ff" : i % 2 === 0 ? "white" : "#fafafa", opacity: d.isPast ? 1 : 0.45, cursor: d.isPast ? "pointer" : "default", transition: "background 0.15s" }}
+                    onClick={() => d.isPast && fetchAbsentsDuJour(d.jour)}
+                    title={d.isPast ? "Cliquer pour voir les absents" : undefined}
+                  >
                     <td style={{ padding: "10px 14px", fontWeight: 700, color: PRIMARY }}>J{d.jour}</td>
                     <td style={{ padding: "10px 14px", color: "#6b7280" }}>{formatDate(d.date)}</td>
                     <td style={{ padding: "10px 14px" }}>
@@ -382,7 +429,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                     <td style={{ padding: "10px 14px" }}>
                       {d.isPast && (
                         <button
-                          onClick={() => window.open(`/api/gestion/marathons/${marathonId}/rapport-jour?jour=${d.jour}&egliseId=${egliseId}`, "_blank")}
+                          onClick={(e) => { e.stopPropagation(); window.open(`/api/gestion/marathons/${marathonId}/rapport-jour?jour=${d.jour}&egliseId=${egliseId}`, "_blank"); }}
                           style={{ padding: "4px 10px", background: "#eff6ff", color: PRIMARY, border: "1px solid #bfdbfe", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
                         >
                           <Download size={11} /> PDF
@@ -394,6 +441,35 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
               </tbody>
             </table>
           </div>
+
+          {/* ── Absents du jour panel ── */}
+          {selectedJour !== null && (
+            <div style={{ background: "#fef2f2", border: "1.5px solid #fecaca", borderRadius: 12, padding: "1.25rem", marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "#b91c1c", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                  <XCircle size={16} /> Absents – Jour {selectedJour} ({loadingAbsents ? "..." : absentsDuJour.length})
+                </h3>
+                <button onClick={() => { setSelectedJour(null); setAbsentsDuJour([]); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}><X size={14} /></button>
+              </div>
+              {loadingAbsents ? (
+                <div style={{ color: "#9ca3af", fontSize: 13 }}>Chargement...</div>
+              ) : absentsDuJour.length === 0 ? (
+                <div style={{ color: "#6b7280", fontSize: 13 }}>Aucun absent enregistré pour ce jour.</div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 8 }}>
+                  {absentsDuJour.map((p) => (
+                    <div key={p.id} style={{ background: "white", border: "1px solid #fecaca", borderRadius: 8, padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                      <XCircle size={14} color="#ef4444" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontWeight: 600, color: "#374151", fontSize: 13 }}>{p.prenom} {p.nom}</div>
+                        <div style={{ fontSize: 11, color: "#b91c1c", fontFamily: "monospace" }}>{p.numeroId}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {stats.sansFaute.length > 0 && (
             <>

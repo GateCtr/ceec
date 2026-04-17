@@ -84,9 +84,12 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `POST /api/gestion/marathons/[id]/cloturer-journee` — Mark absent all non-scanned for a day
 - `GET /api/gestion/marathons/[id]/badge/[participantId]` — Badge data with QR data URL (no auth)
 
+#### API Routes — Admin Marathon Session (auth + RBAC required)
+- `GET/POST/DELETE /api/gestion/marathons/[id]/session` — Open/query/delete today's scan session (admin-only, returns `codeAcces`)
+
 #### API Routes — Public Marathon (no auth required)
-- `GET /api/marathons/[id]/session` — Get today's session info (or setup required)
-- `POST /api/marathons/[id]/session` — Create/update today's session with access code
+- `GET /api/marathons/[id]/session` — Get today's session info (or `requiresSetup` flag if none open)
+- `POST /api/marathons/[id]/session` — **Join-only**: join existing session with correct `codeAcces`; returns 404 `noSession` if not opened by admin yet; returns 403 `requiresCode` on wrong code. Session creation is admin-only.
 - `POST /api/marathons/[id]/scan` — Record QR scan attendance (requires access code)
 - `GET /api/marathons/[id]/scan` — List today's presences (requires access code)
 
@@ -118,8 +121,8 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `MarathonSession` — Daily volunteer session (marathonId, date, numeroJour, codeAcces, nomControleur)
 
 #### Marathon System Pages
-- `/gestion/marathons` — Admin list with create modal, status toggle, delete
-- `/gestion/marathons/[id]` — Detail dashboard: participants table, stats by day, CSV import, config
+- `/gestion/marathons` — Admin list with inline create modal (no `/gestion/marathons/nouveau` sub-route; creation is handled via modal on the list page for UX simplicity)
+- `/gestion/marathons/[id]` — Detail dashboard: Recharts bar chart + day table + absents-du-jour panel (click a past day row), "Ouvrir session du jour" button, CSV import, config
 - `/c/marathons` — Member list of marathons with self-registration
 - `/c/marathons/[id]` — Member detail: QR badge card, print button, personal presence tracking
 - `/marathon-scan/[id]` — Public volunteer scan interface (no auth, camera QR + manual, access code system)

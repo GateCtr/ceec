@@ -35,6 +35,7 @@
     "qrcode": "^1.5.4",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "recharts": "^2.15.4",
     "resend": "^6.10.0",
     "svix": "^1.90.0",
     "zod": "catalog:"

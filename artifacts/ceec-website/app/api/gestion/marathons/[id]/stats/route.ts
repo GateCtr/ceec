@@ -34,6 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const allDays = computeMarathonDays(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);
     const today = toDateString(new Date());
     const elapsedDays = allDays.filter((d) => toDateString(d) <= today);
+    const closedDays = allDays.filter((d) => toDateString(d) < today);
 
     const [totalParticipants, presences] = await Promise.all([
       prisma.marathonParticipant.count({ where: { marathonId } }),
@@ -57,13 +58,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const sansFaute = await prisma.marathonParticipant.findMany({
       where: { marathonId },
-      include: { presences: { where: { statut: "absent" } } },
+      include: {
+        presences: {
+          where: {
+            statut: "absent",
+            date: closedDays.length > 0
+              ? { lte: new Date(closedDays[closedDays.length - 1]) }
+              : undefined,
+          },
+        },
+      },
     });
     const sansFauteList = sansFaute
       .filter((p) => {
-        const nbJoursEcoules = elapsedDays.length;
-        const nbAbsences = p.presences.filter((pr) => pr.statut === "absent").length;
-        return nbJoursEcoules > 0 && nbAbsences === 0;
+        return closedDays.length > 0 && p.presences.length === 0;
       })
       .map((p) => ({ id: p.id, nom: p.nom, prenom: p.prenom, numeroId: p.numeroId }));
 

@@ -5,6 +5,26 @@ import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 import { generateQrToken, formatNumeroId, getElapsedDayNumbers, computeMarathonDays } from "@/lib/marathon-utils";
 
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (ch === "," && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 async function getEgliseId(req: NextRequest): Promise<number | null> {
   const h = req.headers.get("x-eglise-id");
   if (!h) return null;
@@ -49,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const eglise = await prisma.eglise.findUnique({ where: { id: resolvedEgliseId }, select: { nom: true } });
 
     for (const line of dataLines) {
-      const parts = line.split(",").map((s) => s.trim().replace(/^"|"$/g, ""));
+      const parts = parseCsvLine(line);
       const [nom, prenom, email] = parts;
       if (!nom || !prenom) { skipped++; continue; }
 

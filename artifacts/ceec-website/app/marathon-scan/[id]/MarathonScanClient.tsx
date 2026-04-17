@@ -122,23 +122,24 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   const handleJoinSession = async () => {
     const code = inputCode.trim().toUpperCase();
     if (!code) { setError("Entrez le code d'accès"); return; }
+    if (!nomControleur.trim()) { setError("Veuillez entrer votre nom"); return; }
     setLoading(true); setError("");
-    const res = await fetch(`/api/marathons/${marathonId}/session?code=${code}`);
+    const res = await fetch(`/api/marathons/${marathonId}/session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nomControleur: nomControleur.trim(), codeAcces: code }),
+    });
     if (res.ok) {
       const data = await res.json();
-      if (data.valid) {
-        setSessionInfo(data);
-        setCodeAcces(code);
-        codeAccesRef.current = code;
-        if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
-        setNomControleur(nomControleur || data.session?.nomControleur || "");
-        setPresents(data.presents ?? 0);
-        setPhase("scanning");
-      } else {
-        setError("Code invalide");
-      }
+      setSessionInfo(data);
+      setCodeAcces(code);
+      codeAccesRef.current = code;
+      if (typeof window !== "undefined") sessionStorage.setItem(storageKey, code);
+      setPresents(data.presents ?? 0);
+      setPhase("scanning");
     } else {
-      setError("Code invalide ou session introuvable");
+      const d = await res.json().catch(() => ({}));
+      setError(d.error ?? "Code invalide ou session introuvable");
     }
     setLoading(false);
   };

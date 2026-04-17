@@ -302,7 +302,131 @@ export async function sendMarathonAlertEmail({
   return sendEmail(toArr, `⚠️ Alerte présence J${numeroJour} — ${marathonTitre}`, html);
 }
 
-// ─── Template 8 : Message de contact reçu ───────────────────────────────────
+// ─── Template 9 : Badge marathon par email ───────────────────────────────────
+
+export async function sendMarathonBadgeEmail({
+  to,
+  participantPrenom,
+  participantNom,
+  participantNumeroId,
+  participantQrToken,
+  marathonTitre,
+  marathonTheme,
+  marathonReferenceBiblique,
+  marathonDenomination,
+  marathonDateRange,
+}: {
+  to: string;
+  participantPrenom: string;
+  participantNom: string;
+  participantNumeroId: string;
+  participantQrToken: string;
+  marathonTitre: string;
+  marathonTheme?: string | null;
+  marathonReferenceBiblique?: string | null;
+  marathonDenomination: string;
+  marathonDateRange: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const QRCode = (await import("qrcode")).default;
+  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+
+  const qrDataUrl = await QRCode.toDataURL(participantQrToken, {
+    width: 200,
+    margin: 1,
+    color: { dark: "#1e3a8a", light: "#ffffff" },
+  });
+  const qrPngBuffer = Buffer.from(qrDataUrl.split(",")[1], "base64");
+
+  const PRIMARY_COLOR = rgb(30 / 255, 58 / 255, 138 / 255);
+  const GOLD_COLOR = rgb(197 / 255, 155 / 255, 46 / 255);
+  const WHITE_COLOR = rgb(1, 1, 1);
+  const mmToPt = (mm: number) => mm * 2.835;
+  const W = mmToPt(86);
+  const H = mmToPt(54);
+
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([W, H]);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontReg = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const qrImage = await pdfDoc.embedPng(qrPngBuffer);
+  const truncate = (s: string, max: number) => (s.length > max ? s.slice(0, max) + "\u2026" : s);
+
+  const headerH = mmToPt(16);
+  page.drawRectangle({ x: 0, y: H - headerH, width: W, height: headerH, color: PRIMARY_COLOR });
+  page.drawText(truncate(marathonDenomination, 38), { x: 6, y: H - 10, size: 6.5, font: fontBold, color: WHITE_COLOR });
+  page.drawText(truncate(marathonTitre, 42), { x: 6, y: H - 18, size: 5.5, font: fontReg, color: rgb(0.8, 0.85, 1) });
+  page.drawText(marathonDateRange, { x: 6, y: H - 25, size: 4.5, font: fontReg, color: rgb(0.65, 0.7, 0.9) });
+
+  const qrSize = mmToPt(22);
+  const qrX = W - qrSize - 6;
+  const qrY = H - headerH - qrSize - 4;
+  page.drawRectangle({ x: qrX - 2, y: qrY - 2, width: qrSize + 4, height: qrSize + 4, color: GOLD_COLOR });
+  page.drawImage(qrImage, { x: qrX, y: qrY, width: qrSize, height: qrSize });
+
+  const nameY = qrY + qrSize - 4;
+  page.drawText(truncate(`${participantPrenom} ${participantNom}`, 22), { x: 6, y: nameY, size: 9, font: fontBold, color: PRIMARY_COLOR });
+  page.drawText(participantNumeroId, { x: 6, y: nameY - 13, size: 8, font: fontBold, color: GOLD_COLOR });
+  if (marathonReferenceBiblique) {
+    page.drawText(truncate(marathonReferenceBiblique, 28), { x: 6, y: nameY - 24, size: 5.5, font: fontReg, color: rgb(0.4, 0.4, 0.5) });
+  }
+  if (marathonTheme) {
+    page.drawText(truncate(marathonTheme, 30), { x: 6, y: nameY - 34, size: 5, font: fontReg, color: rgb(0.5, 0.5, 0.6) });
+  }
+  page.drawRectangle({ x: 0, y: 0, width: W, height: 2, color: GOLD_COLOR });
+  page.drawRectangle({ x: 0, y: H - 1, width: W, height: 1, color: GOLD_COLOR });
+
+  const pdfBytes = await pdfDoc.save();
+  const pdfBuffer = Buffer.from(pdfBytes);
+
+  const html = emailWrapper(
+    `Votre badge — ${marathonTitre}`,
+    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Bonjour <strong>${participantPrenom}</strong>,</p>` +
+    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Votre carte de participant pour le marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est jointe à cet email en format PDF.</p>` +
+    `<div style="background:#eff6ff;border-left:4px solid #1e3a8a;border-radius:8px;padding:14px 18px;margin:20px 0">` +
+    `<p style="color:#1e3a8a;font-size:14px;line-height:1.6;margin:0">` +
+    `<strong>N° de participant :</strong> ${participantNumeroId}<br>` +
+    `<strong>Période :</strong> ${marathonDateRange}` +
+    (marathonTheme ? `<br><strong>Thème :</strong> ${marathonTheme}` : "") +
+    `</p></div>` +
+    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Présentez le code QR figurant sur votre carte à l'entrée de chaque journée du marathon pour enregistrer votre présence.</p>` +
+    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Si vous avez des questions, contactez l'équipe organisatrice.</p>`
+  );
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log("=== BADGE EMAIL (Resend non configuré — console) ===");
+    console.log(`À : ${to} | Participant : ${participantPrenom} ${participantNom} (${participantNumeroId})`);
+    console.log("====================================================");
+    return { success: true };
+  }
+
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
+      from: "CEEC Platform <noreply@ceec.cd>",
+      to: [to],
+      subject: `Votre badge de participant — ${marathonTitre}`,
+      html,
+      attachments: [
+        {
+          filename: `badge-marathon-${participantNumeroId}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
+    });
+    if (error) {
+      console.error("Resend badge error:", error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error("Badge email send failed:", err);
+    return { success: false, error: String(err) };
+  }
+}
+
+// ─── Template 9 : Message de contact reçu ───────────────────────────────────
 
 export async function sendContactEmail({
   to,

@@ -6,7 +6,7 @@ import {
   Trophy, ArrowLeft, Users, BarChart3, Upload, Settings,
   Plus, Search, Download, CheckCircle, XCircle, X,
   Calendar, Link as LinkIcon, Copy, ClipboardList, Star, Play,
-  Radio, UserCheck, UserX, Clock, RefreshCw
+  Radio, UserCheck, UserX, Clock, RefreshCw, Mail, Send
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -70,6 +70,9 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [alertHistory, setAlertHistory] = useState<AlerteRecord[]>([]);
   const alertSentRef = useRef(false);
   const alerteSeuilRef = useRef(60);
+  const [sendingBadge, setSendingBadge] = useState<number | null>(null);
+  const [sendingAll, setSendingAll] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<{ text: string; color: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -294,6 +297,55 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       setSessionMsg({ text: data.error ?? "Impossible d'ouvrir la session", color: "#b91c1c" });
     }
     setOpeningSession(false);
+  };
+
+  const handleSendBadge = async (p: Participant) => {
+    if (!p.email) {
+      setEmailMsg({ text: `${p.prenom} ${p.nom} n'a pas d'adresse email.`, color: "#b91c1c" });
+      setTimeout(() => setEmailMsg(null), 4000);
+      return;
+    }
+    setSendingBadge(p.id);
+    setEmailMsg(null);
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/send-badge/${p.id}`, {
+      method: "POST",
+      headers: headers(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setEmailMsg({ text: `Badge envoyé à ${data.sentTo} ✓`, color: "#15803d" });
+    } else {
+      setEmailMsg({ text: data.error ?? "Erreur lors de l'envoi", color: "#b91c1c" });
+    }
+    setSendingBadge(null);
+    setTimeout(() => setEmailMsg(null), 5000);
+  };
+
+  const handleSendAllBadges = async () => {
+    const withEmail = participants.filter((p) => p.email).length;
+    if (withEmail === 0) {
+      setEmailMsg({ text: "Aucun participant n'a d'adresse email.", color: "#b91c1c" });
+      setTimeout(() => setEmailMsg(null), 4000);
+      return;
+    }
+    if (!confirm(`Envoyer le badge par email à ${withEmail} participant(s) ?`)) return;
+    setSendingAll(true);
+    setEmailMsg(null);
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/send-badges-all`, {
+      method: "POST",
+      headers: headers(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      const parts = [`${data.sent} envoyé(s)`];
+      if (data.failed > 0) parts.push(`${data.failed} échec(s)`);
+      if (data.noEmail > 0) parts.push(`${data.noEmail} sans email`);
+      setEmailMsg({ text: parts.join(" · ") + " ✓", color: data.failed > 0 ? "#92400e" : "#15803d" });
+    } else {
+      setEmailMsg({ text: data.error ?? "Erreur lors de l'envoi", color: "#b91c1c" });
+    }
+    setSendingAll(false);
+    setTimeout(() => setEmailMsg(null), 7000);
   };
 
   const filtered = participants.filter((p) =>
@@ -668,11 +720,21 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
               <button onClick={handlePrintAllBadges} style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }) }}>
                 <Download size={14} /> Planche badges
               </button>
+              <button onClick={handleSendAllBadges} disabled={sendingAll} style={{ ...btn({ background: sendingAll ? "#e5e7eb" : "#eff6ff", color: sendingAll ? "#9ca3af" : PRIMARY }) }}>
+                <Send size={14} /> {sendingAll ? "Envoi en cours…" : "Envoyer à tous"}
+              </button>
               <button onClick={() => setShowAddPart(true)} style={{ ...btn({ background: PRIMARY, color: "white" }) }}>
                 <Plus size={14} /> Ajouter
               </button>
             </div>
           </div>
+
+          {emailMsg && (
+            <div style={{ marginBottom: 14, padding: "10px 14px", borderRadius: 8, background: emailMsg.color === "#15803d" ? "#f0fdf4" : emailMsg.color === "#92400e" ? "#fffbeb" : "#fef2f2", color: emailMsg.color, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <span><Mail size={13} style={{ display: "inline", marginRight: 6 }} />{emailMsg.text}</span>
+              <button onClick={() => setEmailMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0 }}><X size={13} /></button>
+            </div>
+          )}
 
           {filtered.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem", color: "#9ca3af" }}>
@@ -710,12 +772,22 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                           </div>
                         </td>
                         <td style={{ padding: "10px 14px" }}>
-                          <button
-                            onClick={() => handlePrintBadge(p)}
-                            style={{ padding: "5px 10px", background: "#eff6ff", border: "none", borderRadius: 6, cursor: "pointer", color: PRIMARY, fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
-                          >
-                            <Download size={12} /> Badge PDF
-                          </button>
+                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                            <button
+                              onClick={() => handlePrintBadge(p)}
+                              style={{ padding: "5px 10px", background: "#eff6ff", border: "none", borderRadius: 6, cursor: "pointer", color: PRIMARY, fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
+                            >
+                              <Download size={12} /> Badge PDF
+                            </button>
+                            <button
+                              onClick={() => handleSendBadge(p)}
+                              disabled={sendingBadge === p.id}
+                              title={p.email ? `Envoyer à ${p.email}` : "Pas d'email"}
+                              style={{ padding: "5px 10px", background: p.email ? "#f0fdf4" : "#f9fafb", border: "none", borderRadius: 6, cursor: p.email ? "pointer" : "not-allowed", color: p.email ? "#15803d" : "#d1d5db", fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
+                            >
+                              <Mail size={12} /> {sendingBadge === p.id ? "…" : "Email"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

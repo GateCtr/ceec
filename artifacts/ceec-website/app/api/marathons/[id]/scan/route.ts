@@ -85,7 +85,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const presents = await prisma.marathonPresence.count({ where: { marathonId, numeroJour, statut: "present" } });
 
-    checkAndSendMarathonAlert(marathonId).catch(() => {});
+    await checkAndSendMarathonAlert(marathonId).catch((err) => {
+      console.error("[scan] alert check failed:", err);
+    });
 
     return NextResponse.json({
       ok: true,

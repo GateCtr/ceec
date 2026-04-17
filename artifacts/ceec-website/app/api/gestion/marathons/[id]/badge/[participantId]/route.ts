@@ -12,18 +12,53 @@ async function getEgliseId(req: NextRequest): Promise<number | null> {
   return isNaN(id) ? null : id;
 }
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string; participantId: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string; participantId: string }> }
+) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
     const { id, participantId } = await params;
     const marathonId = parseInt(id, 10);
     const pId = parseInt(participantId, 10);
 
+    const superAdmin = await isSuperAdmin(userId);
+    if (!superAdmin) {
+      const egliseId = await getEgliseId(req);
+      if (!egliseId) {
+        return NextResponse.json({ error: "Contexte église manquant" }, { status: 400 });
+      }
+      const allowed = await hasPermission(userId, "eglise_creer_evenement", egliseId);
+      if (!allowed) {
+        const membre = await prisma.membre.findFirst({
+          where: { clerkUserId: userId, egliseId },
+        });
+        if (!membre) {
+          return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+        }
+        const participantCheck = await prisma.marathonParticipant.findFirst({
+          where: { id: pId, marathonId, membreId: membre.id },
+        });
+        if (!participantCheck) {
+          return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+        }
+      }
+    }
+
     const participant = await prisma.marathonParticipant.findFirst({
       where: { id: pId, marathonId },
-      include: { marathon: { include: { eglise: { select: { nom: true, logoUrl: true } } } } },
+      include: {
+        marathon: { include: { eglise: { select: { nom: true, logoUrl: true } } } },
+      },
     });
 
-    if (!participant) return NextResponse.json({ error: "Participant introuvable" }, { status: 404 });
+    if (!participant) {
+      return NextResponse.json({ error: "Participant introuvable" }, { status: 404 });
+    }
 
     const marathon = participant.marathon;
     const allDays = computeMarathonDays(marathon.dateDebut, marathon.nombreJours, marathon.joursExclus);
@@ -41,7 +76,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         nom: participant.nom,
         prenom: participant.prenom,
         numeroId: participant.numeroId,
-        qrToken: participant.qrToken,
         qrDataUrl,
       },
       marathon: {

@@ -38,6 +38,7 @@ declare global {
 
 export default function MarathonScanClient({ marathonId }: { marathonId: number }) {
   const [phase, setPhase] = useState<"setup" | "ready" | "scanning">("setup");
+  const [hasBarcodeDetector, setHasBarcodeDetector] = useState<boolean | null>(null);
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const [nomControleur, setNomControleur] = useState("");
   const [codeAcces, setCodeAcces] = useState("");
@@ -73,6 +74,10 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   useEffect(() => {
     fetchSessionInfo();
   }, [fetchSessionInfo]);
+
+  useEffect(() => {
+    setHasBarcodeDetector(typeof window !== "undefined" && !!window.BarcodeDetector);
+  }, []);
 
   const handleSetup = async () => {
     if (!nomControleur.trim()) { setError("Veuillez entrer votre nom"); return; }
@@ -342,7 +347,7 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
                 <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                   <div style={{ width: "55%", aspectRatio: "1", border: `3px solid ${GOLD}`, borderRadius: 16, boxShadow: "0 0 0 2000px rgba(0,0,0,0.4)" }} />
                 </div>
-                {!window.BarcodeDetector && (
+                {hasBarcodeDetector === false && (
                   <div style={{ position: "absolute", bottom: 12, left: 12, right: 12, background: "rgba(0,0,0,0.8)", borderRadius: 8, padding: "10px 12px", color: "white", fontSize: 12, textAlign: "center" }}>
                     Votre navigateur ne supporte pas la détection QR automatique — utilisez le mode Manuel
                   </div>

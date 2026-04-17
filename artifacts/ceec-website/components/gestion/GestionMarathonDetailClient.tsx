@@ -92,7 +92,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
 
   const handlePrintBadge = async (p: Participant) => {
     setPrintingBadge(p.id);
-    const res = await fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`);
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`, { headers: headers() });
     if (!res.ok) { setPrintingBadge(null); return; }
     const data = await res.json();
     const win = window.open("", "_blank", "width=600,height=700");
@@ -141,7 +141,9 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
     if (participants.length === 0) return;
     setPrintingBadge(-1);
     const badgeDataArr = await Promise.all(
-      participants.map((p) => fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`).then((r) => r.json()).catch(() => null))
+      participants.map((p) =>
+        fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`, { headers: headers() }).then((r) => r.json()).catch(() => null)
+      )
     );
     const win = window.open("", "_blank", "width=800,height=900");
     if (!win) { setPrintingBadge(null); return; }
@@ -393,12 +395,20 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       {/* ── Stats Tab ── */}
       {tab === "stats" && stats && (
         <div>
-          <h3 style={{ fontSize: 15, fontWeight: 600, color: PRIMARY, marginBottom: 16 }}>Présence par jour</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: PRIMARY }}>Présence par jour</h3>
+            <button
+              onClick={() => window.open(`/api/gestion/marathons/${marathonId}/badges-planche?egliseId=${egliseId}`, "_blank")}
+              style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }), fontSize: 12 }}
+            >
+              <Download size={13} /> Planche badges (PDF)
+            </button>
+          </div>
           <div style={{ background: "white", border: "1.5px solid #e5e7eb", borderRadius: 12, overflow: "hidden", marginBottom: 24 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
               <thead>
                 <tr style={{ background: "#f9fafb" }}>
-                  {["Jour", "Date", "Présents", "Absents", "Taux"].map((h) => (
+                  {["Jour", "Date", "Présents", "Absents", "Taux", "Rapport"].map((h) => (
                     <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: "#6b7280", fontWeight: 600, fontSize: 12, textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
@@ -425,6 +435,16 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                         </div>
                         <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{d.tauxPresence}%</span>
                       </div>
+                    </td>
+                    <td style={{ padding: "10px 14px" }}>
+                      {d.isPast && (
+                        <button
+                          onClick={() => window.open(`/api/gestion/marathons/${marathonId}/rapport-jour?jour=${d.jour}&egliseId=${egliseId}`, "_blank")}
+                          style={{ padding: "4px 10px", background: "#eff6ff", color: PRIMARY, border: "1px solid #bfdbfe", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                        >
+                          <Download size={11} /> PDF
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

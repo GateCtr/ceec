@@ -16,9 +16,10 @@ const GOLD = "#c59b2e";
 interface Marathon {
   id: number; titre: string; theme: string | null; referenceBiblique: string | null;
   dateDebut: string; nombreJours: number; statut: string; denomination: string | null;
-  alerteSeuil: number;
+  alerteSeuil: number; alerteHeure: string | null;
   eglise: { nom: string; logoUrl: string | null }; _count: { participants: number; presences: number };
 }
+interface AlerteRecord { id: number; numeroJour: number; taux: number; envoyeAt: string }
 interface Participant {
   id: number; nom: string; prenom: string; email: string | null; numeroId: string;
   qrToken: string; dateInscription: string;
@@ -62,9 +63,11 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [alerteSeuil, setAlerteSeuil] = useState(60);
   const [alerteSeuilInput, setAlerteSeuilInput] = useState("60");
+  const [alerteHeure, setAlerteHeure] = useState<string>("");
   const [alertBanner, setAlertBanner] = useState<string | null>(null);
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertSendResult, setAlertSendResult] = useState<string | null>(null);
+  const [alertHistory, setAlertHistory] = useState<AlerteRecord[]>([]);
   const alertSentRef = useRef(false);
   const alerteSeuilRef = useRef(60);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -72,10 +75,21 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
 
-  const callAlertEndpoint = useCallback(async (): Promise<{ sent: boolean; reason?: string; recipients?: number; scanned?: number; expected?: number; taux?: number; error?: string }> => {
+  const fetchAlertHistory = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/gestion/marathons/${marathonId}/alert`, { headers: headers() });
+      if (res.ok) {
+        const data = await res.json();
+        setAlertHistory(data.alertes ?? []);
+      }
+    } catch { }
+  }, [marathonId, headers]);
+
+  const callAlertEndpoint = useCallback(async (force = false): Promise<{ sent: boolean; alreadySent?: boolean; reason?: string; recipients?: number; scanned?: number; expected?: number; taux?: number; error?: string }> => {
     const res = await fetch(`/api/gestion/marathons/${marathonId}/alert`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...headers() },
+      body: JSON.stringify({ force }),
     });
     return res.json().catch(() => ({ sent: false, error: "Erreur réseau" }));
   }, [marathonId, headers]);
@@ -84,9 +98,10 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
     setSendingAlert(true);
     setAlertSendResult(null);
     try {
-      const data = await callAlertEndpoint();
+      const data = await callAlertEndpoint(true);
       if (data.sent) {
         setAlertSendResult(`Alerte envoyée à ${data.recipients} coordinateur(s). (${data.scanned}/${data.expected} scannés — ${data.taux}%)`);
+        fetchAlertHistory();
       } else {
         setAlertSendResult(data.reason ?? data.error ?? "Alerte non envoyée");
       }
@@ -95,7 +110,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
     } finally {
       setSendingAlert(false);
     }
-  }, [callAlertEndpoint]);
+  }, [callAlertEndpoint, fetchAlertHistory]);
 
   const fetchLive = useCallback(async () => {
     setLiveLoading(true);
@@ -115,16 +130,16 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
             const seuil = alerteSeuilRef.current;
             if (taux < seuil && !alertSentRef.current) {
               alertSentRef.current = true;
-              setAlertBanner(`Taux de présence (${taux}%) en dessous du seuil d'alerte (${seuil}%). ${scanned}/${expected} participants scannés — alerte en cours d'envoi…`);
-              callAlertEndpoint().then((d) => {
+              setAlertBanner(`Taux de présence (${taux}%) en dessous du seuil d'alerte (${seuil}%). ${scanned}/${expected} participants scannés.`);
+              callAlertEndpoint(false).then((d) => {
                 if (d.sent) {
                   setAlertSendResult(`Alerte automatique envoyée à ${d.recipients} coordinateur(s). (${d.scanned}/${d.expected} scannés — ${d.taux}%)`);
-                } else if (d.reason) {
-                  setAlertSendResult(d.reason);
+                  fetchAlertHistory();
+                } else if (d.alreadySent) {
+                  setAlertSendResult("Une alerte a déjà été envoyée automatiquement par le système de scan aujourd'hui.");
+                  fetchAlertHistory();
                 }
-              }).catch(() => {
-                setAlertSendResult("Échec de l'envoi automatique de l'alerte — essayez manuellement.");
-              });
+              }).catch(() => { });
             }
           }
         }
@@ -138,6 +153,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   useEffect(() => {
     if (tab === "live") {
       fetchLive();
+      fetchAlertHistory();
       liveIntervalRef.current = setInterval(fetchLive, 30000);
     } else {
       if (liveIntervalRef.current) {
@@ -168,6 +184,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       setAlerteSeuil(seuil);
       alerteSeuilRef.current = seuil;
       setAlerteSeuilInput(String(seuil));
+      setAlerteHeure(m.alerteHeure ?? "");
     }
     if (pRes.ok) setParticipants(await pRes.json());
     if (sRes.ok) setStats(await sRes.json());
@@ -410,20 +427,31 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
           </p>
 
           {/* Alert threshold config */}
-          <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13, color: "#92400e", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-              ⚠ Seuil d&apos;alerte :
-            </span>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input
-                type="number"
-                min={0}
-                max={100}
-                value={alerteSeuilInput}
-                onChange={(e) => setAlerteSeuilInput(e.target.value)}
-                style={{ width: 64, padding: "4px 8px", border: "1.5px solid #fcd34d", borderRadius: 6, fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none" }}
-              />
-              <span style={{ fontSize: 13, color: "#92400e" }}>%</span>
+          <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "12px 16px", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#92400e", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>⚠ Configuration des alertes</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <label style={{ fontSize: 13, color: "#92400e", whiteSpace: "nowrap" }}>Seuil :</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={alerteSeuilInput}
+                  onChange={(e) => setAlerteSeuilInput(e.target.value)}
+                  style={{ width: 60, padding: "4px 8px", border: "1.5px solid #fcd34d", borderRadius: 6, fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none" }}
+                />
+                <span style={{ fontSize: 13, color: "#92400e" }}>%</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <label style={{ fontSize: 13, color: "#92400e", whiteSpace: "nowrap" }}>Déclencher après :</label>
+                <input
+                  type="time"
+                  value={alerteHeure}
+                  onChange={(e) => setAlerteHeure(e.target.value)}
+                  style={{ padding: "4px 8px", border: "1.5px solid #fcd34d", borderRadius: 6, fontSize: 13, outline: "none" }}
+                />
+                <span style={{ fontSize: 11, color: "#92400e" }}>(heure min.)</span>
+              </div>
               <button
                 onClick={async () => {
                   const val = Math.min(100, Math.max(0, parseInt(alerteSeuilInput) || 60));
@@ -436,15 +464,25 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                   await fetch(`/api/gestion/marathons/${marathonId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json", ...headers() },
-                    body: JSON.stringify({ alerteSeuil: val }),
+                    body: JSON.stringify({ alerteSeuil: val, alerteHeure: alerteHeure || null }),
                   });
                 }}
-                style={{ ...btn({ background: "#b45309", color: "white", padding: "4px 10px" }), fontSize: 12 }}
+                style={{ ...btn({ background: "#b45309", color: "white", padding: "5px 12px" }), fontSize: 12, whiteSpace: "nowrap" }}
               >
                 Enregistrer
               </button>
             </div>
-            <span style={{ fontSize: 12, color: "#92400e" }}>— Une alerte est déclenchée si le taux de présence est inférieur à ce seuil lors du suivi automatique.</span>
+            <p style={{ fontSize: 11, color: "#b45309", margin: "8px 0 0", lineHeight: 1.5 }}>
+              L&apos;alerte est envoyée automatiquement après chaque scan si le taux est en dessous du seuil
+              {alerteHeure ? ` et qu'il est plus de ${alerteHeure}` : ""}.
+              Les coordinateurs reçoivent un email avec le lien vers ce tableau de bord.
+            </p>
+            {alertHistory.length > 0 && (
+              <div style={{ marginTop: 8, padding: "6px 10px", background: "#fef3c7", borderRadius: 6, fontSize: 12, color: "#92400e" }}>
+                Dernière alerte envoyée : J{alertHistory[0].numeroJour} — {alertHistory[0].taux}% de présence —{" "}
+                {new Date(alertHistory[0].envoyeAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+              </div>
+            )}
           </div>
 
           {/* Alert banner */}

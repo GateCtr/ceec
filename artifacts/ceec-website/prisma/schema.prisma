@@ -334,6 +334,7 @@ model Marathon {
   joursExclus       String[] @map("jours_exclus")
   statut            String   @default("ouvert") @db.VarChar(20)
   alerteSeuil       Int      @default(60) @map("alerte_seuil")
+  alerteHeure       String?  @map("alerte_heure") @db.VarChar(5)
   logoUrl           String?  @map("logo_url")
   denomination      String?  @db.VarChar(255)
   createdByUserId   String   @map("created_by_user_id") @db.VarChar(255)
@@ -343,6 +344,7 @@ model Marathon {
   participants      MarathonParticipant[]
   presences         MarathonPresence[]
   sessions          MarathonSession[]
+  alertes           MarathonAlerte[]
 
   @@index([egliseId])
   @@map("marathons")
@@ -400,4 +402,17 @@ model MarathonSession {
   @@unique([marathonId, date])
   @@index([marathonId])
   @@map("marathon_sessions")
+}
+
+model MarathonAlerte {
+  id         Int      @id @default(autoincrement())
+  marathonId Int      @map("marathon_id")
+  numeroJour Int      @map("numero_jour")
+  taux       Int
+  envoyeAt   DateTime @default(now()) @map("envoye_at")
+  marathon   Marathon @relation(fields: [marathonId], references: [id], onDelete: Cascade)
+
+  @@unique([marathonId, numeroJour])
+  @@index([marathonId])
+  @@map("marathon_alertes")
 }

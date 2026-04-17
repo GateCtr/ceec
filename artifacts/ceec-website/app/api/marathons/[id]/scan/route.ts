@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { computeMarathonDays, toDateString } from "@/lib/marathon-utils";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkAndSendMarathonAlert } from "@/lib/marathon-alert";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const rl = checkRateLimit(`scan:${getClientIp(req)}`, 60, 60_000);
@@ -83,6 +84,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     const presents = await prisma.marathonPresence.count({ where: { marathonId, numeroJour, statut: "present" } });
+
+    checkAndSendMarathonAlert(marathonId).catch(() => {});
 
     return NextResponse.json({
       ok: true,

@@ -7,10 +7,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const marathonId = parseInt(id, 10);
     const body = await req.json();
-    const { qrToken, codeAcces, nomControleur } = body;
+    const { qrToken, numeroId, codeAcces, nomControleur } = body;
 
-    if (!qrToken || !codeAcces) {
-      return NextResponse.json({ error: "QR token et code d'accès requis" }, { status: 400 });
+    if ((!qrToken && !numeroId) || !codeAcces) {
+      return NextResponse.json({ error: "Token QR ou numéro participant, et code d'accès requis" }, { status: 400 });
     }
 
     const marathon = await prisma.marathon.findUnique({ where: { id: marathonId } });
@@ -31,13 +31,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!session) return NextResponse.json({ error: "Aucune session ouverte aujourd'hui" }, { status: 400 });
     if (session.codeAcces !== codeAcces) return NextResponse.json({ error: "Code d'accès incorrect" }, { status: 403 });
 
-    const participant = await prisma.marathonParticipant.findUnique({
-      where: { qrToken },
+    const participant = await prisma.marathonParticipant.findFirst({
+      where: {
+        marathonId,
+        OR: [
+          ...(qrToken ? [{ qrToken }] : []),
+          ...(numeroId ? [{ numeroId }] : []),
+        ],
+      },
       include: { presences: { where: { numeroJour } } },
     });
 
-    if (!participant) return NextResponse.json({ error: "Participant introuvable" }, { status: 404 });
-    if (participant.marathonId !== marathonId) return NextResponse.json({ error: "QR invalide pour ce marathon" }, { status: 400 });
+    if (!participant) return NextResponse.json({ error: "Participant introuvable (QR ou numéro invalide)" }, { status: 404 });
 
     const alreadyPresent = participant.presences.some((p) => p.statut === "present");
     if (alreadyPresent) {

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac";
 import QRCode from "qrcode";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import { computeMarathonDays, toDateString } from "@/lib/marathon-utils";
 
 function getEgliseId(req: NextRequest): number | null {
@@ -24,7 +24,7 @@ export async function GET(
   const { id } = await params;
   const marathonId = parseInt(id, 10);
 
-  const superAdmin = await isSuperAdmin(userId);
+  const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
   let egliseId: number | null = null;
 
   if (!superAdmin) {
@@ -52,18 +52,19 @@ export async function GET(
   const PRIMARY = rgb(30 / 255, 58 / 255, 138 / 255);
   const GOLD = rgb(197 / 255, 155 / 255, 46 / 255);
   const WHITE = rgb(1, 1, 1);
+  const WATERMARK = rgb(0.85, 0.85, 0.9);
   const mmToPt = (mm: number) => mm * 2.835;
 
-  const badgeW = mmToPt(86);
-  const badgeH = mmToPt(54);
-  const colGap = mmToPt(6);
+  const badgeW = mmToPt(90);
+  const badgeH = mmToPt(57);
+  const colGap = mmToPt(5);
   const rowGap = mmToPt(5);
   const marginX = mmToPt(10);
-  const marginY = mmToPt(12);
-  const cols = 3;
-  const rowsPerPage = 4;
-  const pageW = mmToPt(297);
-  const pageH = mmToPt(210);
+  const marginY = mmToPt(15);
+  const cols = 2;
+  const rowsPerPage = 3;
+  const pageW = mmToPt(210);
+  const pageH = mmToPt(297);
 
   const pdfDoc = await PDFDocument.create();
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -73,13 +74,27 @@ export async function GET(
   const headerH = mmToPt(14);
   const qrSize = mmToPt(20);
 
-  let page = pdfDoc.addPage([pageW, pageH]);
+  function addNewPage() {
+    const p = pdfDoc.addPage([pageW, pageH]);
+    p.drawText("ORIGINAL", {
+      x: pageW / 2 - 60,
+      y: pageH / 2 - 10,
+      size: 60,
+      font: fontBold,
+      color: WATERMARK,
+      opacity: 0.12,
+      rotate: degrees(45),
+    });
+    return p;
+  }
+
+  let page = addNewPage();
   let col = 0;
   let row = 0;
 
   for (const p of marathon.participants) {
     if (col === cols) { col = 0; row++; }
-    if (row === rowsPerPage) { page = pdfDoc.addPage([pageW, pageH]); row = 0; col = 0; }
+    if (row === rowsPerPage) { page = addNewPage(); row = 0; col = 0; }
 
     const ox = marginX + col * (badgeW + colGap);
     const oy = pageH - marginY - (row + 1) * badgeH - row * rowGap;
@@ -105,7 +120,6 @@ export async function GET(
     if (marathon.referenceBiblique) {
       page.drawText(truncate(marathon.referenceBiblique, 26), { x: ox + 5, y: nameY - 22, size: 5, font: fontReg, color: rgb(0.4, 0.4, 0.5) });
     }
-
     page.drawRectangle({ x: ox, y: oy, width: badgeW, height: 2, color: GOLD });
 
     col++;

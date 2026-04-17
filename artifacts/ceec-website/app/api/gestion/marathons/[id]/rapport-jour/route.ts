@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import {
   computeMarathonDays,
@@ -27,7 +27,7 @@ export async function GET(
   const { id } = await params;
   const marathonId = parseInt(id, 10);
 
-  const superAdmin = await isSuperAdmin(userId);
+  const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
   let egliseId: number | null = null;
 
   if (!superAdmin) {

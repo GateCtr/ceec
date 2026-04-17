@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { hasPermission, isSuperAdmin } from "@/lib/auth/rbac";
+import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
 
 async function getEgliseId(req: NextRequest): Promise<number | null> {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const egliseId = await getEgliseId(req);
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
-    const superAdmin = await isSuperAdmin(userId);
+    const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
     const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const egliseId = await getEgliseId(req);
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
-    const superAdmin = await isSuperAdmin(userId);
+    const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
     const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
@@ -100,7 +100,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const egliseId = await getEgliseId(req);
     if (!egliseId) return NextResponse.json({ error: "Église introuvable" }, { status: 400 });
 
-    const superAdmin = await isSuperAdmin(userId);
+    const superAdmin = (await isSuperAdmin(userId)) || (await isAdminPlatteforme(userId));
     const allowed = superAdmin || await hasPermission(userId, "eglise_creer_evenement", egliseId);
     if (!allowed) return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 

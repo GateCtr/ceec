@@ -88,15 +88,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const numeroJour = todayIdx + 1;
     const todayDate = allDays[todayIdx];
 
-    const accessCode = codeAcces || generateAccessCode();
-
-    const session = await prisma.marathonSession.upsert({
-      where: { marathonId_date: { marathonId, date: todayDate } },
-      create: { marathonId, date: todayDate, numeroJour, codeAcces: accessCode, nomControleur: nomControleur ?? null },
-      update: { nomControleur: nomControleur ?? null, codeAcces: accessCode },
+    const todayStart = new Date(today);
+    const todayEnd = new Date(todayStart.getTime() + 86400000);
+    const existingSession = await prisma.marathonSession.findFirst({
+      where: { marathonId, date: { gte: todayStart, lt: todayEnd } },
     });
 
-    return NextResponse.json({ session, numeroJour, date: today });
+    if (existingSession) {
+      if (!codeAcces || codeAcces !== existingSession.codeAcces) {
+        return NextResponse.json(
+          { error: "Une session existe déjà aujourd'hui. Fournissez le code d'accès actuel pour rejoindre.", requiresCode: true },
+          { status: 409 }
+        );
+      }
+      const updated = await prisma.marathonSession.update({
+        where: { id: existingSession.id },
+        data: { nomControleur: nomControleur ?? existingSession.nomControleur },
+      });
+      return NextResponse.json({ session: { ...updated, codeAcces: existingSession.codeAcces }, numeroJour, date: today });
+    }
+
+    const newCode = generateAccessCode();
+    const session = await prisma.marathonSession.create({
+      data: { marathonId, date: todayDate, numeroJour, codeAcces: newCode, nomControleur: nomControleur ?? null },
+    });
+
+    return NextResponse.json({ session: { ...session, codeAcces: newCode }, numeroJour, date: today });
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

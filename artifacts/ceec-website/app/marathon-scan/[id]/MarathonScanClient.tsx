@@ -120,16 +120,20 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
     setLoading(false);
   };
 
-  const sendScan = useCallback(async (token: string) => {
+  const sendScan = useCallback(async (token: string, isManual = false) => {
     const now = Date.now();
     if (token === lastScannedRef.current && now - lastScannedTimeRef.current < 3000) return;
     lastScannedRef.current = token;
     lastScannedTimeRef.current = now;
 
+    const body = isManual
+      ? { numeroId: token, codeAcces: codeAcces || inputCode.toUpperCase(), nomControleur }
+      : { qrToken: token, codeAcces: codeAcces || inputCode.toUpperCase(), nomControleur };
+
     const res = await fetch(`/api/marathons/${marathonId}/scan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ qrToken: token, codeAcces: codeAcces || inputCode.toUpperCase(), nomControleur }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       const data: ScanResult = await res.json();
@@ -192,7 +196,7 @@ export default function MarathonScanClient({ marathonId }: { marathonId: number 
   const handleManualScan = () => {
     const token = manualToken.trim();
     if (!token) return;
-    sendScan(token);
+    sendScan(token, true);
     setManualToken("");
   };
 

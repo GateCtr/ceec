@@ -33,6 +33,8 @@ export default function GestionMarathonsClient({ egliseId }: { egliseId: number 
     titre: "", theme: "", referenceBiblique: "",
     dateDebut: "", nombreJours: "21", denomination: "",
   });
+  const [joursExclus, setJoursExclus] = useState<string[]>([]);
+  const [newExcluDate, setNewExcluDate] = useState("");
 
   const fetchMarathons = useCallback(async () => {
     setLoading(true);
@@ -53,12 +55,14 @@ export default function GestionMarathonsClient({ egliseId }: { egliseId: number 
     const res = await fetch("/api/gestion/marathons", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-eglise-id": String(egliseId) },
-      body: JSON.stringify({ ...form, nombreJours: parseInt(form.nombreJours), joursExclus: [] }),
+      body: JSON.stringify({ ...form, nombreJours: parseInt(form.nombreJours), joursExclus }),
     });
     if (res.ok) {
       const data = await res.json();
       setShowCreate(false);
       setForm({ titre: "", theme: "", referenceBiblique: "", dateDebut: "", nombreJours: "21", denomination: "" });
+      setJoursExclus([]);
+      setNewExcluDate("");
       router.push(`/gestion/marathons/${data.id}`);
     } else {
       const d = await res.json();
@@ -241,8 +245,57 @@ export default function GestionMarathonsClient({ egliseId }: { egliseId: number 
               </div>
             </div>
 
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 5 }}>
+                Jours à exclure (congés, repos)
+              </label>
+              <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                <input
+                  type="date"
+                  value={newExcluDate}
+                  min={form.dateDebut || undefined}
+                  onChange={(e) => setNewExcluDate(e.target.value)}
+                  style={{ flex: 1, padding: "8px 12px", border: "1.5px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newExcluDate && !joursExclus.includes(newExcluDate)) {
+                      setJoursExclus([...joursExclus, newExcluDate].sort());
+                      setNewExcluDate("");
+                    }
+                  }}
+                  style={{ padding: "8px 14px", background: GOLD, color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}
+                >
+                  + Ajouter
+                </button>
+              </div>
+              {joursExclus.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {joursExclus.map((d) => (
+                    <span key={d} style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef3c7", color: "#92400e", fontSize: 12, padding: "3px 8px", borderRadius: 100, fontWeight: 600 }}>
+                      {new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}
+                      <button
+                        type="button"
+                        onClick={() => setJoursExclus(joursExclus.filter((x) => x !== d))}
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1, color: "#b45309" }}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {joursExclus.length === 0 && (
+                <p style={{ margin: 0, fontSize: 12, color: "#9ca3af", fontStyle: "italic" }}>Aucun jour exclu — tous les jours consécutifs seront comptés</p>
+              )}
+            </div>
+
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: "1.5rem" }}>
-              <button onClick={() => setShowCreate(false)} style={{ padding: "9px 18px", border: "1.5px solid #e5e7eb", borderRadius: 8, background: "white", cursor: "pointer", fontWeight: 600, fontSize: 14, color: "#374151" }}>
+              <button
+                onClick={() => { setShowCreate(false); setJoursExclus([]); setNewExcluDate(""); }}
+                style={{ padding: "9px 18px", border: "1.5px solid #e5e7eb", borderRadius: 8, background: "white", cursor: "pointer", fontWeight: 600, fontSize: 14, color: "#374151" }}
+              >
                 Annuler
               </button>
               <button

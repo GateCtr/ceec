@@ -66,35 +66,36 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertSendResult, setAlertSendResult] = useState<string | null>(null);
   const alertSentRef = useRef(false);
+  const alerteSeuilRef = useRef(60);
   const fileRef = useRef<HTMLInputElement>(null);
   const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const headers = useCallback(() => ({ "x-eglise-id": String(egliseId) }), [egliseId]);
 
+  const callAlertEndpoint = useCallback(async (): Promise<{ sent: boolean; reason?: string; recipients?: number; scanned?: number; expected?: number; taux?: number; error?: string }> => {
+    const res = await fetch(`/api/gestion/marathons/${marathonId}/alert`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...headers() },
+    });
+    return res.json().catch(() => ({ sent: false, error: "Erreur réseau" }));
+  }, [marathonId, headers]);
+
   const handleSendAlert = useCallback(async () => {
     setSendingAlert(true);
     setAlertSendResult(null);
     try {
-      const res = await fetch(`/api/gestion/marathons/${marathonId}/alert`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...headers() },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.sent) {
-          setAlertSendResult(`Alerte envoyée à ${data.recipients} coordinateur(s). (${data.scanned}/${data.expected} scannés — ${data.taux}%)`);
-        } else {
-          setAlertSendResult(data.reason ?? "Alerte non envoyée");
-        }
+      const data = await callAlertEndpoint();
+      if (data.sent) {
+        setAlertSendResult(`Alerte envoyée à ${data.recipients} coordinateur(s). (${data.scanned}/${data.expected} scannés — ${data.taux}%)`);
       } else {
-        setAlertSendResult(data.error ?? "Erreur lors de l'envoi");
+        setAlertSendResult(data.reason ?? data.error ?? "Alerte non envoyée");
       }
     } catch {
       setAlertSendResult("Erreur réseau");
     } finally {
       setSendingAlert(false);
     }
-  }, [marathonId, headers]);
+  }, [callAlertEndpoint]);
 
   const fetchLive = useCallback(async () => {
     setLiveLoading(true);
@@ -111,13 +112,20 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
           const { scanned, expected } = data.liveToday;
           if (expected > 0) {
             const taux = Math.round((scanned / expected) * 100);
-            setAlerteSeuil((seuil) => {
-              if (taux < seuil && !alertSentRef.current) {
-                alertSentRef.current = true;
-                setAlertBanner(`Taux de présence (${taux}%) en dessous du seuil d'alerte (${seuil}%). ${scanned}/${expected} participants scannés.`);
-              }
-              return seuil;
-            });
+            const seuil = alerteSeuilRef.current;
+            if (taux < seuil && !alertSentRef.current) {
+              alertSentRef.current = true;
+              setAlertBanner(`Taux de présence (${taux}%) en dessous du seuil d'alerte (${seuil}%). ${scanned}/${expected} participants scannés — alerte en cours d'envoi…`);
+              callAlertEndpoint().then((d) => {
+                if (d.sent) {
+                  setAlertSendResult(`Alerte automatique envoyée à ${d.recipients} coordinateur(s). (${d.scanned}/${d.expected} scannés — ${d.taux}%)`);
+                } else if (d.reason) {
+                  setAlertSendResult(d.reason);
+                }
+              }).catch(() => {
+                setAlertSendResult("Échec de l'envoi automatique de l'alerte — essayez manuellement.");
+              });
+            }
           }
         }
       }
@@ -156,8 +164,10 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       const m = await mRes.json();
       setMarathon(m);
       setEditForm({ titre: m.titre, theme: m.theme ?? "", referenceBiblique: m.referenceBiblique ?? "", denomination: m.denomination ?? "", statut: m.statut });
-      setAlerteSeuil(m.alerteSeuil ?? 60);
-      setAlerteSeuilInput(String(m.alerteSeuil ?? 60));
+      const seuil = m.alerteSeuil ?? 60;
+      setAlerteSeuil(seuil);
+      alerteSeuilRef.current = seuil;
+      setAlerteSeuilInput(String(seuil));
     }
     if (pRes.ok) setParticipants(await pRes.json());
     if (sRes.ok) setStats(await sRes.json());
@@ -418,9 +428,11 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                 onClick={async () => {
                   const val = Math.min(100, Math.max(0, parseInt(alerteSeuilInput) || 60));
                   setAlerteSeuil(val);
+                  alerteSeuilRef.current = val;
                   setAlerteSeuilInput(String(val));
                   alertSentRef.current = false;
                   setAlertBanner(null);
+                  setAlertSendResult(null);
                   await fetch(`/api/gestion/marathons/${marathonId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json", ...headers() },

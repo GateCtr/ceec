@@ -50,6 +50,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const expected = totalParticipants;
     const taux = expected > 0 ? Math.round((scanned / expected) * 100) : 0;
 
+    if (taux >= marathon.alerteSeuil) {
+      return NextResponse.json({
+        sent: false,
+        reason: `Taux de présence (${taux}%) au-dessus du seuil configuré (${marathon.alerteSeuil}%). Aucune alerte envoyée.`,
+        scanned,
+        expected,
+        taux,
+        seuil: marathon.alerteSeuil,
+        numeroJour,
+      });
+    }
+
     const recipients = await getChurchStaffEmails(marathon.egliseId);
 
     if (recipients.length === 0) {
@@ -59,6 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         scanned,
         expected,
         taux,
+        seuil: marathon.alerteSeuil,
         numeroJour,
       });
     }

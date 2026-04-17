@@ -5,10 +5,22 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
-    const marathonId = parseInt(id, 10);
     const { searchParams } = new URL(req.url);
     const code = searchParams.get("code");
+
+    if (code) {
+      const ip = getClientIp(req);
+      const rl = checkRateLimit(`session-validate:${ip}`, 20, 60000);
+      if (!rl.allowed) {
+        return NextResponse.json({ error: "Trop de tentatives, réessayez plus tard." }, {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil(rl.resetIn / 1000)) },
+        });
+      }
+    }
+
+    const { id } = await params;
+    const marathonId = parseInt(id, 10);
 
     const marathon = await prisma.marathon.findUnique({
       where: { id: marathonId },

@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { hasPermission, isSuperAdmin, isAdminPlatteforme } from "@/lib/auth/rbac";
 import { logActivity, getActeurNom } from "@/lib/activity-log";
-import { generateQrToken, formatNumeroId, getElapsedDayNumbers, toDateString } from "@/lib/marathon-utils";
 
 function getEgliseIdSync(req: NextRequest): number | null {
   const h = req.headers.get("x-eglise-id") ?? new URL(req.url).searchParams.get("egliseId");

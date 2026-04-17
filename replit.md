@@ -93,6 +93,7 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 #### API Routes — Member Marathon
 - `POST /api/membre/marathons/[id]/inscrire` — Self-register as participant
 - `DELETE /api/membre/marathons/[id]/inscrire` — Self-unregister
+- `GET /api/membre/marathons/[id]/badge` — Download own badge as PDF (membership + participation check)
 
 #### RBAC System (`lib/auth/rbac.ts`)
 - 9 roles: `super_admin`, `admin_eglise`, `moderateur`, `secretaire`, `tresorier`, `diacre`, `ancien`, `responsable_dept`, `fidele`
@@ -122,6 +123,7 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `/c/marathons` — Member list of marathons with self-registration
 - `/c/marathons/[id]` — Member detail: QR badge card, print button, personal presence tracking
 - `/marathon-scan/[id]` — Public volunteer scan interface (no auth, camera QR + manual, access code system)
+- `/c/marathons/[id]/ma-carte` — Dedicated member badge card page with PDF download + print
 
 #### Marathon Utilities (`lib/marathon-utils.ts`)
 - `computeMarathonDays(dateDebut, nombreJours, joursExclus)` — Compute actual calendar days (skipping excluded days)

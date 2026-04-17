@@ -182,6 +182,7 @@ export default clerkMiddleware(async (auth, req) => {
     url.pathname === "/gestion" ||
     url.pathname.startsWith("/gestion/") ||
     url.pathname.startsWith("/api/gestion") ||
+    url.pathname.startsWith("/api/membre") ||
     url.pathname.startsWith("/marathon-scan");
 
   if (churchSlug && isChurchNativePrefix) {

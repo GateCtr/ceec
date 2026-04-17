@@ -44,7 +44,6 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
   const [csvLoading, setCsvLoading] = useState(false);
   const [closingDay, setClosingDay] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [printingBadge, setPrintingBadge] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ titre: "", theme: "", referenceBiblique: "", denomination: "", statut: "" });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
@@ -90,106 +89,13 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
     setAdding(false);
   };
 
-  const handlePrintBadge = async (p: Participant) => {
-    setPrintingBadge(p.id);
-    const res = await fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`, { headers: headers() });
-    if (!res.ok) { setPrintingBadge(null); return; }
-    const data = await res.json();
-    const win = window.open("", "_blank", "width=600,height=700");
-    if (!win) { setPrintingBadge(null); return; }
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Badge ${p.prenom} ${p.nom}</title>
-    <style>
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Georgia,serif;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh}
-      .card{width:86mm;background:white;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);page-break-inside:avoid}
-      .header{background:${PRIMARY};color:white;padding:18px 16px;text-align:center}
-      .header h1{font-size:13px;font-weight:400;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-      .header h2{font-size:17px;font-weight:700;margin-bottom:4px}
-      .header p{font-size:10px;color:rgba(255,255,255,0.75)}
-      .body{padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
-      .name{font-size:18px;font-weight:700;color:${PRIMARY};text-align:center}
-      .subtitle{font-size:11px;color:#6b7280;text-align:center}
-      .qr-wrap{border:3px solid ${GOLD};border-radius:8px;padding:6px;background:#fff}
-      .num{font-size:14px;font-weight:700;color:${GOLD};letter-spacing:2px;border-top:1px solid #e5e7eb;padding-top:10px;width:100%;text-align:center}
-      .ref{font-size:9px;color:#6b7280;text-align:center;font-style:italic;padding:0 8px}
-      @media print{body{background:white}.card{box-shadow:none;margin:0}}
-    </style></head><body>
-    <div class="card">
-      <div class="header">
-        ${data.marathon.logoUrl ? `<img src="${data.marathon.logoUrl}" style="height:36px;margin-bottom:8px;object-fit:contain" alt="">` : ""}
-        <h1>${data.marathon.denomination}</h1>
-        <h2>${data.marathon.titre}</h2>
-        ${data.marathon.theme ? `<p>${data.marathon.theme}</p>` : ""}
-        <p style="margin-top:4px;font-size:9px">${formatDate(data.marathon.dateDebut)} – ${formatDate(data.marathon.dateFin)}</p>
-      </div>
-      <div class="body">
-        <div class="name">${p.prenom} ${p.nom}</div>
-        ${p.email ? `<div class="subtitle">${p.email}</div>` : ""}
-        <div class="qr-wrap"><img src="${data.participant.qrDataUrl}" alt="QR Code" style="width:120px;height:120px;display:block"></div>
-        <div class="num">${p.numeroId}</div>
-        ${data.marathon.referenceBiblique ? `<div class="ref">${data.marathon.referenceBiblique}</div>` : ""}
-      </div>
-    </div>
-    <script>window.onload=()=>{window.print();}<\/script>
-    </body></html>`;
-    win.document.write(html);
-    win.document.close();
-    setPrintingBadge(null);
+  const handlePrintBadge = (p: Participant) => {
+    window.open(`/api/gestion/marathons/${marathonId}/badge/${p.id}`, "_blank");
   };
 
-  const handlePrintAllBadges = async () => {
+  const handlePrintAllBadges = () => {
     if (participants.length === 0) return;
-    setPrintingBadge(-1);
-    const badgeDataArr = await Promise.all(
-      participants.map((p) =>
-        fetch(`/api/gestion/marathons/${marathonId}/badge/${p.id}`, { headers: headers() }).then((r) => r.json()).catch(() => null)
-      )
-    );
-    const win = window.open("", "_blank", "width=800,height=900");
-    if (!win) { setPrintingBadge(null); return; }
-    const badgesHtml = badgeDataArr.map((data, i) => {
-      if (!data) return "";
-      const p = participants[i];
-      return `<div class="card">
-        <div class="header">
-          ${data.marathon.logoUrl ? `<img src="${data.marathon.logoUrl}" style="height:28px;margin-bottom:4px;object-fit:contain" alt="">` : ""}
-          <div class="denom">${data.marathon.denomination}</div>
-          <div class="titre">${data.marathon.titre}</div>
-          ${data.marathon.theme ? `<div class="theme">${data.marathon.theme}</div>` : ""}
-          <div class="dates">${formatDate(data.marathon.dateDebut)} – ${formatDate(data.marathon.dateFin)}</div>
-        </div>
-        <div class="body">
-          <div class="name">${p.prenom} ${p.nom}</div>
-          <div class="qr-wrap"><img src="${data.participant.qrDataUrl}" alt="QR" style="width:80px;height:80px;display:block"></div>
-          <div class="num">${p.numeroId}</div>
-          ${data.marathon.referenceBiblique ? `<div class="ref">${data.marathon.referenceBiblique}</div>` : ""}
-        </div>
-      </div>`;
-    }).join("");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Planche de badges</title>
-    <style>
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Georgia,serif;background:white}
-      .grid{display:flex;flex-wrap:wrap;gap:6mm;padding:10mm;justify-content:flex-start}
-      .card{width:54mm;border:1px solid #ccc;border-radius:4px;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
-      .header{background:${PRIMARY};color:white;padding:8px;text-align:center}
-      .denom{font-size:7px;text-transform:uppercase;letter-spacing:1px;opacity:0.8}
-      .titre{font-size:9px;font-weight:700;margin:2px 0}
-      .theme{font-size:7px;opacity:0.75}
-      .dates{font-size:6px;opacity:0.65;margin-top:2px}
-      .body{padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px}
-      .name{font-size:10px;font-weight:700;color:${PRIMARY};text-align:center}
-      .qr-wrap{border:2px solid ${GOLD};border-radius:4px;padding:3px}
-      .num{font-size:8px;font-weight:700;color:${GOLD};letter-spacing:1px}
-      .ref{font-size:6px;color:#666;text-align:center;font-style:italic}
-      @media print{@page{size:A4;margin:0}}
-    </style></head><body>
-    <div class="grid">${badgesHtml}</div>
-    <script>window.onload=()=>{window.print();}<\/script>
-    </body></html>`;
-    win.document.write(html);
-    win.document.close();
-    setPrintingBadge(null);
+    window.open(`/api/gestion/marathons/${marathonId}/badges-planche?egliseId=${egliseId}`, "_blank");
   };
 
   const handleCsvUpload = async (file: File) => {
@@ -329,7 +235,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                   <ClipboardList size={14} /> {closingDay ? "..." : `Clôturer J${stats.todayDayNum}`}
                 </button>
               )}
-              <button onClick={handlePrintAllBadges} disabled={printingBadge !== null} style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }) }}>
+              <button onClick={handlePrintAllBadges} style={{ ...btn({ background: "#f0fdf4", color: "#15803d" }) }}>
                 <Download size={14} /> Planche badges
               </button>
               <button onClick={() => setShowAddPart(true)} style={{ ...btn({ background: PRIMARY, color: "white" }) }}>
@@ -376,10 +282,9 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
                         <td style={{ padding: "10px 14px" }}>
                           <button
                             onClick={() => handlePrintBadge(p)}
-                            disabled={printingBadge === p.id}
                             style={{ padding: "5px 10px", background: "#eff6ff", border: "none", borderRadius: 6, cursor: "pointer", color: PRIMARY, fontWeight: 600, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
                           >
-                            <Download size={12} /> {printingBadge === p.id ? "..." : "Badge"}
+                            <Download size={12} /> Badge PDF
                           </button>
                         </td>
                       </tr>

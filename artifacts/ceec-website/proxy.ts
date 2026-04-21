@@ -68,8 +68,7 @@ function isNeonCompatible(): boolean {
   return neonUrl.includes("neon.tech") || !!process.env.NEON_DATABASE_URL;
 }
 
-const INTERNAL_RESOLVE_SECRET =
-  process.env.INTERNAL_RESOLVE_SECRET ?? "ceec-internal-resolve";
+const INTERNAL_RESOLVE_SECRET = process.env.INTERNAL_RESOLVE_SECRET;
 
 interface ChurchInfo {
   id: number;
@@ -86,6 +85,7 @@ async function resolveChurch(
   }
 
   try {
+    if (!INTERNAL_RESOLVE_SECRET) return null;
     const resolveUrl = `${baseUrl}/api/church/resolve?slug=${encodeURIComponent(slug)}`;
     const res = await fetch(resolveUrl, {
       headers: { "x-internal-resolve": INTERNAL_RESOLVE_SECRET },

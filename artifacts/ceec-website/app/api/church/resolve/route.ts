@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 const INTERNAL_RESOLVE_HEADER = "x-internal-resolve";
-const INTERNAL_RESOLVE_SECRET =
-  process.env.INTERNAL_RESOLVE_SECRET ?? "ceec-internal-resolve";
+const INTERNAL_RESOLVE_SECRET = process.env.INTERNAL_RESOLVE_SECRET;
 
 export async function GET(req: NextRequest) {
   const resolveHeader = req.headers.get(INTERNAL_RESOLVE_HEADER);
-  if (resolveHeader !== INTERNAL_RESOLVE_SECRET) {
+  if (!INTERNAL_RESOLVE_SECRET || resolveHeader !== INTERNAL_RESOLVE_SECRET) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 

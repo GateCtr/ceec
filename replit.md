@@ -24,7 +24,7 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 - **Type imports**: `import type { Annonce, Evenement, PageEglise, SectionPage, ... } from "@prisma/client"`
 - **Styling**: Inline styles (no Tailwind class usage, uses Tailwind as base reset)
 - **Language**: French (localization via Clerk `frFR`)
-- **Port**: 3000 (dev workflow: `artifacts/ceec-website: CEEC Website`)
+- **Port**: 5000 by default, or `$PORT` when provided by Replit (dev workflow: `Start application`)
 - **Proxy/Middleware**: `proxy.ts` at root (renamed from `middleware.ts` for Next.js 16 compatibility)
 - **Middleware**: `middleware.ts` at church root for x-eglise-id/x-eglise-slug header injection
 
@@ -166,7 +166,8 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 ## Replit Migration Notes
 
 - `pnpm.onlyBuiltDependencies` added to root `package.json` to allow Prisma, Clerk, sharp, and esbuild postinstall scripts to run
-- Dev/start scripts updated to use `${PORT:-3000} -H 0.0.0.0` for Replit proxy compatibility
+- Dev/start scripts updated to use `${PORT:-5000} -H 0.0.0.0` for Replit proxy compatibility
+- Internal church resolve route now requires `INTERNAL_RESOLVE_SECRET`; it no longer uses a predictable fallback secret.
 - `server.allowedHosts: true` in Vite configs
 
 ## Key Commands

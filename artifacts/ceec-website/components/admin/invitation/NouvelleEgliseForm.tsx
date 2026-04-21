@@ -333,7 +333,7 @@ export default function NouvelleEgliseForm({ initialPending }: Props) {
                 </div>
 
                 <div>
-                  <FieldLabel label="Sous-domaine" hint="optionnel — ex: kinshasa-centre (donne kinshasa-centre.ceec.cd)" />
+                  <FieldLabel label="Sous-domaine" hint="optionnel — ex: kinshasa-centre (donne kinshasa-centre.ceec-rdc.org)" />
                   <div style={{ position: "relative" }}>
                     <FieldIcon><Link2 size={15} /></FieldIcon>
                     <input

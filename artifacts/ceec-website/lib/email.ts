@@ -32,7 +32,7 @@ async function sendEmail(
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
-      from: "CEEC Platform <noreply@ceec.cd>",
+      from: "CEEC Platform <noreply@ceec-rdc.org>",
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
@@ -404,7 +404,7 @@ export async function sendMarathonBadgeEmail({
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
-      from: "CEEC Platform <noreply@ceec.cd>",
+      from: "CEEC Platform <noreply@ceec-rdc.org>",
       to: [to],
       subject: `Votre badge de participant — ${marathonTitre}`,
       html,

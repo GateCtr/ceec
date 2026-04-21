@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/rbac-edge";
 import { resolveChurchBySlug } from "@/lib/db/edge";
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec-rdc.org";
 
 // Chemins qui ne doivent JAMAIS être réécrits vers /c/...
 // Règle : toutes les routes /api/ générales bypass la réécriture église.
@@ -38,8 +38,8 @@ function extractChurchSlug(req: Request): string | null {
 
   if (!isLocalDev) {
     // Extraire le sous-domaine UNIQUEMENT si l'hôte est un vrai sous-domaine de ROOT_DOMAIN.
-    // Ex: "eglise1.ceec.cd"       → "eglise1"   ✓
-    //     "ceec.cd"               → null         ✓ (domaine racine, pas de sous-domaine)
+    // Ex: "eglise1.ceec-rdc.org"       → "eglise1"   ✓
+    //     "ceec-rdc.org"               → null         ✓ (domaine racine, pas de sous-domaine)
     //     "ceec-site.vercel.app"  → null         ✓ (domaine tiers, jamais un slug)
     //     "ceec-site.replit.app"  → null         ✓ (domaine Replit production)
     if (host.endsWith("." + ROOT_DOMAIN)) {

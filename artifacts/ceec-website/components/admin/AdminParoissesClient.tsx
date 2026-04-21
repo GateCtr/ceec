@@ -181,7 +181,7 @@ export default function AdminParoissesClient({ initialParoisses }: Props) {
                 <div>
                   <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 15 }}>{p.nom}</div>
                   <div style={{ color: "#64748b", fontSize: 13 }}>{p.ville}{p.pasteur ? ` \u00b7 ${p.pasteur}` : ""}</div>
-                  {p.slug && <div style={{ color: "#c59b2e", fontSize: 12, fontWeight: 600 }}>{p.slug}.ceec.cd</div>}
+                  {p.slug && <div style={{ color: "#c59b2e", fontSize: 12, fontWeight: 600 }}>{p.slug}.ceec-rdc.org</div>}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

@@ -49,32 +49,32 @@ Allez dans **Project Settings → Environment Variables** et ajoutez :
 ### Domaine & sécurité
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_ROOT_DOMAIN` | `ceec.cd` |
+| `NEXT_PUBLIC_ROOT_DOMAIN` | `ceec-rdc.org` |
 | `INTERNAL_RESOLVE_SECRET` | Chaîne secrète aléatoire pour sécuriser l'API interne de résolution d'église (ex: `openssl rand -hex 32`) |
 
 ---
 
 ## 3. Configuration DNS pour les sous-domaines
 
-Pour que chaque église ait son sous-domaine (`nom.ceec.cd`), configurez chez votre registrar DNS :
+Pour que chaque église ait son sous-domaine (`nom.ceec-rdc.org`), configurez chez votre registrar DNS :
 
 ```
-*.ceec.cd   CNAME   cname.vercel-dns.com
-ceec.cd     A       76.76.21.21
+*.ceec-rdc.org   CNAME   cname.vercel-dns.com
+ceec-rdc.org     A       76.76.21.21
 ```
 
 Puis dans Vercel **Project Settings → Domains**, ajoutez :
-- `ceec.cd`
-- `*.ceec.cd` (wildcard — nécessite un plan Vercel Pro ou supérieur)
+- `ceec-rdc.org`
+- `*.ceec-rdc.org`
 
 ---
 
 ## 4. Configuration Clerk pour la production
 
 Dans le tableau de bord Clerk :
-1. Allez dans **Domains** → ajoutez `ceec.cd` et `*.ceec.cd`
+1. Allez dans **Domains** → ajoutez `ceec-rdc.org` et `*.ceec-rdc.org`
 2. Remplacez les clés de développement (`pk_test_`) par les clés de production (`pk_live_`)
-3. Configurez le **Redirect URL** : `https://ceec.cd/sign-in`
+3. Configurez le **Redirect URL** : `https://ceec-rdc.org/sign-in`
 
 ---
 
@@ -101,8 +101,8 @@ DATABASE_URL="votre-url-neon" pnpm prisma:push
 ## Architecture de production
 
 ```
-ceec.cd          → Vercel (Next.js — page d'accueil plateforme)
-nom.ceec.cd      → Vercel (Next.js — espace église via wildcard + middleware)
-nom.ceec.cd/gestion → Vercel (Next.js — admin église)
-ceec.cd/admin    → Vercel (Next.js — super admin plateforme)
+ceec-rdc.org          → Vercel (Next.js — page d'accueil plateforme)
+nom.ceec-rdc.org      → Vercel (Next.js — espace église via wildcard + middleware)
+nom.ceec-rdc.org/gestion → Vercel (Next.js — admin église)
+ceec-rdc.org/admin    → Vercel (Next.js — super admin plateforme)
 ```

@@ -157,7 +157,7 @@ export default function ChurchFooter({
               Membre de la Communauté des Églises Évangéliques au Congo.
             </p>
             <Link href="/" style={{ display: "inline-block", fontSize: 13, color: accent, textDecoration: "none" }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>ceec.cd <ChevronRight size={12} /></span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>ceec-rdc.org <ChevronRight size={12} /></span>
             </Link>
           </div>
         </div>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { CheckCircle, ExternalLink } from "lucide-react";
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec-rdc.org";
 
 function getChurchGestionUrl(slug: string): string {
   if (typeof window !== "undefined") {

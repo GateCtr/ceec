@@ -9,7 +9,7 @@ import {
 } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db";
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec.cd";
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec-rdc.org";
 
 function buildChurchUrl(slug: string, path: string, isLocalDev: boolean): string {
   if (isLocalDev) {

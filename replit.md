@@ -27,6 +27,7 @@ pnpm workspace monorepo using TypeScript. Contains the CEEC website (Next.js) an
 - **Port**: 5000 by default, or `$PORT` when provided by Replit (dev workflow: `Start application`)
 - **Proxy/Middleware**: `proxy.ts` at root (renamed from `middleware.ts` for Next.js 16 compatibility)
 - **Middleware**: `middleware.ts` at church root for x-eglise-id/x-eglise-slug header injection
+- **Production domain**: `ceec-rdc.org` with wildcard subdomains `*.ceec-rdc.org` on Vercel
 
 #### Route Groups
 - `(platform)` — Top-level public site + platform auth
@@ -185,3 +186,5 @@ All under `/api/gestion/`, require `x-eglise-id` header, Clerk auth, and RBAC pe
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — Clerk publishable key
 - `CLERK_WEBHOOK_SECRET` — Webhook secret for Clerk events
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL` — /sign-in (platform)
+- `NEXT_PUBLIC_ROOT_DOMAIN` — `ceec-rdc.org` for production subdomain routing
+- `INTERNAL_RESOLVE_SECRET` — random secret shared by middleware and internal church resolution API

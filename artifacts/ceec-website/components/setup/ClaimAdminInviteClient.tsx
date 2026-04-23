@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Shield, CheckCircle, AlertCircle, Loader2, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   roleLabel: string;
   roleNom: string;
   error: string | null;
+  isLoggedIn: boolean;
 }
 
 export default function ClaimAdminInviteClient({
@@ -19,6 +20,7 @@ export default function ClaimAdminInviteClient({
   roleLabel,
   roleNom,
   error,
+  isLoggedIn,
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -103,6 +105,62 @@ export default function ClaimAdminInviteClient({
                 Retour à l&apos;accueil
               </Link>
             </div>
+          ) : !isLoggedIn ? (
+            /* Not logged in — show invite preview + auth options */
+            <>
+              <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.7, margin: "0 0 20px" }}>
+                Vous avez été invité(e) à rejoindre l&apos;équipe d&apos;administration de la plateforme CEEC.
+              </p>
+
+              {/* Role badge */}
+              <div style={{
+                background: roleColor.bg, border: `1px solid ${roleColor.border}`,
+                borderRadius: 12, padding: "14px 18px", marginBottom: 20,
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: roleColor.text, marginBottom: 4 }}>
+                  Rôle assigné
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: roleColor.text }}>
+                  {roleLabel}
+                </div>
+              </div>
+
+              {/* Email info */}
+              <div style={{
+                background: "#f8fafc", borderRadius: 10, padding: "12px 16px",
+                marginBottom: 24, fontSize: 13, color: "#64748b",
+              }}>
+                Cette invitation est destinée à <strong style={{ color: "#334155" }}>{email}</strong>.
+                <br />Créez un compte ou connectez-vous avec cette adresse email pour l&apos;accepter.
+              </div>
+
+              {/* Auth buttons */}
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
+                <Link
+                  href={`/sign-up?redirect_url=/setup/admin-invite/${token}`}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                    padding: "13px", background: "#1e3a8a", color: "white",
+                    borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: "none",
+                  }}
+                >
+                  <UserPlus size={18} />
+                  Créer un compte
+                </Link>
+                <Link
+                  href={`/sign-in?redirect_url=/setup/admin-invite/${token}`}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                    padding: "12px", background: "white", color: "#1e3a8a",
+                    border: "1.5px solid #bfdbfe", borderRadius: 10,
+                    fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  }}
+                >
+                  <LogIn size={18} />
+                  J&apos;ai déjà un compte — Se connecter
+                </Link>
+              </div>
+            </>
           ) : done ? (
             /* Success state */
             <div style={{ textAlign: "center" }}>

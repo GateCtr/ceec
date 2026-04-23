@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ClaimAdminInviteClient from "@/components/setup/ClaimAdminInviteClient";
 
@@ -17,10 +16,6 @@ export default async function AdminInvitePage({
 }) {
   const { token } = await params;
   const { userId } = await auth();
-
-  if (!userId) {
-    redirect(`/sign-in?redirect_url=/setup/admin-invite/${token}`);
-  }
 
   const invite = await prisma.inviteToken.findUnique({
     where: { token },
@@ -45,6 +40,7 @@ export default async function AdminInvitePage({
       roleLabel={roleLabel}
       roleNom={invite?.role?.nom ?? ""}
       error={error}
+      isLoggedIn={!!userId}
     />
   );
 }

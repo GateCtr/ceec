@@ -36,6 +36,30 @@ export async function PATCH(req: NextRequest) {
       where: { id: egliseId },
       data,
     });
+
+    // When logoUrl changes: sync the favicon in EgliseConfig if it was
+    // auto-derived from the old logo (i.e. faviconUrl is null or matched old logo).
+    // This forces browsers to pick up the new logo as favicon.
+    if ("logoUrl" in data) {
+      const newLogoUrl = data.logoUrl as string | null;
+      try {
+        const existingConfig = await prisma.egliseConfig.findUnique({
+          where: { egliseId },
+          select: { faviconUrl: true },
+        });
+        // Only sync if faviconUrl is not explicitly set to a different custom URL
+        if (!existingConfig?.faviconUrl || existingConfig.faviconUrl === (eglise as Record<string, unknown>).logoUrl) {
+          await prisma.egliseConfig.upsert({
+            where: { egliseId },
+            update: { faviconUrl: newLogoUrl },
+            create: { egliseId, faviconUrl: newLogoUrl },
+          });
+        }
+      } catch {
+        // Non-critical: favicon sync failure doesn't block the logo update
+      }
+    }
+
     return NextResponse.json(eglise);
   } catch {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

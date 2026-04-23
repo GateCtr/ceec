@@ -12,7 +12,7 @@ async function getEglises() {
     return await prisma.eglise.findMany({
       where: { statut: "actif" },
       orderBy: { nom: "asc" },
-      select: { id: true, nom: true, slug: true, ville: true, pasteur: true },
+      select: { id: true, nom: true, slug: true, ville: true, pasteur: true, logoUrl: true },
     });
   } catch {
     return [];

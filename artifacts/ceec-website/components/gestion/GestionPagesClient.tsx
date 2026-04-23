@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, Home, Settings, Eye, EyeOff } from "lucide-react";
 
 type Page = {
   id: number;
@@ -70,7 +70,125 @@ function EditPageForm({ page, onSave, onCancel }: { page: Page; onSave: (d: Part
   );
 }
 
-export default function GestionPagesClient({ initialPages }: { initialPages: Page[] }) {
+function HomePageCard({ homePage, onCreated }: { homePage: Page | null; onCreated: (page: Page) => void }) {
+  const [creating, setCreating] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [localPage, setLocalPage] = useState<Page | null>(homePage);
+
+  async function createHomePage() {
+    setCreating(true);
+    try {
+      const res = await fetch("/api/gestion/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titre: "Page d'accueil", slug: "accueil", type: "accueil" }),
+      });
+      if (res.ok) {
+        const page = await res.json();
+        const newPage = { ...page, sectionsCount: 0 };
+        setLocalPage(newPage);
+        onCreated(newPage);
+      }
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function togglePublish() {
+    if (!localPage) return;
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/gestion/pages/${localPage.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ publie: !localPage.publie }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setLocalPage((p) => p ? { ...p, publie: updated.publie } : p);
+      }
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  const page = localPage;
+
+  return (
+    <div style={{
+      background: page ? "white" : "#f0f7ff",
+      border: `2px solid ${page ? "#bfdbfe" : "#93c5fd"}`,
+      borderRadius: 14,
+      padding: "1.25rem 1.5rem",
+      marginBottom: 24,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 10,
+            background: "linear-gradient(135deg, #1e3a8a, #1e5aa8)",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Home size={22} color="white" />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#0f172a" }}>Page d&apos;accueil du site</div>
+            <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>
+              {page
+                ? `${page.sectionsCount} section${page.sectionsCount !== 1 ? "s" : ""} configurée${page.sectionsCount !== 1 ? "s" : ""} · ${page.publie ? "✅ Publiée" : "⚪ Brouillon"}`
+                : "Non configurée — la page par défaut est affichée"}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {page ? (
+            <>
+              <a
+                href="/c"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 13, cursor: "pointer", textDecoration: "none" }}
+              >
+                Voir
+              </a>
+              <button
+                onClick={togglePublish}
+                disabled={publishing}
+                style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: page.publie ? "#fef3c7" : "#dcfce7", color: page.publie ? "#b45309" : "#15803d", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
+                {page.publie ? <><EyeOff size={13} /> Dépublier</> : <><Eye size={13} /> Publier</>}
+              </button>
+              <Link
+                href={`/gestion/pages/${page.id}/sections`}
+                style={{ padding: "8px 16px", borderRadius: 8, background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
+                <Settings size={13} /> Configurer les sections
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={createHomePage}
+              disabled={creating}
+              style={{ padding: "8px 20px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: creating ? 0.7 : 1, display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              <Plus size={14} />
+              {creating ? "Création…" : "Initialiser la page d'accueil"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {!page && (
+        <div style={{ marginTop: 12, padding: "10px 14px", background: "#eff6ff", borderRadius: 8, fontSize: 13, color: "#1d4ed8" }}>
+          💡 Sans page d&apos;accueil configurée, votre site affiche automatiquement vos annonces et événements récents. Initialisez-la pour personnaliser les sections, le hero, et l&apos;ordre du contenu.
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function GestionPagesClient({ initialPages, homePage }: { initialPages: Page[]; homePage: Page | null }) {
   const [pages, setPages] = useState<Page[]>(initialPages);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -107,7 +225,10 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
 
   return (
     <>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginBottom: 20 }}>
+      <HomePageCard homePage={homePage} onCreated={(p) => setPages((ps) => [...ps, p])} />
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#374151", margin: 0 }}>Pages supplémentaires</h2>
         <Link
           href="/gestion/pages/nouveau"
           style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}
@@ -117,12 +238,12 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
       </div>
 
       {pages.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <FileText size={40} color="#e2e8f0" />
+            <FileText size={36} color="#e2e8f0" />
           </div>
-          <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune page configurée</h3>
-          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Créez votre première page personnalisée pour enrichir votre site public.</p>
+          <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune page supplémentaire</h3>
+          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Créez des pages libres (À propos, Contact, Ministères…) pour enrichir votre site.</p>
           <Link href="/gestion/pages/nouveau" style={{ padding: "10px 24px", borderRadius: 9, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700, fontSize: 14 }}>Créer une page</Link>
         </div>
       ) : (
@@ -155,7 +276,7 @@ export default function GestionPagesClient({ initialPages }: { initialPages: Pag
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
                         <Link
-                          href={`/gestion/pages/${page.id}`}
+                          href={`/gestion/pages/${page.id}/sections`}
                           style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", fontSize: 12, fontWeight: 600, color: "#374151", textDecoration: "none" }}
                         >
                           Sections

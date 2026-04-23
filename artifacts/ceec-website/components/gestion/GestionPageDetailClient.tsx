@@ -49,10 +49,13 @@ const SECTION_TYPES = [
 const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; placeholder?: string }>> = {
   hero: [
     { key: "titre", label: "Titre principal", type: "text", placeholder: "Bienvenue à notre église" },
-    { key: "sousTitre", label: "Sous-titre", type: "text", placeholder: "Venez tel que vous êtes" },
+    { key: "sousTitre", label: "Sous-titre / lieu", type: "text", placeholder: "Kinshasa, RDC" },
+    { key: "description", label: "Description (facultatif)", type: "textarea", placeholder: "Présentation de l'église..." },
     { key: "imageUrl", label: "Image de fond (URL)", type: "text", placeholder: "https://..." },
-    { key: "ctaTexte", label: "Texte du bouton", type: "text", placeholder: "En savoir plus" },
-    { key: "ctaLien", label: "Lien du bouton", type: "text", placeholder: "/c/a-propos" },
+    { key: "ctaLabel1", label: "Bouton principal — texte", type: "text", placeholder: "Rejoindre l'église" },
+    { key: "ctaHref1", label: "Bouton principal — lien", type: "text", placeholder: "/c/inscription" },
+    { key: "ctaLabel2", label: "Bouton secondaire — texte", type: "text", placeholder: "Voir les événements" },
+    { key: "ctaHref2", label: "Bouton secondaire — lien", type: "text", placeholder: "/c/evenements" },
   ],
   texte_image: [
     { key: "titre", label: "Titre", type: "text", placeholder: "Notre mission" },
@@ -419,7 +422,7 @@ export default function GestionPageDetailClient({
     }
   }
 
-  const previewUrl = `/c/${page.slug}`;
+  const previewUrl = page.type === "accueil" ? "/c" : `/c/${page.slug}`;
 
   return (
     <>

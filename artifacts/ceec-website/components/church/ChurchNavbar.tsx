@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, useAuth } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { EgliseData } from "@/lib/church-context";
 
 type PageLink = {
@@ -28,10 +28,23 @@ export default function ChurchNavbar({
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  const isHomePage = pathname === "/c";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const primary = config?.couleurPrimaire ?? "var(--church-primary, #1e3a8a)";
   const accent = config?.couleurAccent ?? "var(--church-accent, #c59b2e)";
   const navBg = primary.startsWith("#") ? primary : "#1e3a8a";
+  const accentColor = accent.startsWith("#") ? accent : "#c59b2e";
+
+  const transparent = isHomePage && !scrolled;
 
   const baseLinks = [
     { href: "/c", label: "Accueil" },
@@ -55,12 +68,16 @@ export default function ChurchNavbar({
   return (
     <nav
       style={{
-        background: navBg,
+        background: transparent ? "transparent" : navBg,
         color: "white",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-        position: "sticky",
+        boxShadow: transparent ? "none" : "0 2px 12px rgba(0,0,0,0.18)",
+        position: "fixed",
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 100,
+        transition: "background 0.3s ease, box-shadow 0.3s ease",
+        backdropFilter: transparent ? "none" : "blur(2px)",
       }}
     >
       <div
@@ -80,13 +97,13 @@ export default function ChurchNavbar({
             <img
               src={eglise.logoUrl}
               alt={eglise.nom}
-              style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: `2px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` }}
+              style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentColor}` }}
             />
           ) : (
             <div
               style={{
                 width: 40, height: 40, borderRadius: "50%",
-                background: accent.startsWith("#") ? accent : "#c59b2e",
+                background: accentColor,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontWeight: 800, fontSize: 16, color: navBg, flexShrink: 0,
               }}
@@ -95,10 +112,10 @@ export default function ChurchNavbar({
             </div>
           )}
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.2, color: "white", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.2, color: "white", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
               {eglise.nom}
             </div>
-            <div style={{ fontSize: 10, opacity: 0.7, lineHeight: 1.2 }}>
+            <div style={{ fontSize: 10, opacity: 0.75, lineHeight: 1.2, textShadow: transparent ? "0 1px 3px rgba(0,0,0,0.4)" : "none" }}>
               {eglise.ville} — CEEC
             </div>
           </div>
@@ -116,10 +133,11 @@ export default function ChurchNavbar({
                 fontSize: 14,
                 fontWeight: isActive(link.href) ? 600 : 400,
                 background: isActive(link.href) ? "rgba(255,255,255,0.2)" : "transparent",
-                borderBottom: isActive(link.href) ? `2px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "2px solid transparent",
+                borderBottom: isActive(link.href) ? `2px solid ${accentColor}` : "2px solid transparent",
                 color: "white",
                 textDecoration: "none",
                 transition: "background 0.15s",
+                textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
               }}
             >
               {link.label}
@@ -133,8 +151,9 @@ export default function ChurchNavbar({
               <Link href="/c/mon-espace" style={{
                 padding: "6px 12px", borderRadius: 7, fontSize: 14,
                 background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.2)" : "transparent",
-                borderBottom: pathname === "/c/mon-espace" ? `2px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "2px solid transparent",
+                borderBottom: pathname === "/c/mon-espace" ? `2px solid ${accentColor}` : "2px solid transparent",
                 color: "white", textDecoration: "none", fontWeight: pathname === "/c/mon-espace" ? 600 : 400,
+                textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
               }}>
                 Mon espace
               </Link>
@@ -148,12 +167,13 @@ export default function ChurchNavbar({
                 padding: "6px 16px", borderRadius: 7, fontSize: 14,
                 background: "rgba(255,255,255,0.12)", color: "white", fontWeight: 500,
                 marginLeft: 4, textDecoration: "none",
+                textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
               }}>
                 Connexion
               </Link>
               <Link href="/c/inscription" style={{
                 padding: "6px 16px", borderRadius: 7, fontSize: 14,
-                background: accent.startsWith("#") ? accent : "#c59b2e",
+                background: accentColor,
                 color: navBg, fontWeight: 700, marginLeft: 4, textDecoration: "none",
               }}>
                 S&apos;inscrire
@@ -177,7 +197,7 @@ export default function ChurchNavbar({
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div style={{ background: "rgba(0,0,0,0.25)", backdropFilter: "blur(4px)", padding: "1rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+        <div style={{ background: `${navBg}f0`, backdropFilter: "blur(8px)", padding: "1rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.12)" }}>
           {links.map((link) => (
             <Link
               key={link.href}
@@ -188,7 +208,7 @@ export default function ChurchNavbar({
                 color: "white", fontSize: 15, fontWeight: isActive(link.href) ? 600 : 400,
                 background: isActive(link.href) ? "rgba(255,255,255,0.15)" : "transparent",
                 marginBottom: 4, textDecoration: "none",
-                borderLeft: isActive(link.href) ? `3px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "3px solid transparent",
+                borderLeft: isActive(link.href) ? `3px solid ${accentColor}` : "3px solid transparent",
               }}
             >
               {link.label}
@@ -199,7 +219,7 @@ export default function ChurchNavbar({
               display: "block", padding: "12px 14px", borderRadius: 8,
               color: "white", fontSize: 15, marginBottom: 4, textDecoration: "none",
               background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.15)" : "transparent",
-              borderLeft: pathname === "/c/mon-espace" ? `3px solid ${accent.startsWith("#") ? accent : "#c59b2e"}` : "3px solid transparent",
+              borderLeft: pathname === "/c/mon-espace" ? `3px solid ${accentColor}` : "3px solid transparent",
             }}>
               Mon espace
             </Link>
@@ -214,7 +234,7 @@ export default function ChurchNavbar({
               </Link>
               <Link href="/c/inscription" onClick={() => setMenuOpen(false)} style={{
                 flex: 1, padding: "11px", borderRadius: 8,
-                background: accent.startsWith("#") ? accent : "#c59b2e",
+                background: accentColor,
                 color: navBg, fontWeight: 700, textAlign: "center", fontSize: 14, textDecoration: "none",
               }}>
                 S&apos;inscrire

@@ -20,19 +20,25 @@ export default async function GestionPagesPage() {
   const allowed = superAdmin || await hasPermission(userId, "eglise_gerer_config", egliseId);
   if (!allowed) redirect("/gestion?error=acces-refuse");
 
-  const pages = await prisma.pageEglise.findMany({
+  const allPages = await prisma.pageEglise.findMany({
     where: { egliseId },
     orderBy: { ordre: "asc" },
     include: { _count: { select: { sections: true } } },
   });
 
+  const homePage = allPages.find((p) => p.type === "accueil") ?? null;
+  const otherPages = allPages.filter((p) => p.type !== "accueil");
+
   return (
     <div style={{ padding: "2rem", maxWidth: 900 }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Pages du site</h1>
-        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Créez et gérez les pages personnalisées de votre site public</p>
+        <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Gérez la page d&apos;accueil et les pages personnalisées de votre site public</p>
       </div>
-      <GestionPagesClient initialPages={pages.map(p => ({ ...p, sectionsCount: p._count.sections }))} />
+      <GestionPagesClient
+        initialPages={otherPages.map((p) => ({ ...p, sectionsCount: p._count.sections }))}
+        homePage={homePage ? { ...homePage, sectionsCount: homePage._count.sections } : null}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ type Eglise = {
   slug: string | null;
   ville: string;
   pasteur: string | null;
+  logoUrl?: string | null;
   inscriptionUrl: string | null;
 };
 
@@ -42,6 +43,39 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
     );
   }
 
+  function ChurchAvatar({ eglise, size = 42 }: { eglise: Eglise; size?: number }) {
+    if (eglise.logoUrl) {
+      return (
+        <img
+          src={eglise.logoUrl}
+          alt={eglise.nom}
+          width={size}
+          height={size}
+          style={{
+            width: size, height: size, borderRadius: "50%", objectFit: "cover",
+            border: "2px solid #e2e8f0", flexShrink: 0,
+          }}
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement;
+            target.style.display = "none";
+            const fallback = target.nextElementSibling as HTMLElement | null;
+            if (fallback) fallback.style.display = "flex";
+          }}
+        />
+      );
+    }
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%",
+        background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "white", fontWeight: 800, fontSize: Math.round(size * 0.4), flexShrink: 0,
+      }}>
+        {eglise.nom.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Barre de recherche */}
@@ -52,13 +86,8 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
           stroke="#94a3b8"
           strokeWidth="2"
           style={{
-            position: "absolute",
-            left: 12,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 16,
-            height: 16,
-            pointerEvents: "none",
+            position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+            width: 16, height: 16, pointerEvents: "none",
           }}
         >
           <circle cx="11" cy="11" r="8" />
@@ -70,28 +99,16 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher une paroisse ou une ville…"
           style={{
-            width: "100%",
-            padding: "10px 14px 10px 38px",
-            borderRadius: 8,
-            border: "1.5px solid #e2e8f0",
-            fontSize: 14,
-            outline: "none",
-            boxSizing: "border-box",
-            color: "#0f172a",
+            width: "100%", padding: "10px 14px 10px 38px", borderRadius: 8,
+            border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none",
+            boxSizing: "border-box", color: "#0f172a",
           }}
           autoFocus
         />
       </div>
 
       {/* Liste */}
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        maxHeight: 340,
-        overflowY: "auto",
-        paddingRight: 2,
-      }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 340, overflowY: "auto", paddingRight: 2 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "1.5rem", color: "#94a3b8", fontSize: 14 }}>
             Aucune paroisse trouvée pour &laquo;&nbsp;{query}&nbsp;&raquo;
@@ -103,16 +120,9 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
                 key={eglise.id}
                 href={eglise.inscriptionUrl}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  border: "1.5px solid #e2e8f0",
-                  textDecoration: "none",
-                  background: "white",
-                  transition: "border-color 0.15s, box-shadow 0.15s",
-                  cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 12, padding: "12px 14px",
+                  borderRadius: 10, border: "1.5px solid #e2e8f0", textDecoration: "none",
+                  background: "white", transition: "border-color 0.15s, box-shadow 0.15s", cursor: "pointer",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = "#1e3a8a";
@@ -123,33 +133,22 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                {/* Avatar initiale */}
-                <div style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  fontWeight: 800,
-                  fontSize: 17,
-                  flexShrink: 0,
-                }}>
-                  {eglise.nom.charAt(0).toUpperCase()}
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <ChurchAvatar eglise={eglise} size={42} />
+                  {eglise.logoUrl && (
+                    <div style={{
+                      width: 42, height: 42, borderRadius: "50%",
+                      background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
+                      display: "none", alignItems: "center", justifyContent: "center",
+                      color: "white", fontWeight: 800, fontSize: 17, flexShrink: 0,
+                      position: "absolute", top: 0, left: 0,
+                    }}>
+                      {eglise.nom.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
-
-                {/* Infos */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontWeight: 700,
-                    fontSize: 14,
-                    color: "#0f172a",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {eglise.nom}
                   </div>
                   <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
@@ -159,47 +158,16 @@ export default function ChurchPickerClient({ eglises }: { eglises: Eglise[] }) {
                     )}
                   </div>
                 </div>
-
-                {/* Flèche */}
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#94a3b8"
-                  strokeWidth="2.5"
-                  style={{ width: 16, height: 16, flexShrink: 0 }}
-                >
+                <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ width: 16, height: 16, flexShrink: 0 }}>
                   <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </a>
             ) : (
               <div
                 key={eglise.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  border: "1.5px solid #f1f5f9",
-                  background: "#f8fafc",
-                  opacity: 0.6,
-                }}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10, border: "1.5px solid #f1f5f9", background: "#f8fafc", opacity: 0.6 }}
               >
-                <div style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "50%",
-                  background: "#cbd5e1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  fontWeight: 800,
-                  fontSize: 17,
-                  flexShrink: 0,
-                }}>
-                  {eglise.nom.charAt(0).toUpperCase()}
-                </div>
+                <ChurchAvatar eglise={eglise} size={42} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, color: "#64748b" }}>{eglise.nom}</div>
                   <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>

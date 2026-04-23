@@ -159,7 +159,7 @@ export default async function ChurchLayout({ children }: { children: React.React
         pages={publishedPages}
         config={{ couleurPrimaire: primaryColor, couleurAccent: accentColor }}
       />
-      <main style={{ minHeight: "70vh" }}>{children}</main>
+      <main style={{ minHeight: "70vh", paddingTop: 64 }}>{children}</main>
       <ChurchFooter eglise={eglise} social={socialLinks} pages={publishedPages} />
     </EgliseProvider>
   );

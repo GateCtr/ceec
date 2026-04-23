@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
+import { SITE_URL } from "@/lib/seo";
 import { MapPin, Phone, Mail, User, Clock, Globe, Facebook, Youtube, Instagram, Twitter, ExternalLink, Megaphone, CalendarDays, Users } from "lucide-react";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "ceec-rdc.org";
@@ -32,11 +33,33 @@ async function getEgliseData(id: number) {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const data = await prisma.eglise.findUnique({ where: { id: parseInt(id) }, select: { nom: true, ville: true } }).catch(() => null);
-  if (!data) return { title: "Paroisse | CEEC" };
+  const data = await prisma.eglise
+    .findUnique({
+      where: { id: parseInt(id) },
+      select: { nom: true, ville: true, description: true, logoUrl: true, photoUrl: true },
+    })
+    .catch(() => null);
+  if (!data) return { title: "Paroisse" };
+  const description =
+    data.description ??
+    `Découvrez la paroisse ${data.nom} de la CEEC à ${data.ville}.`;
+  const ogImage = data.photoUrl ?? data.logoUrl ?? null;
   return {
-    title: `${data.nom} — ${data.ville} | CEEC`,
-    description: `Découvrez la paroisse ${data.nom} de la CEEC à ${data.ville}.`,
+    title: `${data.nom} — ${data.ville}`,
+    description,
+    openGraph: {
+      title: `${data.nom} | CEEC`,
+      description,
+      url: `${SITE_URL}/paroisses/${id}`,
+      type: "website",
+      ...(ogImage ? { images: [{ url: ogImage, alt: data.nom }] } : {}),
+    },
+    twitter: {
+      card: ogImage ? ("summary_large_image" as const) : ("summary" as const),
+      title: `${data.nom} | CEEC`,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
   };
 }
 

@@ -10,10 +10,25 @@ import {
   GraduationCap, Tv2,
 } from "lucide-react";
 
-export const metadata = {
-  title: "À propos | CEEC",
+import type { Metadata } from "next";
+import { SITE_URL, SITE_NAME, orgJsonLd } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "À propos",
   description:
     "Découvrez la Communauté des Églises Évangéliques au Congo — identité juridique, mission, doctrine, gouvernance et structure.",
+  openGraph: {
+    title: `À propos | ${SITE_NAME}`,
+    description:
+      "Histoire, mission, doctrine et gouvernance de la Communauté des Églises Évangéliques au Congo.",
+    url: `${SITE_URL}/a-propos`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: `À propos | ${SITE_NAME}`,
+    description: "Histoire, mission et gouvernance de la CEEC.",
+  },
 };
 
 async function getStats() {
@@ -193,6 +208,10 @@ export default async function AProposPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd()) }}
+      />
       <NavbarServer />
       <main>
 

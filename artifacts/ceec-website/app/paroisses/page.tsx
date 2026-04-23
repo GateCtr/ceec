@@ -1,8 +1,28 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import NavbarServer from "@/components/NavbarServer";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/db";
 import { ChevronRight } from "lucide-react";
+import { SITE_URL, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Nos Paroisses",
+  description:
+    "Découvrez les paroisses de la Communauté des Églises Évangéliques au Congo (CEEC) à travers la République Démocratique du Congo.",
+  openGraph: {
+    title: `Nos Paroisses | ${SITE_NAME}`,
+    description:
+      "Retrouvez toutes les paroisses CEEC actives en RDC — adresses, pasteurs, activités et informations pratiques.",
+    url: `${SITE_URL}/paroisses`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: `Nos Paroisses | ${SITE_NAME}`,
+    description: "Retrouvez toutes les paroisses CEEC actives en RDC.",
+  },
+};
 
 async function getEglises() {
   try {
@@ -12,10 +32,6 @@ async function getEglises() {
   }
 }
 
-export const metadata = {
-  title: "Nos Eglises | CEEC",
-  description: "Decouvrez toutes les eglises membres de la CEEC au Congo",
-};
 
 export default async function ParoissesPage() {
   const eglisesList = await getEglises();

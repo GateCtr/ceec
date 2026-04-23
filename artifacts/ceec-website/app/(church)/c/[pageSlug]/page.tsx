@@ -12,11 +12,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { pageSlug } = await params;
   if (!slug) return {};
   try {
-    const page = await prisma.pageEglise.findFirst({
-      where: { slug: pageSlug, eglise: { slug }, publie: true },
-      select: { titre: true },
-    });
-    return { title: page?.titre ?? pageSlug };
+    const [page, eglise] = await Promise.all([
+      prisma.pageEglise.findFirst({
+        where: { slug: pageSlug, eglise: { slug }, publie: true },
+        select: { titre: true, sections: true },
+      }),
+      prisma.eglise.findUnique({
+        where: { slug },
+        select: { nom: true, logoUrl: true, photoUrl: true },
+      }),
+    ]);
+    if (!page || !eglise) return {};
+    const ogImage = eglise.photoUrl ?? eglise.logoUrl ?? null;
+    return {
+      title: page.titre,
+      openGraph: {
+        title: `${page.titre} | ${eglise.nom}`,
+        type: "website",
+        ...(ogImage ? { images: [{ url: ogImage, alt: eglise.nom }] } : {}),
+      },
+      twitter: {
+        card: ogImage ? ("summary_large_image" as const) : ("summary" as const),
+        title: `${page.titre} | ${eglise.nom}`,
+        ...(ogImage ? { images: [ogImage] } : {}),
+      },
+    };
   } catch { return {}; }
 }
 

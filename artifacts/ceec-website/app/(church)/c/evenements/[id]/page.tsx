@@ -10,7 +10,44 @@ import ParticipationButton from "@/components/church/ParticipationButton";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return { title: "Événement" };
+  const headersList = await headers();
+  const egliseIdHeader = headersList.get("x-eglise-id");
+  const { id } = await params;
+  const evtId = parseInt(id, 10);
+
+  try {
+    const evt = await prisma.evenement.findFirst({
+      where: egliseIdHeader
+        ? { id: evtId, egliseId: parseInt(egliseIdHeader, 10) }
+        : { id: evtId },
+      select: {
+        titre: true, description: true, imageUrl: true, dateDebut: true, lieu: true,
+        eglise: { select: { nom: true } },
+      },
+    });
+    if (!evt) return { title: "Événement" };
+    const description =
+      evt.description?.replace(/<[^>]+>/g, "").slice(0, 160) ??
+      `Événement du ${new Date(evt.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}${evt.lieu ? ` à ${evt.lieu}` : ""}${evt.eglise ? ` — ${evt.eglise.nom}` : ""}`;
+    return {
+      title: evt.titre,
+      description,
+      openGraph: {
+        title: evt.titre,
+        description,
+        type: "article",
+        ...(evt.imageUrl ? { images: [{ url: evt.imageUrl, alt: evt.titre }] } : {}),
+      },
+      twitter: {
+        card: evt.imageUrl ? ("summary_large_image" as const) : ("summary" as const),
+        title: evt.titre,
+        description,
+        ...(evt.imageUrl ? { images: [evt.imageUrl] } : {}),
+      },
+    };
+  } catch {
+    return { title: "Événement" };
+  }
 }
 
 export default async function EvenementDetailPage({ params }: Props) {

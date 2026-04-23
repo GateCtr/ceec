@@ -3,9 +3,53 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import MembreMarathonDetailClient from "./MembreMarathonDetailClient";
 import { computeMarathonDays, toDateString } from "@/lib/marathon-utils";
+
+type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const headersList = await headers();
+  const egliseIdHeader = headersList.get("x-eglise-id");
+  const { id } = await params;
+  const marathonId = parseInt(id, 10);
+
+  try {
+    const marathon = await prisma.marathon.findFirst({
+      where: egliseIdHeader
+        ? { id: marathonId, egliseId: parseInt(egliseIdHeader, 10) }
+        : { id: marathonId },
+      select: {
+        titre: true, theme: true, logoUrl: true, dateDebut: true, nombreJours: true,
+        eglise: { select: { nom: true } },
+      },
+    });
+    if (!marathon) return { title: "Marathon" };
+    const description =
+      marathon.theme ??
+      `Marathon de prière de ${marathon.nombreJours} jours — ${marathon.eglise.nom}`;
+    return {
+      title: marathon.titre,
+      description,
+      openGraph: {
+        title: marathon.titre,
+        description,
+        type: "article",
+        ...(marathon.logoUrl ? { images: [{ url: marathon.logoUrl, alt: marathon.titre }] } : {}),
+      },
+      twitter: {
+        card: marathon.logoUrl ? ("summary_large_image" as const) : ("summary" as const),
+        title: marathon.titre,
+        description,
+        ...(marathon.logoUrl ? { images: [marathon.logoUrl] } : {}),
+      },
+    };
+  } catch {
+    return { title: "Marathon" };
+  }
+}
 
 export default async function MembreMarathonDetailPage({
   params,

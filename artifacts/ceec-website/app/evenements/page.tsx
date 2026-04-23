@@ -6,7 +6,25 @@ import Link from "next/link";
 import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Événements | CEEC" };
+import { SITE_URL, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Événements",
+  description:
+    "Agenda des événements, rassemblements et activités organisés par les paroisses de la CEEC.",
+  openGraph: {
+    title: `Événements | ${SITE_NAME}`,
+    description:
+      "Agenda des événements, rassemblements et activités organisés par les paroisses de la CEEC en RDC.",
+    url: `${SITE_URL}/evenements`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: `Événements | ${SITE_NAME}`,
+    description: "Agenda des événements CEEC en RDC.",
+  },
+};
 
 const ITEMS_PER_PAGE = 12;
 

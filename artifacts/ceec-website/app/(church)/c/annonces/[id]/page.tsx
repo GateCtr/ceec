@@ -9,7 +9,42 @@ import { prisma } from "@/lib/db/index";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return { title: "Annonce" };
+  const headersList = await headers();
+  const egliseIdHeader = headersList.get("x-eglise-id");
+  const { id } = await params;
+  const annonceId = parseInt(id, 10);
+
+  try {
+    const annonce = await prisma.annonce.findFirst({
+      where: egliseIdHeader
+        ? { id: annonceId, egliseId: parseInt(egliseIdHeader, 10) }
+        : { id: annonceId },
+      select: {
+        titre: true, contenu: true,
+        eglise: { select: { nom: true } },
+      },
+    });
+    if (!annonce) return { title: "Annonce" };
+    const description = annonce.contenu
+      ? annonce.contenu.replace(/<[^>]+>/g, "").slice(0, 160)
+      : `Annonce de ${annonce.eglise?.nom ?? "l'église"}`;
+    return {
+      title: annonce.titre,
+      description,
+      openGraph: {
+        title: annonce.titre,
+        description,
+        type: "article",
+      },
+      twitter: {
+        card: "summary",
+        title: annonce.titre,
+        description,
+      },
+    };
+  } catch {
+    return { title: "Annonce" };
+  }
 }
 
 const prioriteStyle = (p: string) => {

@@ -3,6 +3,7 @@ import { Playfair_Display, Lato } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import "./globals.css";
+import { SITE_URL, SITE_NAME, SITE_FULL_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -20,14 +21,43 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "CEEC — Communauté des Églises Évangéliques au Congo",
-  description:
-    "Bienvenue sur le site officiel de la Communauté des Églises Évangéliques au Congo (CEEC). Découvrez nos paroisses, nos événements et notre communauté.",
-  keywords: "CEEC, Église, Évangélique, Congo, Paroisse, Communauté",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_FULL_NAME}`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "CEEC", "Église", "Évangélique", "Congo", "Paroisse", "Communauté",
+    "RDC", "Kinshasa", "Foi", "Protestant",
+  ],
+  authors: [{ name: SITE_FULL_NAME, url: SITE_URL }],
+  creator: SITE_FULL_NAME,
+  publisher: SITE_FULL_NAME,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_CD",
+    url: SITE_URL,
+    siteName: `${SITE_NAME} — ${SITE_FULL_NAME}`,
+    title: `${SITE_NAME} — ${SITE_FULL_NAME}`,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/icon.png", width: 512, height: 512, alt: "Logo CEEC" }],
+  },
+  twitter: {
+    card: "summary",
+    title: `${SITE_NAME} — ${SITE_FULL_NAME}`,
+    description: SITE_DESCRIPTION,
+    images: ["/icon.png"],
+  },
   icons: {
     icon: [{ url: "/icon.png", type: "image/png" }],
     shortcut: [{ url: "/icon.png" }],
-    apple: [{ url: "/icon.png" }],
+    apple: [{ url: "/apple-icon.png" }],
   },
 };
 

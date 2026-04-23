@@ -6,7 +6,25 @@ import Link from "next/link";
 import { Megaphone, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Annonces | CEEC" };
+import { SITE_URL, SITE_NAME } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Annonces",
+  description:
+    "Dernières annonces et nouvelles de la Communauté des Églises Évangéliques au Congo.",
+  openGraph: {
+    title: `Annonces | ${SITE_NAME}`,
+    description:
+      "Restez informé des dernières nouvelles et annonces officielles de la CEEC et de ses paroisses.",
+    url: `${SITE_URL}/annonces`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: `Annonces | ${SITE_NAME}`,
+    description: "Dernières annonces et nouvelles de la CEEC.",
+  },
+};
 
 const ITEMS_PER_PAGE = 12;
 

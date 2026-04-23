@@ -6,6 +6,7 @@ import { EgliseProvider, type EgliseData } from "@/lib/church-context";
 import ChurchNavbar from "@/components/church/ChurchNavbar";
 import ChurchFooter from "@/components/church/ChurchFooter";
 import ChurchAuthLayout from "@/components/church/ChurchAuthLayout";
+import { churchBaseUrl, churchJsonLd } from "@/lib/seo";
 
 const AUTH_PATHS = ["/c/connexion", "/c/inscription", "/c/oauth-callback"];
 
@@ -50,9 +51,14 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const eglise = await prisma.eglise.findUnique({
       where: { slug },
-      select: { nom: true, ville: true, description: true, logoUrl: true, config: { select: { faviconUrl: true } } },
+      select: {
+        nom: true, ville: true, description: true,
+        logoUrl: true, photoUrl: true,
+        config: { select: { faviconUrl: true } },
+      },
     });
     if (!eglise) return {};
+
     const faviconUrl = eglise.config?.faviconUrl ?? eglise.logoUrl ?? null;
     const icons = faviconUrl
       ? {
@@ -61,10 +67,34 @@ export async function generateMetadata(): Promise<Metadata> {
           apple: [{ url: faviconUrl }],
         }
       : undefined;
+
+    const description =
+      eglise.description ??
+      `Paroisse ${eglise.nom}${eglise.ville ? ` de ${eglise.ville}` : ""} — Communauté des Églises Évangéliques au Congo (CEEC)`;
+
+    const baseUrl = churchBaseUrl(slug);
+    const ogImage = eglise.photoUrl ?? eglise.logoUrl ?? null;
+
     return {
+      metadataBase: new URL(baseUrl),
       title: { default: eglise.nom, template: `%s | ${eglise.nom}` },
-      description: eglise.description ?? `Église de ${eglise.ville} — Communauté des Églises Évangéliques au Congo (CEEC)`,
+      description,
       icons,
+      openGraph: {
+        type: "website",
+        locale: "fr_CD",
+        url: `${baseUrl}/c`,
+        siteName: eglise.nom,
+        title: eglise.nom,
+        description,
+        ...(ogImage ? { images: [{ url: ogImage, alt: eglise.nom }] } : {}),
+      },
+      twitter: {
+        card: ogImage ? ("summary_large_image" as const) : ("summary" as const),
+        title: eglise.nom,
+        description,
+        ...(ogImage ? { images: [ogImage] } : {}),
+      },
     };
   } catch { return {}; }
 }
@@ -139,9 +169,12 @@ export default async function ChurchLayout({ children }: { children: React.React
     horaires: churchConfig?.horaires,
   };
 
+  const ldJson = eglise.slug ? churchJsonLd({ ...eglise, slug: eglise.slug }) : null;
+
   if (isAuthPage) {
     return (
       <EgliseProvider eglise={eglise} isChurchDomain={true}>
+        {ldJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />}
         <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         {churchConfig?.cssPersonnalise && (
           <style dangerouslySetInnerHTML={{ __html: sanitizeCustomCss(churchConfig.cssPersonnalise) }} />
@@ -153,6 +186,7 @@ export default async function ChurchLayout({ children }: { children: React.React
 
   return (
     <EgliseProvider eglise={eglise} isChurchDomain={true}>
+      {ldJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />}
       <style dangerouslySetInnerHTML={{ __html: cssVars }} />
       {churchConfig?.cssPersonnalise && (
         <style dangerouslySetInnerHTML={{ __html: sanitizeCustomCss(churchConfig.cssPersonnalise) }} />

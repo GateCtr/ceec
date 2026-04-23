@@ -6,13 +6,39 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, MapPin, Calendar, Clock, Tag, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
+import { SITE_URL, SITE_NAME } from "@/lib/seo";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const evt = await prisma.evenement.findUnique({ where: { id: parseInt(id, 10) }, select: { titre: true } });
-  return { title: evt ? `${evt.titre} | CEEC` : "Événement | CEEC" };
+  const evt = await prisma.evenement
+    .findUnique({
+      where: { id: parseInt(id, 10) },
+      select: { titre: true, description: true, imageUrl: true, dateDebut: true, lieu: true, eglise: { select: { nom: true } } },
+    })
+    .catch(() => null);
+  if (!evt) return { title: "Événement" };
+  const description =
+    evt.description?.slice(0, 160) ??
+    `Événement du ${new Date(evt.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}${evt.lieu ? ` à ${evt.lieu}` : ""} — ${SITE_NAME}`;
+  return {
+    title: evt.titre,
+    description,
+    openGraph: {
+      title: `${evt.titre} | ${SITE_NAME}`,
+      description,
+      url: `${SITE_URL}/evenements/${id}`,
+      type: "article",
+      ...(evt.imageUrl ? { images: [{ url: evt.imageUrl, alt: evt.titre }] } : {}),
+    },
+    twitter: {
+      card: evt.imageUrl ? ("summary_large_image" as const) : ("summary" as const),
+      title: `${evt.titre} | ${SITE_NAME}`,
+      description,
+      ...(evt.imageUrl ? { images: [evt.imageUrl] } : {}),
+    },
+  };
 }
 
 export default async function EvenementDetailPage({ params }: Props) {

@@ -50,6 +50,9 @@ export async function PUT(req: NextRequest) {
       ...(body.cssPersonnalise !== undefined && { cssPersonnalise: body.cssPersonnalise || null }),
       ...(body.facebook !== undefined && { facebook: body.facebook || null }),
       ...(body.youtube !== undefined && { youtube: body.youtube || null }),
+      ...(body.youtubeChannelId !== undefined && {
+        youtubeChannelId: (body.youtubeChannelId as string)?.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30) || null,
+      }),
       ...(body.instagram !== undefined && { instagram: body.instagram || null }),
       ...(body.twitter !== undefined && { twitter: body.twitter || null }),
       ...(body.whatsapp !== undefined && { whatsapp: body.whatsapp || null }),

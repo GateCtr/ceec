@@ -6,6 +6,7 @@ import { EgliseProvider, type EgliseData } from "@/lib/church-context";
 import ChurchNavbar from "@/components/church/ChurchNavbar";
 import ChurchFooter from "@/components/church/ChurchFooter";
 import ChurchAuthLayout from "@/components/church/ChurchAuthLayout";
+import ChurchLiveDetector from "@/components/church/ChurchLiveDetector";
 import { churchBaseUrl, churchJsonLd } from "@/lib/seo";
 
 const AUTH_PATHS = ["/c/connexion", "/c/inscription", "/c/oauth-callback"];
@@ -198,6 +199,13 @@ export default async function ChurchLayout({ children }: { children: React.React
       />
       <main style={{ minHeight: "70vh", paddingTop: 64 }}>{children}</main>
       <ChurchFooter eglise={eglise} social={socialLinks} pages={publishedPages} />
+      {churchConfig?.youtubeChannelId && (
+        <ChurchLiveDetector
+          channelId={churchConfig.youtubeChannelId}
+          egliseNom={eglise.nom}
+          primaryColor={primaryColor}
+        />
+      )}
     </EgliseProvider>
   );
 }

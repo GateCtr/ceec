@@ -14,6 +14,7 @@ type ConfigData = {
   cssPersonnalise?: string | null;
   facebook?: string | null;
   youtube?: string | null;
+  youtubeChannelId?: string | null;
   instagram?: string | null;
   twitter?: string | null;
   whatsapp?: string | null;
@@ -61,6 +62,7 @@ export default function GestionApparenceClient({ initialConfig, initialContact, 
     cssPersonnalise: initialConfig?.cssPersonnalise ?? "",
     facebook: initialConfig?.facebook ?? "",
     youtube: initialConfig?.youtube ?? "",
+    youtubeChannelId: initialConfig?.youtubeChannelId ?? "",
     instagram: initialConfig?.instagram ?? "",
     twitter: initialConfig?.twitter ?? "",
     whatsapp: initialConfig?.whatsapp ?? "",
@@ -282,6 +284,13 @@ export default function GestionApparenceClient({ initialConfig, initialContact, 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {input("facebook", "Facebook (URL)", { placeholder: "https://facebook.com/..." })}
             {input("youtube", "YouTube (URL)", { placeholder: "https://youtube.com/..." })}
+            <div>
+              {input("youtubeChannelId", "YouTube Channel ID (direct auto)", { placeholder: "UCxxxxxxxxxxxxxxxxxxxxxxxxx" })}
+              <p style={{ fontSize: 11, color: "#6b7280", marginTop: 3 }}>
+                Trouvez l&apos;ID dans YouTube Studio → Paramètres → Informations sur la chaîne.
+                Il commence par <strong>UC</strong>. Le direct s&apos;affiche <em>automatiquement</em> sur votre site.
+              </p>
+            </div>
             {input("instagram", "Instagram (URL)", { placeholder: "https://instagram.com/..." })}
             {input("twitter", "Twitter / X (URL)", { placeholder: "https://twitter.com/..." })}
             {input("whatsapp", "WhatsApp (numéro)", { placeholder: "+243..." })}

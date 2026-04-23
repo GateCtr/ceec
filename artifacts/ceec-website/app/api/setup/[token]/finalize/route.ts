@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { isSuperAdmin, isAdminPlatteforme, getUserRoles } from "@/lib/auth/rbac";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 const DEV_DOMAIN = process.env.REPLIT_DEV_DOMAIN;
@@ -117,6 +118,31 @@ export async function POST(
 
     const slug = invite.eglise.slug;
     const egliseId = invite.eglise.id;
+
+    // Synchroniser immédiatement les rôles dans les métadonnées Clerk
+    // pour que le middleware reflète le nouveau rôle sans attendre une reconnexion.
+    try {
+      const [superAdmin, adminPlatteformeFlag, userRoles] = await Promise.all([
+        isSuperAdmin(userId),
+        isAdminPlatteforme(userId),
+        getUserRoles(userId),
+      ]);
+
+      const churchRoles = userRoles
+        .filter((ur) => ur.egliseId !== null && ur.role.scope === "church")
+        .map((ur) => ({ egliseId: ur.egliseId as number, role: ur.role.nom }));
+
+      const clerkMeta = await clerkClient();
+      await clerkMeta.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          isSuperAdmin: superAdmin,
+          isAdminPlatteforme: adminPlatteformeFlag,
+          churchRoles,
+        },
+      });
+    } catch (metaErr) {
+      console.error("[setup/finalize] Erreur synchro metadata Clerk:", metaErr);
+    }
 
     // Auto-create default home page if it doesn't exist yet
     const existingHome = await prisma.pageEglise.findFirst({

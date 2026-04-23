@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, PLATFORM_ROLES, ROLES } from "@/lib/auth/rbac";
@@ -23,7 +23,30 @@ export default async function AdminUtilisateursPage() {
     where: { clerkUserId: { in: clerkIds } },
     select: { id: true, nom: true, prenom: true, email: true, clerkUserId: true },
   });
-  const membreByClerk = Object.fromEntries(membresMap.map((m) => [m.clerkUserId, m]));
+  const membreByClerk: Record<string, { id: number; nom: string | null; prenom: string | null; email: string | null; clerkUserId: string }> =
+    Object.fromEntries(membresMap.map((m) => [m.clerkUserId, m]));
+
+  // Pour les Clerk IDs sans entrée `membre` (ex : super admins créés manuellement),
+  // on récupère leurs infos directement depuis l'API Clerk.
+  const missingIds = clerkIds.filter((id) => !membreByClerk[id] || (!membreByClerk[id].nom && !membreByClerk[id].email));
+  if (missingIds.length > 0) {
+    try {
+      const clerk = await clerkClient();
+      await Promise.allSettled(
+        missingIds.map(async (cid) => {
+          const u = await clerk.users.getUser(cid);
+          const primaryEmail = u.emailAddresses.find((ea) => ea.id === u.primaryEmailAddressId)?.emailAddress ?? u.emailAddresses[0]?.emailAddress ?? null;
+          membreByClerk[cid] = {
+            id: 0,
+            nom: u.lastName ?? null,
+            prenom: u.firstName ?? null,
+            email: primaryEmail,
+            clerkUserId: cid,
+          };
+        })
+      );
+    } catch { /* graceful — déjà null si Clerk inaccessible */ }
+  }
 
   const allMembres = await prisma.membre.findMany({
     select: { id: true, nom: true, prenom: true, email: true, clerkUserId: true },

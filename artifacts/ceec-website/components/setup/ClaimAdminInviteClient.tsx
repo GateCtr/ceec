@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, CheckCircle, AlertCircle, Loader2, LogIn, UserPlus } from "lucide-react";
+import { Shield, CheckCircle, AlertCircle, Loader2, LogIn } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -131,34 +131,30 @@ export default function ClaimAdminInviteClient({
                 marginBottom: 24, fontSize: 13, color: "#64748b",
               }}>
                 Cette invitation est destinée à <strong style={{ color: "#334155" }}>{email}</strong>.
-                <br />Créez un compte ou connectez-vous avec cette adresse email pour l&apos;accepter.
+                <br />Connectez-vous avec cette adresse email pour l&apos;accepter.
               </div>
 
-              {/* Auth buttons */}
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
-                <Link
-                  href={`/sign-up?redirect_url=/setup/admin-invite/${token}`}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                    padding: "13px", background: "#1e3a8a", color: "white",
-                    borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: "none",
-                  }}
-                >
-                  <UserPlus size={18} />
-                  Créer un compte
-                </Link>
-                <Link
-                  href={`/sign-in?redirect_url=/setup/admin-invite/${token}`}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                    padding: "12px", background: "white", color: "#1e3a8a",
-                    border: "1.5px solid #bfdbfe", borderRadius: 10,
-                    fontWeight: 600, fontSize: 15, textDecoration: "none",
-                  }}
-                >
-                  <LogIn size={18} />
-                  J&apos;ai déjà un compte — Se connecter
-                </Link>
+              {/* Sign-in button */}
+              <Link
+                href={`/sign-in?redirect_url=/setup/admin-invite/${token}`}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                  padding: "13px", background: "#1e3a8a", color: "white",
+                  borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: "none",
+                }}
+              >
+                <LogIn size={18} />
+                Se connecter pour accepter
+              </Link>
+
+              {/* Note for users without an account */}
+              <div style={{
+                marginTop: 16, background: "#fefce8", border: "1px solid #fde68a",
+                borderRadius: 10, padding: "12px 16px", fontSize: 12.5, color: "#92400e",
+                lineHeight: 1.6,
+              }}>
+                <strong>Vous n&apos;avez pas encore de compte ?</strong><br />
+                Les inscriptions sont sur invitation uniquement. Contactez le super administrateur pour qu&apos;il crée votre compte.
               </div>
             </>
           ) : done ? (

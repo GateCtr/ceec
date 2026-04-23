@@ -19,12 +19,12 @@ async function getData() {
 
     const stats = [
       {
-        valeur: String(nbEglises),
-        label: "Églises membres",
+        valeur: cfg["nb_eglises"]?.valeur ?? String(nbEglises),
+        label: cfg["nb_eglises"]?.label ?? "Paroisses",
         icon: <Church size={30} />,
       },
       {
-        valeur: cfg["nb_provinces"]?.valeur ?? "26",
+        valeur: cfg["nb_provinces"]?.valeur ?? "5+",
         label: cfg["nb_provinces"]?.label ?? "Provinces couvertes",
         icon: <MapPin size={30} />,
       },
@@ -34,7 +34,7 @@ async function getData() {
         icon: <Users size={30} />,
       },
       {
-        valeur: cfg["annee_fondation"]?.valeur ?? "1960",
+        valeur: cfg["annee_fondation"]?.valeur ?? "2009",
         label: cfg["annee_fondation"]?.label ?? "Année de fondation",
         icon: <CalendarDays size={30} />,
       },
@@ -47,10 +47,10 @@ async function getData() {
       annoncesList: [],
       evenementsList: [],
       stats: [
-        { valeur: "0",        label: "Églises membres",    icon: <Church size={30} /> },
-        { valeur: "26",       label: "Provinces couvertes", icon: <MapPin size={30} /> },
+        { valeur: "50+",      label: "Paroisses",           icon: <Church size={30} /> },
+        { valeur: "5+",       label: "Provinces couvertes", icon: <MapPin size={30} /> },
         { valeur: "100 000+", label: "Fidèles",             icon: <Users size={30} /> },
-        { valeur: "1960",     label: "Année de fondation",  icon: <CalendarDays size={30} /> },
+        { valeur: "2009",     label: "Année de fondation",  icon: <CalendarDays size={30} /> },
       ],
     };
   }
@@ -281,19 +281,20 @@ export default async function HomePage() {
                 <SectionTitle>Une communauté fondée sur la foi et l&apos;unité</SectionTitle>
                 <p className="leading-relaxed mb-6 text-base" style={{ color: "#64748b" }}>
                   La <strong style={{ color: "var(--color-primary)" }}>Communauté des Églises Évangéliques au Congo</strong> (CEEC)
-                  est un mouvement chrétien ancré dans les valeurs de l&apos;Évangile, présent dans toutes
-                  les provinces de la République Démocratique du Congo depuis 1960.
+                  est une association sans but lucratif fondée le <strong style={{ color: "var(--color-primary)" }}>12 janvier 2009</strong> à
+                  Kinshasa, ancrée dans les valeurs de l&apos;Évangile et présente à travers la République Démocratique du Congo.
                 </p>
-                <p className="leading-relaxed mb-8 text-base" style={{ color: "#64748b" }}>
-                  Notre mission : rassembler, former et envoyer des chrétiens engagés au service de Dieu
-                  et de la nation — à travers l&apos;évangélisation, la formation théologique et l&apos;action sociale.
+                <p className="leading-relaxed mb-6 text-base" style={{ color: "#64748b" }}>
+                  Notre mission : prêcher l&apos;Évangile éternel, faire des disciples de Jésus-Christ
+                  et promouvoir les œuvres sociales — depuis la RDC jusqu&apos;à l&apos;Afrique et le monde entier
+                  (Matthieu 28&nbsp;: 19-20&nbsp;; Jacques 1&nbsp;: 27).
                 </p>
 
                 {/* Points forts */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 mb-8">
                   {[
-                    "Mouvement œcuménique évangélique depuis plus de 60 ans",
-                    "Réseau actif dans les 26 provinces du Congo",
+                    "Fondée le 12 janvier 2009 — ASBL, Pers. juridique N°609/Cab/JU & DH/2011",
+                    "Paroisses à Kinshasa, Haut-Katanga, Lualaba, Haut Lomami et Équateur",
                     "Formation de pasteurs, diacres et leaders laïcs",
                   ].map((point) => (
                     <div key={point} className="flex items-start gap-3">
@@ -306,6 +307,30 @@ export default async function HomePage() {
                       <span className="text-sm font-medium" style={{ color: "var(--color-foreground)" }}>{point}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Leadership */}
+                <div className="rounded-xl px-5 py-4 flex items-center gap-4"
+                  style={{ background: "var(--color-primary-50)", border: "1px solid var(--color-primary-100)" }}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: "var(--color-primary)", color: "#fff" }}>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="1.8">
+                      <circle cx="12" cy="8" r="4" strokeLinecap="round" />
+                      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "var(--color-secondary-800)" }}>
+                      Président Communautaire &amp; Représentant Légal
+                    </p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--color-primary)" }}>
+                      Évêque Missionnaire MPANGA MUKUTU Pozard
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                      N°04 bis, Av. SAULONA, Q/Musey, C/Ngaliema — Kinshasa, RDC
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-10">
@@ -355,7 +380,7 @@ export default async function HomePage() {
                   <span className="text-xs font-bold uppercase tracking-wide"
                     style={{ color: "var(--color-primary-900)" }}>Depuis</span>
                   <span className="text-2xl font-extrabold leading-none"
-                    style={{ color: "var(--color-primary-900)", fontFamily: "var(--font-display)" }}>1960</span>
+                    style={{ color: "var(--color-primary-900)", fontFamily: "var(--font-display)" }}>2009</span>
                 </div>
               </div>
             </div>

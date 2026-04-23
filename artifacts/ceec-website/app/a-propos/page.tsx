@@ -23,14 +23,15 @@ async function getStats() {
       prisma.communauteConfig.findMany(),
     ]);
     const cfg = Object.fromEntries(configEntries.map((c) => [c.cle, c]));
+    const nbEglisesDisplay = cfg["nb_eglises"]?.valeur ?? (nbEglises > 0 ? String(nbEglises) : "50+");
     return {
-      nbEglises,
+      nbEglises: nbEglisesDisplay,
       nbProvinces: cfg["nb_provinces"]?.valeur ?? "5+",
       nbFideles:   cfg["nb_fideles"]?.valeur   ?? "2 000+",
       anneeFondation: cfg["annee_fondation"]?.valeur ?? "2009",
     };
   } catch {
-    return { nbEglises: 0, nbProvinces: "5+", nbFideles: "2 000+", anneeFondation: "2009" };
+    return { nbEglises: "50+", nbProvinces: "5+", nbFideles: "2 000+", anneeFondation: "2009" };
   }
 }
 
@@ -266,7 +267,7 @@ export default async function AProposPage() {
           }}>
             {[
               { valeur: stats.anneeFondation, label: "Année de fondation",  icon: <CalendarDays size={28} /> },
-              { valeur: String(stats.nbEglises || "50+"), label: "Paroisses membres", icon: <Church size={28} /> },
+              { valeur: stats.nbEglises, label: "Paroisses membres", icon: <Church size={28} /> },
               { valeur: stats.nbProvinces,    label: "Provinces couvertes", icon: <MapPin size={28} /> },
               { valeur: stats.nbFideles,      label: "Fidèles",             icon: <Users size={28} /> },
             ].map((s, i) => (

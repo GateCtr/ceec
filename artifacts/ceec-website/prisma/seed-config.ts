@@ -24,7 +24,7 @@ const COMMUNAUTE_CONFIG = [
   },
   {
     cle: "nb_fideles",
-    valeur: "100 000+",
+    valeur: "2 000+",
     label: "Fidèles",
     icone: "👥",
   },

@@ -29,7 +29,7 @@ async function getData() {
         icon: <MapPin size={30} />,
       },
       {
-        valeur: cfg["nb_fideles"]?.valeur ?? "100 000+",
+        valeur: cfg["nb_fideles"]?.valeur ?? "2 000+",
         label: cfg["nb_fideles"]?.label ?? "Fidèles",
         icon: <Users size={30} />,
       },
@@ -49,7 +49,7 @@ async function getData() {
       stats: [
         { valeur: "50+",      label: "Paroisses",           icon: <Church size={30} /> },
         { valeur: "5+",       label: "Provinces couvertes", icon: <MapPin size={30} /> },
-        { valeur: "100 000+", label: "Fidèles",             icon: <Users size={30} /> },
+        { valeur: "2 000+",   label: "Fidèles",             icon: <Users size={30} /> },
         { valeur: "2009",     label: "Année de fondation",  icon: <CalendarDays size={30} /> },
       ],
     };
@@ -234,8 +234,8 @@ export default async function HomePage() {
             {/* Sous-titre */}
             <p className="mx-auto mb-12 leading-relaxed max-w-2xl text-lg md:text-xl"
               style={{ color: "rgba(255,255,255,0.72)" }}>
-              La CEEC fédère des dizaines d&apos;églises évangéliques à travers toutes les
-              provinces du Congo — unies dans la foi, la prière et le service au peuple congolais.
+              Plus de 50 paroisses unies — de Kinshasa à Lubumbashi, Kolwezi, Mulongo
+              et Mbandaka — prêchant l&apos;Évangile et servant le peuple congolais.
             </p>
 
             {/* Boutons */}
@@ -365,11 +365,11 @@ export default async function HomePage() {
                   <div className="text-center max-w-xs">
                     <p className="font-bold text-lg italic"
                       style={{ color: "var(--color-primary)", fontFamily: "var(--font-display)" }}>
-                      &ldquo;Que tous soient un&rdquo;
+                      &ldquo;Allez, faites de toutes les nations des disciples&rdquo;
                     </p>
                     <p className="text-xs font-semibold uppercase tracking-widest mt-1"
                       style={{ color: "var(--color-secondary)" }}>
-                      Jean 17 : 21
+                      Matthieu 28 : 19-20
                     </p>
                   </div>
                 </div>
@@ -526,14 +526,14 @@ export default async function HomePage() {
             </div>
             <p className="text-2xl md:text-3xl font-bold italic leading-snug mb-6"
               style={{ color: "var(--color-primary-900)", fontFamily: "var(--font-display)", marginTop: "-2rem" }}>
-              Car là où deux ou trois sont assemblés en mon nom,
-              je suis au milieu d&apos;eux.
+              La religion pure et sans tache devant Dieu notre Père consiste à visiter
+              les orphelins et les veuves dans leur affliction.
             </p>
             <div className="flex items-center justify-center gap-3">
               <div className="h-px w-12" style={{ background: "rgba(30,58,138,0.4)" }} />
               <span className="text-sm font-bold uppercase tracking-widest"
                 style={{ color: "var(--color-primary-800)" }}>
-                Matthieu 18 : 20
+                Jacques 1 : 27
               </span>
               <div className="h-px w-12" style={{ background: "rgba(30,58,138,0.4)" }} />
             </div>

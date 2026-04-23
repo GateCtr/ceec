@@ -94,13 +94,12 @@ const organes = [
 ];
 
 const comite = [
-  { role: "Représentant Légal & Président Communautaire", nom: "Évêque Missionnaire MPANGA MUKUTU Pozard" },
-  { role: "1er Suppléant — Administration & Finances",     nom: "—" },
-  { role: "2ème Suppléant — Activités Spirituelles",       nom: "—" },
-  { role: "Secrétaire Général",                            nom: "—" },
-  { role: "Trésorier Général",                             nom: "—" },
-  { role: "Chargé de l'Évangélisation",                    nom: "—" },
-  { role: "Chargé du Développement Communautaire",         nom: "—" },
+  { role: "Président Communautaire & Représentant Légal", nom: "Évêque Missionnaire MPANGA MUKUTU Pozard" },
+  { role: "1er Suppléant",                                nom: "Révérend Pasteur ILUNGA SHIMBI André" },
+  { role: "2ème Suppléant",                              nom: "Pasteur BANZA LUKANGA Constantin" },
+  { role: "Secrétaire Général Administratif",             nom: "Révérend Pasteur ILUNGA MONGA KENGA Jean" },
+  { role: "Trésorier Général",                            nom: "KALENGA MPANGA Ruth" },
+  { role: "Conseiller",                                   nom: "Révérend Pasteur MAKONGA PELESA Gédéon" },
 ];
 
 const departements = [
@@ -223,7 +222,7 @@ export default async function AProposPage() {
               color: "rgba(197,155,46,1)", background: "rgba(197,155,46,0.12)",
               borderRadius: 20, padding: "4px 16px", marginBottom: 20,
             }}>
-              CEEC — ASBL N°609/Cab/JU&amp;DH/2011
+              Communauté des Églises Évangéliques au Congo
             </span>
 
             <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 900, margin: "0 0 20px", lineHeight: 1.15, color: "#fff" }}>
@@ -291,7 +290,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Identité Officielle</span>
+              }}>Reconnaissance Légale</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Statut Juridique &amp; Siège Social
               </h2>
@@ -332,7 +331,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Statuts — Titre I, Chapitre III &amp; V</span>
+              }}>Ce qui nous anime</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Nos Objectifs Officiels
               </h2>
@@ -373,7 +372,7 @@ export default async function AProposPage() {
                   Le champ d&apos;action de la CEEC s&apos;étend depuis la <strong>RDC</strong>, vers l&apos;<strong>Afrique</strong>,
                   et enfin le <strong>monde entier</strong> — jusqu&apos;aux extrémités de la terre.
                 </p>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em" }}>Statuts — Ch. V</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em" }}>RDC · Afrique · Monde</span>
               </div>
             </div>
           </div>
@@ -387,7 +386,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Document Officiel CEEC</span>
+              }}>Ce en quoi nous croyons</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Notre Doctrine
               </h2>
@@ -424,7 +423,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Statuts — Titre III, Articles 10-14</span>
+              }}>Comment nous sommes organisés</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Nos Organes de Gouvernance
               </h2>
@@ -477,7 +476,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Statuts — Article 14</span>
+              }}>Vie de l&apos;Église Locale</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Départements de l&apos;Église Locale
               </h2>
@@ -516,7 +515,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Liste Officielle des Paroisses</span>
+              }}>Notre présence sur le terrain</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Notre Présence en RDC
               </h2>
@@ -569,7 +568,7 @@ export default async function AProposPage() {
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Statuts — Titre II, Article 2</span>
+              }}>Nous rejoindre</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: 0 }}>
                 Conditions d&apos;Adhésion
               </h2>

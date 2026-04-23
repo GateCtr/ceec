@@ -107,43 +107,131 @@ const jalons = [
   },
 ];
 
-/* ─── Serviteurs de la première heure ───────────────── */
-const pionniers = [
+/* ─── Serviteurs de la première heure (registre officiel) ── */
+const categoriesPionniers = [
   {
-    nom: "Pasteur Josué NKULU ILUNGA",
-    paroisse: "Église de Badiading — Kinshasa",
+    label: "Direction",
+    couleur: "#c59b2e",
+    membres: [
+      { n: "01", nom: "Couple Papa Évêque MPANGA" },
+      { n: "02", nom: "Couple Révérend GEDEON PELESA" },
+    ],
   },
   {
-    nom: "Pasteur NUMBI TWITE Juvénal",
-    paroisse: "Église de Kingasani Siforco — Kinshasa",
+    label: "Révérends",
+    couleur: "#1e3a8a",
+    membres: [
+      { n: "03", nom: "Révérend GUYLAIN" },
+      { n: "04", nom: "Révérend ILONGIA PAPI" },
+    ],
   },
   {
-    nom: "Rév. Pasteur MASENGO KAZADI",
-    paroisse: "Église de Kinkole — Kinshasa",
+    label: "Pasteurs",
+    couleur: "#c59b2e",
+    membres: [
+      { n: "05", nom: "Pasteur MBUYU MWEMBO Jean Pierre" },
+      { n: "06", nom: "Pasteur BOAZ LUMUMBA" },
+      { n: "07", nom: "Pasteur ELIE LUMULUIMPE" },
+      { n: "08", nom: "Pasteur MPANGA NSENGA Raoul" },
+      { n: "09", nom: "Pasteur KABONGO KALEKA Stanis" },
+      { n: "10", nom: "Pasteur Jean KALOMBO MUKENDJI" },
+      { n: "11", nom: "Pasteur Jérémie NKULU WA KASONGO" },
+      { n: "12", nom: "Pasteur LIKULU INDOFALA Victor" },
+    ],
   },
   {
-    nom: "Pasteur Samuel KITWA",
-    paroisse: "Église de Badara — Kinshasa",
+    label: "Anciens & Anciennes",
+    couleur: "#1e3a8a",
+    membres: [
+      { n: "13", nom: "Ancien KABAMBA KONGOLO Thomas" },
+      { n: "14", nom: "Ancien BUTOTO BITAKWIRA Boutros" },
+      { n: "15", nom: "Ancien AMISI NGOMA" },
+      { n: "16", nom: "Ancien VARIUS" },
+      { n: "17", nom: "Ancien KINDA WA MPIANA FREDDY" },
+      { n: "18", nom: "Ancienne NTUMBA Arcelle" },
+      { n: "19", nom: "Ancien BANZA ILUNGA Viator" },
+      { n: "20", nom: "Ancien NONGO J.P" },
+      { n: "21", nom: "Ancien BOLEKALEKA BULAYA BOCK" },
+      { n: "22", nom: "Ancien Guylain EKOFO" },
+      { n: "23", nom: "Ancien KASONGO NZAZI Jean Jacques" },
+      { n: "24", nom: "Ancienne PASCALINE MATEMBA" },
+      { n: "25", nom: "Ancien MULONGO MWIKA Bruno" },
+      { n: "26", nom: "Ancien KIZEMBE NGELEKA Ozias" },
+      { n: "27", nom: "Ancien KASONGO WA KASONGO DICKMAS" },
+    ],
   },
   {
-    nom: "Pasteur Charly LUMBALA",
-    paroisse: "Église Évangélique Porte du Ciel — Mikonga",
+    label: "Mamans",
+    couleur: "#c59b2e",
+    membres: [
+      { n: "28", nom: "Maman Pasteur BERTHE Victor" },
+      { n: "29", nom: "Maman Pasteur KABONGO Stanis" },
+      { n: "30", nom: "Maman Pasteur ILONGIA" },
+      { n: "31", nom: "Maman Pasteur MPANGA" },
+      { n: "32", nom: "Maman Rév. Sylvie PELESA GEDEON" },
+      { n: "33", nom: "Maman Pasteur ELIE" },
+      { n: "34", nom: "Maman Pasteur Justine BOAZ" },
+      { n: "35", nom: "Maman Ancien DICKMAS" },
+      { n: "36", nom: "Maman Ancien Huguette KABAMBA" },
+      { n: "37", nom: "Maman Ancien KINDA FREDDY" },
+      { n: "38", nom: "Maman Ancien BANZA Viator" },
+      { n: "39", nom: "Maman Ancien KIZEMBE OZIAS" },
+      { n: "40", nom: "Maman Ancien VARIUS" },
+      { n: "41", nom: "Maman Ancien BRUNO" },
+      { n: "42", nom: "Maman Ancien Ruth BUTOTO" },
+      { n: "43", nom: "Maman Ancien Guylain EKOFO" },
+      { n: "45", nom: "Maman Ancien Sarah KASONGO" },
+      { n: "46", nom: "Maman NGUDIA Ruth" },
+    ],
   },
   {
-    nom: "Rév. Pasteur ALIDA",
-    paroisse: "Église Péniel — Nganda Musolo",
+    label: "Diacres & Diaconesses",
+    couleur: "#1e3a8a",
+    membres: [
+      { n: "47", nom: "Diacre BEYA Stallone" },
+      { n: "48", nom: "Maman Diacre Sylvie NDAY" },
+      { n: "49", nom: "Diacre MAVULA AMOS" },
+      { n: "50", nom: "Diacre DUNIA Henry" },
+      { n: "51", nom: "Diacre KABEZYA André" },
+      { n: "52", nom: "Diacre WABEYA MULEBA" },
+      { n: "53", nom: "Diacre NGOY ILUNGA" },
+      { n: "54", nom: "Diaconesse JACQUIE NGOY" },
+      { n: "55", nom: "Diacre GOVODE FANFAN" },
+      { n: "56", nom: "Diacre KULITA Jean Luc" },
+      { n: "57", nom: "Diacre NDAY WA MPOYO" },
+      { n: "58", nom: "Diaconesse Annie MULEMBA" },
+      { n: "59", nom: "Diaconesse Marie NDEMBO" },
+      { n: "60", nom: "Diaconesse ELALIE" },
+      { n: "61", nom: "Diaconesse Julie MULANGA" },
+      { n: "62", nom: "Diaconesse Chantal NGOY" },
+      { n: "63", nom: "Diaconesse Sylvie KUSENGA NZUZI" },
+      { n: "64", nom: "Diaconesse Tantine SUZUKI" },
+      { n: "65", nom: "Diaconesse BIBI LENGO" },
+      { n: "66", nom: "Diacre ILUNGA MULANDALA SOLEIL" },
+    ],
   },
   {
-    nom: "Pasteur Jean KALOMBO",
-    paroisse: "Église Champ de Dieu — Pompage",
-  },
-  {
-    nom: "Évangéliste Guylain EKOFO",
-    paroisse: "Groupe de prière de Pompage — Kinshasa",
-  },
-  {
-    nom: "Rév. Pasteur BERTIN LANDU",
-    paroisse: "Nouvelle Jérusalem — Mbandaka, Équateur",
+    label: "Évangélistes",
+    couleur: "#c59b2e",
+    membres: [
+      { n: "67", nom: "Év. KASONGO KALENGA OSCAR" },
+      { n: "68", nom: "Év. BEYA Stallone" },
+      { n: "69", nom: "Év. Jacques NKULU WA KILUBA" },
+      { n: "70", nom: "Év. MUTOMBO NSHIMBA Alain" },
+      { n: "71", nom: "Év. NSENGA KABONDO WEMBA" },
+      { n: "72", nom: "Év. MULUNDA BEATRICE" },
+      { n: "73", nom: "Év. MATOKYO POKYO J.C" },
+      { n: "74", nom: "Év. Freddy KADIMA" },
+      { n: "75", nom: "Év. Le Bon KABUYA" },
+      { n: "76", nom: "Év. Esaïe LOKOTA ILUNGA" },
+      { n: "77", nom: "Év. NICO BATIGI Miracle" },
+      { n: "78", nom: "Év. MATONDO ESAIE BRUCE" },
+      { n: "79", nom: "Év. Laure PEMBAMOTO KYOMBO" },
+      { n: "80", nom: "Év. KIBIMBA Christian" },
+      { n: "81", nom: "Év. KAYAMBA Georges" },
+      { n: "82", nom: "Év. KITOBO Bienvenu" },
+      { n: "83", nom: "Év. KALENGA Paul" },
+    ],
   },
 ];
 
@@ -374,38 +462,72 @@ export default function HistoriquePage() {
 
         {/* ══ SERVITEURS DE LA PREMIÈRE HEURE ═════════════ */}
         <section style={{ background: "white", padding: "5rem 1rem" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 48 }}>
               <span style={{
                 display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "#1e3a8a",
                 background: "rgba(30,58,138,0.08)", borderRadius: 20, padding: "4px 14px", marginBottom: 12,
-              }}>Ceux qui ont dit oui les premiers</span>
+              }}>Registre officiel</span>
               <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#1e3a8a", margin: "0 0 10px" }}>
                 Serviteurs de la Première Heure
               </h2>
-              <p style={{ color: "#64748b", fontSize: 15, maxWidth: 560, margin: "0 auto" }}>
-                Ces pasteurs et évangélistes ont rejoint la vision dès l&apos;origine, posant les premières pierres
-                de la communauté dans leur quartier et leur ville.
+              <p style={{ color: "#64748b", fontSize: 15, maxWidth: 620, margin: "0 auto" }}>
+                83 hommes et femmes qui, dès les premiers pas de la CEEC, ont dit oui à la vision —
+                pasteurs, anciens, diacres, diaconesses et évangélistes.
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 18 }}>
-              {pionniers.map((p) => (
-                <div key={p.nom} style={{
-                  background: "#f8fafc", borderRadius: 12, padding: "1.25rem 1.5rem",
-                  border: "1px solid #e2e8f0",
-                  display: "flex", gap: 14, alignItems: "flex-start",
+            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+              {categoriesPionniers.map((cat) => (
+                <div key={cat.label} style={{
+                  border: "1px solid #e2e8f0", borderRadius: 16, overflow: "hidden",
                 }}>
+                  {/* En-tête de catégorie */}
                   <div style={{
-                    width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
-                    background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 16,
-                  }}>🙏</div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: "#1e3a8a", marginBottom: 3 }}>{p.nom}</div>
-                    <div style={{ fontSize: 12, color: "#c59b2e", fontWeight: 600 }}>{p.paroisse}</div>
+                    background: cat.couleur === "#c59b2e"
+                      ? "rgba(197,155,46,0.08)"
+                      : "rgba(30,58,138,0.06)",
+                    borderBottom: "1px solid #e2e8f0",
+                    padding: "0.85rem 1.5rem",
+                    display: "flex", alignItems: "center", gap: 10,
+                  }}>
+                    <div style={{
+                      width: 8, height: 8, borderRadius: "50%",
+                      background: cat.couleur, flexShrink: 0,
+                    }} />
+                    <span style={{
+                      fontSize: 12, fontWeight: 800, textTransform: "uppercase",
+                      letterSpacing: "0.1em", color: cat.couleur,
+                    }}>{cat.label}</span>
+                    <span style={{
+                      fontSize: 11, color: "#94a3b8", fontWeight: 600,
+                    }}>— {cat.membres.length} {cat.membres.length > 1 ? "membres" : "membre"}</span>
+                  </div>
+
+                  {/* Grille des noms */}
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                    gap: 0,
+                  }}>
+                    {cat.membres.map((m, idx) => (
+                      <div key={m.n} style={{
+                        padding: "0.75rem 1.25rem",
+                        borderRight: "1px solid #f1f5f9",
+                        borderBottom: "1px solid #f1f5f9",
+                        display: "flex", gap: 10, alignItems: "center",
+                        background: idx % 2 === 0 ? "white" : "#fafbfc",
+                      }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: "#cbd5e1",
+                          fontFamily: "monospace", flexShrink: 0, minWidth: 22,
+                        }}>{m.n}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", lineHeight: 1.4 }}>
+                          {m.nom}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}

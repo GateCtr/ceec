@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Shield, CheckCircle, AlertCircle, Loader2, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 
@@ -22,7 +21,6 @@ export default function ClaimAdminInviteClient({
   error,
   isLoggedIn,
 }: Props) {
-  const router = useRouter();
   const [loading, setLoading]         = useState(false);
   const [claimError, setClaimError]   = useState("");
   const [done, setDone]               = useState(false);
@@ -45,7 +43,9 @@ export default function ClaimAdminInviteClient({
       const data = await res.json();
       if (!res.ok) { setClaimError(data.error ?? "Une erreur est survenue."); return; }
       setDone(true);
-      setTimeout(() => router.push(data.redirectUrl ?? "/admin"), 1800);
+      // Hard redirect : force un rechargement complet pour que le serveur
+      // lise la session Clerk + les nouveaux rôles DB sans cache Next.js.
+      setTimeout(() => { window.location.href = data.redirectUrl ?? "/admin"; }, 1800);
     } finally {
       setLoading(false);
     }

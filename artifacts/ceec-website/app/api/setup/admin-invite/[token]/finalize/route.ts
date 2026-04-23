@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { isSuperAdmin, isAdminPlatteforme, getUserRoles } from "@/lib/auth/rbac";
 
 export async function POST(
   _req: NextRequest,
@@ -69,6 +70,32 @@ export async function POST(
         });
       }
     });
+
+    // Synchroniser immédiatement les métadonnées Clerk so that any subsequent
+    // call to sync-roles (or middleware checks) reflects the new platform role.
+    try {
+      const [superAdmin, adminPlatteformeFlag, userRoles] = await Promise.all([
+        isSuperAdmin(userId),
+        isAdminPlatteforme(userId),
+        getUserRoles(userId),
+      ]);
+
+      const churchRoles = userRoles
+        .filter((ur) => ur.egliseId !== null && ur.role.scope === "church")
+        .map((ur) => ({ egliseId: ur.egliseId as number, role: ur.role.nom }));
+
+      const clerk = await clerkClient();
+      await clerk.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          isSuperAdmin: superAdmin,
+          isAdminPlatteforme: adminPlatteformeFlag,
+          churchRoles,
+        },
+      });
+    } catch (metaErr) {
+      // Ne pas bloquer la réponse si la synchro meta échoue — le rôle DB est déjà assigné.
+      console.error("[finalize] Erreur synchro metadata Clerk:", metaErr);
+    }
 
     return NextResponse.json({ success: true, redirectUrl: "/admin" });
   } catch (e) {

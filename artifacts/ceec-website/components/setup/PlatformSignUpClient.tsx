@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSignUp } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useSignUp, useClerk } from "@clerk/nextjs";
 import { Shield, CheckCircle, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -17,7 +16,7 @@ type Step = "form" | "verify" | "done";
 
 export default function PlatformSignUpClient({ token, email, roleLabel, error }: Props) {
   const { signUp, fetchStatus } = useSignUp();
-  const router = useRouter();
+  const clerk = useClerk();
 
   const [prenom, setPrenom]     = useState("");
   const [nom, setNom]           = useState("");
@@ -65,16 +64,20 @@ export default function PlatformSignUpClient({ token, email, roleLabel, error }:
       const { error: verifyErr } = await signUp.verifications.verifyEmailCode({ code });
       if (verifyErr) { setErrorMsg(verifyErr.message || "Code incorrect ou expiré."); return; }
 
-      if (signUp.status !== "complete") {
+      if (signUp.status !== "complete" || !signUp.createdSessionId) {
         setErrorMsg("Vérification incomplète. Veuillez réessayer.");
         return;
       }
 
-      const { error: finalErr } = await signUp.finalize();
-      if (finalErr) { setErrorMsg(finalErr.message || "Erreur lors de la finalisation."); return; }
+      // setActive établit la session SANS déclencher l'afterSignUpUrl de Clerk
+      // (qui pourrait pointer vers sync-roles et provoquer /?error=acces-refuse
+      // car le rôle admin n'est pas encore assigné à ce stade).
+      await clerk.setActive({ session: signUp.createdSessionId });
 
       setStep("done");
-      setTimeout(() => router.push(`/setup/admin-invite/${token}`), 1800);
+      // Navigation forcée (hard redirect) vers la page d'invitation pour que
+      // le serveur lise bien la nouvelle session Clerk avant l'acceptation.
+      setTimeout(() => { window.location.href = `/setup/admin-invite/${token}`; }, 1500);
     } catch (err: unknown) {
       setErrorMsg((err as Error)?.message ?? "Une erreur inattendue est survenue.");
     } finally {

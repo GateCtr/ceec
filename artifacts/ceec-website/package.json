@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed:config": "tsx prisma/seed-config.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

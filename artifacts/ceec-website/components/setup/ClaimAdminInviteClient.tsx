@@ -23,9 +23,10 @@ export default function ClaimAdminInviteClient({
   isLoggedIn,
 }: Props) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [claimError, setClaimError] = useState("");
-  const [done, setDone] = useState(false);
+  const [loading, setLoading]         = useState(false);
+  const [claimError, setClaimError]   = useState("");
+  const [done, setDone]               = useState(false);
+  const [showAuth, setShowAuth]       = useState(false);
 
   const roleColor =
     roleNom === "admin_plateforme"
@@ -33,17 +34,16 @@ export default function ClaimAdminInviteClient({
       : { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" };
 
   async function handleAccept() {
+    if (!isLoggedIn) {
+      setShowAuth(true);
+      return;
+    }
     setLoading(true);
     setClaimError("");
     try {
-      const res = await fetch(`/api/setup/admin-invite/${token}/finalize`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/setup/admin-invite/${token}/finalize`, { method: "POST" });
       const data = await res.json();
-      if (!res.ok) {
-        setClaimError(data.error ?? "Une erreur est survenue.");
-        return;
-      }
+      if (!res.ok) { setClaimError(data.error ?? "Une erreur est survenue."); return; }
       setDone(true);
       setTimeout(() => router.push(data.redirectUrl ?? "/admin"), 1800);
     } finally {
@@ -85,122 +85,44 @@ export default function ClaimAdminInviteClient({
         </div>
 
         <div style={{ padding: "32px" }}>
-          {/* Error state */}
+          {/* ── Lien invalide / expiré ── */}
           {error ? (
             <div style={{ textAlign: "center" }}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: 10,
-                background: "#fee2e2", border: "1px solid #fca5a5",
-                borderRadius: 12, padding: "14px 18px", marginBottom: 24,
-                color: "#b91c1c", fontSize: 14,
-              }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 12, padding: "14px 18px", marginBottom: 24, color: "#b91c1c", fontSize: 14 }}>
                 <AlertCircle size={18} style={{ flexShrink: 0 }} />
                 {error}
               </div>
-              <Link href="/" style={{
-                display: "inline-block", padding: "10px 24px",
-                background: "#1e3a8a", color: "white", borderRadius: 9,
-                fontWeight: 600, fontSize: 14, textDecoration: "none",
-              }}>
+              <Link href="/" style={{ display: "inline-block", padding: "10px 24px", background: "#1e3a8a", color: "white", borderRadius: 9, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
                 Retour à l&apos;accueil
               </Link>
             </div>
-          ) : !isLoggedIn ? (
-            /* Not logged in — show invite preview + auth options */
+
+          ) : done ? (
+            /* ── Succès ── */
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f0fdf4", border: "2px solid #bbf7d0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
+                <CheckCircle size={32} color="#16a34a" />
+              </div>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: "0 0 8px" }}>Invitation acceptée !</h2>
+              <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 4px" }}>
+                Votre rôle <strong>{roleLabel}</strong> est maintenant actif.
+              </p>
+              <p style={{ color: "#94a3b8", fontSize: 13 }}>Redirection vers l&apos;administration…</p>
+            </div>
+
+          ) : (
+            /* ── Invitation ── */
             <>
               <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.7, margin: "0 0 20px" }}>
                 Vous avez été invité(e) à rejoindre l&apos;équipe d&apos;administration de la plateforme CEEC.
               </p>
 
-              {/* Role badge */}
-              <div style={{
-                background: roleColor.bg, border: `1px solid ${roleColor.border}`,
-                borderRadius: 12, padding: "14px 18px", marginBottom: 20,
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: roleColor.text, marginBottom: 4 }}>
-                  Rôle assigné
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: roleColor.text }}>
-                  {roleLabel}
-                </div>
-              </div>
-
-              {/* Email info */}
-              <div style={{
-                background: "#f8fafc", borderRadius: 10, padding: "12px 16px",
-                marginBottom: 24, fontSize: 13, color: "#64748b",
-              }}>
-                Cette invitation est destinée à <strong style={{ color: "#334155" }}>{email}</strong>.
-                <br />Connectez-vous avec cette adresse email pour l&apos;accepter.
-              </div>
-
-              {/* Auth buttons */}
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
-                <Link
-                  href={`/setup/admin-invite/${token}/signup`}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                    padding: "13px", background: "#1e3a8a", color: "white",
-                    borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: "none",
-                  }}
-                >
-                  <UserPlus size={18} />
-                  Créer un compte
-                </Link>
-                <Link
-                  href={`/sign-in?redirect_url=/setup/admin-invite/${token}`}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                    padding: "12px", background: "white", color: "#1e3a8a",
-                    border: "1.5px solid #bfdbfe", borderRadius: 10,
-                    fontWeight: 600, fontSize: 15, textDecoration: "none",
-                  }}
-                >
-                  <LogIn size={18} />
-                  J&apos;ai déjà un compte — Se connecter
-                </Link>
-              </div>
-            </>
-          ) : done ? (
-            /* Success state */
-            <div style={{ textAlign: "center" }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: "50%",
-                background: "#f0fdf4", border: "2px solid #bbf7d0",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                margin: "0 auto 18px",
-              }}>
-                <CheckCircle size={32} color="#16a34a" />
-              </div>
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: "0 0 8px" }}>
-                Invitation acceptée !
-              </h2>
-              <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 4px" }}>
-                Votre rôle <strong>{roleLabel}</strong> est maintenant actif.
-              </p>
-              <p style={{ color: "#94a3b8", fontSize: 13 }}>
-                Redirection vers l&apos;administration…
-              </p>
-            </div>
-          ) : (
-            /* Invite details */
-            <>
-              <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.7, margin: "0 0 20px" }}>
-                Vous avez été invité(e) à rejoindre l&apos;équipe d&apos;administration
-                de la plateforme CEEC.
-              </p>
-
-              {/* Role badge */}
-              <div style={{
-                background: roleColor.bg, border: `1px solid ${roleColor.border}`,
-                borderRadius: 12, padding: "14px 18px", marginBottom: 20,
-              }}>
+              {/* Rôle */}
+              <div style={{ background: roleColor.bg, border: `1px solid ${roleColor.border}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: roleColor.text, marginBottom: 4 }}>
                   Rôle assigné
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: roleColor.text }}>
-                  {roleLabel}
-                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: roleColor.text }}>{roleLabel}</div>
                 <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
                   {roleNom === "admin_plateforme"
                     ? "Accès complet à l'administration : églises, membres, contenu, invitations."
@@ -208,55 +130,81 @@ export default function ClaimAdminInviteClient({
                 </div>
               </div>
 
-              {/* Email info */}
-              <div style={{
-                background: "#f8fafc", borderRadius: 10, padding: "12px 16px",
-                marginBottom: 24, fontSize: 13, color: "#64748b",
-              }}>
-                Cette invitation est destinée à <strong style={{ color: "#334155" }}>{email}</strong>.
-                Vous devez être connecté(e) avec cette adresse pour l&apos;accepter.
+              {/* Email ciblé */}
+              <div style={{ background: "#f8fafc", borderRadius: 10, padding: "10px 14px", marginBottom: 24, fontSize: 13, color: "#64748b" }}>
+                Destiné à : <strong style={{ color: "#334155" }}>{email}</strong>
               </div>
 
-              {/* Claim error */}
+              {/* Erreur d'acceptation */}
               {claimError && (
-                <div style={{
-                  display: "flex", alignItems: "flex-start", gap: 10,
-                  background: "#fee2e2", border: "1px solid #fca5a5",
-                  borderRadius: 10, padding: "12px 16px", marginBottom: 18,
-                  color: "#b91c1c", fontSize: 13,
-                }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px", marginBottom: 18, color: "#b91c1c", fontSize: 13 }}>
                   <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
                   {claimError}
                 </div>
               )}
 
-              <button
-                onClick={handleAccept}
-                disabled={loading}
-                style={{
-                  width: "100%", padding: "13px",
-                  background: loading ? "#94a3b8" : "#1e3a8a",
-                  color: "white", border: "none", borderRadius: 10,
-                  fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                }}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
-                    Activation en cours…
-                  </>
-                ) : (
-                  <>
-                    <Shield size={18} />
-                    Accepter l&apos;invitation
-                  </>
-                )}
-              </button>
+              {/* ── Bouton principal ── */}
+              {!showAuth && (
+                <button
+                  onClick={handleAccept}
+                  disabled={loading}
+                  style={{
+                    width: "100%", padding: "13px",
+                    background: loading ? "#94a3b8" : "#1e3a8a",
+                    color: "white", border: "none", borderRadius: 10,
+                    fontWeight: 700, fontSize: 15,
+                    cursor: loading ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
+                      Activation en cours…
+                    </>
+                  ) : (
+                    <>
+                      <Shield size={18} />
+                      Accepter l&apos;invitation
+                    </>
+                  )}
+                </button>
+              )}
 
-              <p style={{ textAlign: "center", fontSize: 12, color: "#94a3b8", marginTop: 16, marginBottom: 0 }}>
-                En acceptant, vous rejoignez l&apos;équipe d&apos;administration CEEC.
-              </p>
+              {/* ── Options auth (non connecté, après clic) ── */}
+              {showAuth && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 13.5, color: "#374151", fontWeight: 600, textAlign: "center" }}>
+                    Pour accepter, connectez-vous ou créez un compte
+                  </p>
+                  <Link
+                    href={`/sign-in?redirect_url=/setup/admin-invite/${token}`}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, padding: "13px", background: "#1e3a8a", color: "white", borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: "none" }}
+                  >
+                    <LogIn size={18} />
+                    Se connecter
+                  </Link>
+                  <Link
+                    href={`/setup/admin-invite/${token}/signup`}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, padding: "12px", background: "white", color: "#1e3a8a", border: "1.5px solid #bfdbfe", borderRadius: 10, fontWeight: 600, fontSize: 15, textDecoration: "none" }}
+                  >
+                    <UserPlus size={18} />
+                    Créer un compte
+                  </Link>
+                  <button
+                    onClick={() => setShowAuth(false)}
+                    style={{ background: "none", border: "none", color: "#94a3b8", fontSize: 13, cursor: "pointer", marginTop: 2 }}
+                  >
+                    ← Retour
+                  </button>
+                </div>
+              )}
+
+              {!showAuth && (
+                <p style={{ textAlign: "center", fontSize: 12, color: "#94a3b8", marginTop: 16, marginBottom: 0 }}>
+                  En acceptant, vous rejoignez l&apos;équipe d&apos;administration CEEC.
+                </p>
+              )}
             </>
           )}
         </div>

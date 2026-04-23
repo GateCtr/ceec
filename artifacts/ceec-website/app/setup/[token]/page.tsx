@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSignUp } from "@clerk/nextjs";
+import { useSignUp, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
@@ -25,7 +25,8 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   const [step, setStep] = useState<Step>("loading");
   const [inviteError, setInviteError] = useState("");
 
-  const { signUp, isLoaded, setActive, errors, fetchStatus } = useSignUp();
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const { setActive } = useClerk();
   const router = useRouter();
 
   const isLoading = fetchStatus === "fetching";
@@ -110,7 +111,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   };
 
   const handleFinalize = async () => {
-    if (!signUp || !isLoaded) return;
+    if (!signUp) return;
     setFinalizing(true);
     setApiError("");
 

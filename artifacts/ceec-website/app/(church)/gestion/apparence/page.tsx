@@ -31,7 +31,7 @@ export default async function GestionApparencePage() {
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Apparence et branding</h1>
         <p style={{ color: "#64748b", marginTop: 4, fontSize: 14 }}>Personnalisez les couleurs, le favicon et les réseaux sociaux de votre site</p>
       </div>
-      <GestionApparenceClient initialConfig={config} initialContact={eglise ?? {}} />
+      <GestionApparenceClient initialConfig={config} initialContact={eglise ?? {}} egliseId={egliseId} />
     </div>
   );
 }

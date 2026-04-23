@@ -39,7 +39,11 @@ export async function POST(
     }
 
     if (invite.usedAt) {
-      return NextResponse.json({ error: "Ce lien a déjà été utilisé" }, { status: 410 });
+      const slug = invite.eglise?.slug ?? null;
+      return NextResponse.json(
+        { error: "Ce lien a déjà été utilisé", slug, redirectUrl: slug ? buildRedirectUrl(slug) : null },
+        { status: 410 }
+      );
     }
 
     if (invite.expiresAt < new Date()) {

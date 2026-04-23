@@ -25,7 +25,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   const [step, setStep] = useState<Step>("loading");
   const [inviteError, setInviteError] = useState("");
 
-  const { signUp, errors, fetchStatus } = useSignUp();
+  const { signUp, isLoaded, setActive, errors, fetchStatus } = useSignUp();
   const router = useRouter();
 
   const isLoading = fetchStatus === "fetching";
@@ -37,13 +37,20 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   const [apiError, setApiError] = useState("");
   const [finalizing, setFinalizing] = useState(false);
 
+  const [usedSlug, setUsedSlug] = useState<string | null>(null);
+  const [usedEgliseNom, setUsedEgliseNom] = useState<string | null>(null);
+
   useEffect(() => {
     params.then(({ token: t }) => {
       setToken(t);
       fetch(`/api/setup/${t}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.error) {
+        .then((r) => r.json().then((data) => ({ status: r.status, data })))
+        .then(({ status, data }) => {
+          if (status === 410 && data.slug) {
+            setUsedSlug(data.slug);
+            setUsedEgliseNom(data.egliseNom ?? null);
+            setStep("error");
+          } else if (data.error) {
             setInviteError(data.error);
             setStep("error");
           } else {
@@ -103,16 +110,14 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   };
 
   const handleFinalize = async () => {
-    if (!signUp) return;
+    if (!signUp || !isLoaded) return;
     setFinalizing(true);
     setApiError("");
 
     try {
-      // Crée la session Clerk d'abord (nécessaire pour l'API)
-      const { error: finalErr } = await signUp.finalize();
-      if (finalErr) {
-        setApiError(finalErr.message || "Erreur lors de la création de la session.");
-        return;
+      // Active la session Clerk (le signup est déjà "complete" depuis l'étape de vérification)
+      if (signUp.createdSessionId) {
+        await setActive({ session: signUp.createdSessionId });
       }
 
       // Assigne les rôles via l'API (utilise la session active)
@@ -123,6 +128,17 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
       const data = await res.json();
 
       if (!res.ok) {
+        // Si le lien a déjà été utilisé mais qu'on a bien le slug, c'est que
+        // la session a été créée avec succès — on redirige quand même vers la gestion
+        if (res.status === 410 && data.slug) {
+          setStep("done");
+          setTimeout(() => {
+            const target = data.redirectUrl ?? `/gestion?eglise=${data.slug}`;
+            if (target.startsWith("http")) window.location.href = target;
+            else router.push(target);
+          }, 2500);
+          return;
+        }
         setApiError(data.error ?? "Erreur lors de la finalisation");
         return;
       }
@@ -155,6 +171,31 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   }
 
   if (step === "error") {
+    if (usedSlug) {
+      return (
+        <Center>
+          <Card>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: 72, height: 72, background: "#dcfce7", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 20px" }}>✓</div>
+              <h2 style={{ color: "#1e3a8a", margin: "0 0 12px" }}>Espace déjà configuré</h2>
+              <p style={{ color: "#64748b", lineHeight: 1.6 }}>
+                {usedEgliseNom ? (
+                  <>L&apos;espace de <strong>{usedEgliseNom}</strong> a déjà été configuré.</>
+                ) : (
+                  <>Cet espace a déjà été configuré.</>
+                )}
+              </p>
+              <Link
+                href={`/gestion?eglise=${usedSlug}`}
+                style={{ display: "inline-block", marginTop: 20, background: "#1e3a8a", color: "white", fontWeight: 700, textDecoration: "none", padding: "12px 28px", borderRadius: 10 }}
+              >
+                Accéder à la gestion <ChevronRight size={14} style={{ display: "inline", verticalAlign: "middle" }} />
+              </Link>
+            </div>
+          </Card>
+        </Center>
+      );
+    }
     return (
       <Center>
         <Card>

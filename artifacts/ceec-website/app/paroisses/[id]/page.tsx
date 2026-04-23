@@ -50,7 +50,7 @@ export default async function ParoisseDetailPage({
     <>
       <NavbarServer />
       <main>
-        <section style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "4rem 1rem" }}>
+        <section style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "7rem 1rem 4rem", minHeight: "45vh", display: "flex", alignItems: "center" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
             <Link href="/paroisses" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 16, display: "inline-block" }}>
               &larr; Retour aux eglises

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CheckCircle, X, ChevronUp, ChevronDown, Plus } from "lucide-react";
+import ImagePicker from "@/components/gestion/ImagePicker";
 
 type NavLink = { label: string; href: string; externe?: boolean };
 type FooterLink = { label: string; href: string };
@@ -52,7 +53,7 @@ function parseChampsActifs(raw: unknown): { telephone: boolean; sujet: boolean }
 
 type ContactData = { adresse?: string | null; telephone?: string | null; email?: string | null };
 
-export default function GestionApparenceClient({ initialConfig, initialContact }: { initialConfig: ConfigData | null; initialContact?: ContactData }) {
+export default function GestionApparenceClient({ initialConfig, initialContact, egliseId }: { initialConfig: ConfigData | null; initialContact?: ContactData; egliseId?: number }) {
   const [form, setForm] = useState({
     couleurPrimaire: initialConfig?.couleurPrimaire ?? "#1e3a8a",
     couleurAccent: initialConfig?.couleurAccent ?? "#c59b2e",
@@ -208,7 +209,12 @@ export default function GestionApparenceClient({ initialConfig, initialContact }
             <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurPrimaire, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>Bouton</div>
             <div style={{ flex: 1, height: 32, borderRadius: 8, background: form.couleurAccent, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12, fontWeight: 600 }}>Accent</div>
           </div>
-          {input("faviconUrl", "URL du favicon (icône dans l'onglet)", { placeholder: "https://..." })}
+          <ImagePicker
+            label="Favicon (icône dans l'onglet navigateur)"
+            value={form.faviconUrl}
+            onChange={(url) => updateField("faviconUrl", url)}
+            egliseId={egliseId}
+          />
         </>
       )}
 

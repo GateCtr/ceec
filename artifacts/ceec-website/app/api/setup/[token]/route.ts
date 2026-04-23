@@ -22,7 +22,11 @@ export async function GET(
 
     if (invite.usedAt) {
       return NextResponse.json(
-        { error: "Ce lien d'invitation a déjà été utilisé" },
+        {
+          error: "Ce lien d'invitation a déjà été utilisé",
+          slug: invite.eglise?.slug ?? null,
+          egliseNom: invite.eglise?.nom ?? null,
+        },
         { status: 410 }
       );
     }

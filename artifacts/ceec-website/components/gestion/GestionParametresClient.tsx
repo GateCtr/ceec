@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CheckCircle } from "lucide-react";
+import ImagePicker from "@/components/gestion/ImagePicker";
 
 interface EgliseData {
   id: number;
@@ -116,15 +117,12 @@ export default function GestionParametresClient({ eglise }: Props) {
           </div>
         </div>
 
-        <div>
-          <label style={s.label}>URL du logo</label>
-          <input type="url" style={s.input} {...field("logoUrl")} placeholder="https://…" />
-          {form.logoUrl && (
-            <div style={{ marginTop: 8 }}>
-              <img src={form.logoUrl} alt="Logo" style={{ width: 60, height: 60, borderRadius: 8, objectFit: "cover", border: "1px solid #e2e8f0" }} />
-            </div>
-          )}
-        </div>
+        <ImagePicker
+          label="Logo de l'église"
+          value={form.logoUrl}
+          onChange={(url) => setForm({ ...form, logoUrl: url })}
+          egliseId={eglise.id}
+        />
 
         <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9" }}>
           <button type="submit" style={s.submitBtn} disabled={loading}>

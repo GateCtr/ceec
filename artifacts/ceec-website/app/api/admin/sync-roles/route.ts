@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { isSuperAdmin, isAdminPlatteforme, getUserRoles } from "@/lib/auth/rbac";
+import { isSuperAdmin, isAdminPlatteforme, isPlatformAdmin, getUserRoles } from "@/lib/auth/rbac";
 
 async function syncUserRoles(userId: string) {
-  const [superAdmin, adminPlatteforme, userRoles] = await Promise.all([
+  const [superAdmin, adminPlatteforme, platformMember, userRoles] = await Promise.all([
     isSuperAdmin(userId),
     isAdminPlatteforme(userId),
+    isPlatformAdmin(userId),   // true pour super_admin + admin_plateforme + moderateur_plateforme
     getUserRoles(userId),
   ]);
 
@@ -21,11 +22,12 @@ async function syncUserRoles(userId: string) {
     publicMetadata: {
       isSuperAdmin: superAdmin,
       isAdminPlatteforme: adminPlatteforme,
+      isPlatformMember: platformMember,   // porte d'entrée middleware pour tous les rôles plateforme
       churchRoles,
     },
   });
 
-  return { isSuperAdmin: superAdmin, isAdminPlatteforme: adminPlatteforme, churchRoles };
+  return { isSuperAdmin: superAdmin, isAdminPlatteforme: adminPlatteforme, isPlatformMember: platformMember, churchRoles };
 }
 
 // GET : bootstrap automatique — synchro puis redirect vers /admin (ou ?redirect=...)
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest) {
 
     const result = await syncUserRoles(userId);
 
-    if (!result.isAdminPlatteforme && !result.isSuperAdmin) {
+    if (!result.isPlatformMember) {
       return NextResponse.redirect(new URL("/?error=acces-refuse", req.url));
     }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { isSuperAdmin, isAdminPlatteforme, getUserRoles } from "@/lib/auth/rbac";
+import { isSuperAdmin, isAdminPlatteforme, isPlatformAdmin, getUserRoles } from "@/lib/auth/rbac";
 
 export async function POST(
   _req: NextRequest,
@@ -74,9 +74,10 @@ export async function POST(
     // Synchroniser immédiatement les métadonnées Clerk so that any subsequent
     // call to sync-roles (or middleware checks) reflects the new platform role.
     try {
-      const [superAdmin, adminPlatteformeFlag, userRoles] = await Promise.all([
+      const [superAdmin, adminPlatteformeFlag, platformMember, userRoles] = await Promise.all([
         isSuperAdmin(userId),
         isAdminPlatteforme(userId),
+        isPlatformAdmin(userId),
         getUserRoles(userId),
       ]);
 
@@ -89,6 +90,7 @@ export async function POST(
         publicMetadata: {
           isSuperAdmin: superAdmin,
           isAdminPlatteforme: adminPlatteformeFlag,
+          isPlatformMember: platformMember,
           churchRoles,
         },
       });

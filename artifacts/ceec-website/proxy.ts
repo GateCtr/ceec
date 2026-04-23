@@ -279,7 +279,12 @@ export default clerkMiddleware(async (auth, req) => {
       const client = await clerkClient();
       const user = await client.users.getUser(userId);
       const meta = user.publicMetadata as Record<string, unknown>;
-      canAccessAdmin = meta.isAdminPlatteforme === true || meta.isSuperAdmin === true;
+      // isPlatformMember = true pour super_admin + admin_plateforme + moderateur_plateforme
+      // Les pages individuelles dans /admin/* ont leurs propres vérifications DB pour les permissions fines
+      canAccessAdmin =
+        meta.isPlatformMember === true ||
+        meta.isAdminPlatteforme === true ||
+        meta.isSuperAdmin === true;
     } catch {
       canAccessAdmin = false;
     }

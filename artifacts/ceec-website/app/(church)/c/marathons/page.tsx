@@ -12,14 +12,15 @@ export default async function MembreMarathonsPage() {
   if (!egliseIdHeader) redirect("/c");
   const egliseId = parseInt(egliseIdHeader, 10);
 
+  // Auth optionnelle — la page est publique, seule la participation est protégée
   const { userId } = await auth();
-  if (!userId) redirect("/c/connexion");
 
-  const membre = await prisma.membre.findFirst({
-    where: { clerkUserId: userId, egliseId },
-    select: { id: true },
-  });
-  if (!membre) redirect("/c");
+  const membre = userId
+    ? await prisma.membre.findFirst({
+        where: { clerkUserId: userId, egliseId },
+        select: { id: true },
+      })
+    : null;
 
   const marathons = await prisma.marathon.findMany({
     where: { egliseId },
@@ -27,11 +28,16 @@ export default async function MembreMarathonsPage() {
     include: { _count: { select: { participants: true } } },
   });
 
-  const mesInscriptions = await prisma.marathonParticipant.findMany({
-    where: { membreId: membre.id },
-    select: { marathonId: true },
-  });
-  const mesMarathonIds = new Set(mesInscriptions.map((i) => i.marathonId));
+  const mesMarathonIds = membre
+    ? new Set(
+        (
+          await prisma.marathonParticipant.findMany({
+            where: { membreId: membre.id },
+            select: { marathonId: true },
+          })
+        ).map((i) => i.marathonId)
+      )
+    : new Set<number>();
 
   return (
     <MembreMarathonsClient
@@ -42,6 +48,7 @@ export default async function MembreMarathonsPage() {
         inscrit: mesMarathonIds.has(m.id),
       }))}
       egliseId={egliseId}
+      isMembre={!!membre}
     />
   );
 }

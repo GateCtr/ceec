@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, ArrowLeft, CheckCircle, XCircle, Download, Plus, Calendar, ExternalLink } from "lucide-react";
+import { Trophy, ArrowLeft, CheckCircle, XCircle, Download, Plus, Calendar, ExternalLink, LogIn } from "lucide-react";
 import QRCode from "qrcode";
 
 const PRIMARY = "#1e3a8a";
@@ -24,7 +24,7 @@ function formatDate(d: string) {
 
 export default function MembreMarathonDetailClient({
   marathon, participant, membreId, joursEcoules, joursRestants,
-}: { marathon: Marathon; participant: Participant | null; membreId: number; joursEcoules: number; joursRestants: number }) {
+}: { marathon: Marathon; participant: Participant | null; membreId: number | null; joursEcoules: number; joursRestants: number }) {
   const router = useRouter();
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [inscrit, setInscrit] = useState(!!participant);
@@ -136,7 +136,11 @@ export default function MembreMarathonDetailClient({
           <Trophy size={40} color="#d1d5db" style={{ marginBottom: 14 }} />
           <h3 style={{ color: PRIMARY, marginBottom: 8 }}>Participez au marathon</h3>
           <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 20 }}>Inscrivez-vous pour recevoir votre carte de participant avec QR code.</p>
-          {marathon.statut === "ouvert" ? (
+          {!membreId ? (
+            <button onClick={() => router.push("/c/connexion")} style={{ padding: "11px 24px", background: "transparent", color: PRIMARY, border: `2px solid ${PRIMARY}`, borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <LogIn size={16} /> Se connecter pour participer
+            </button>
+          ) : marathon.statut === "ouvert" ? (
             <button onClick={handleInscrire} disabled={inscribing} style={{ padding: "11px 24px", background: PRIMARY, color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: inscribing ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
               <Plus size={16} /> {inscribing ? "Inscription..." : "S'inscrire au marathon"}
             </button>

@@ -15,17 +15,18 @@ export default async function MembreMarathonDetailPage({
   if (!egliseIdHeader) redirect("/c");
   const egliseId = parseInt(egliseIdHeader, 10);
 
+  // Auth optionnelle — la page est publique, seule la participation est protégée
   const { userId } = await auth();
-  if (!userId) redirect("/c/connexion");
 
   const { id } = await params;
   const marathonId = parseInt(id, 10);
 
-  const membre = await prisma.membre.findFirst({
-    where: { clerkUserId: userId, egliseId },
-    select: { id: true, nom: true, prenom: true },
-  });
-  if (!membre) redirect("/c");
+  const membre = userId
+    ? await prisma.membre.findFirst({
+        where: { clerkUserId: userId, egliseId },
+        select: { id: true, nom: true, prenom: true },
+      })
+    : null;
 
   const marathon = await prisma.marathon.findFirst({
     where: { id: marathonId, egliseId },
@@ -39,12 +40,12 @@ export default async function MembreMarathonDetailPage({
   const joursEcoules = allDays.filter((d) => d.toISOString().slice(0, 10) <= today).length;
   const joursRestants = allDays.length - joursEcoules;
 
-  const participant = await prisma.marathonParticipant.findFirst({
-    where: { marathonId, membreId: membre.id },
-    include: {
-      presences: { orderBy: { numeroJour: "asc" } },
-    },
-  });
+  const participant = membre
+    ? await prisma.marathonParticipant.findFirst({
+        where: { marathonId, membreId: membre.id },
+        include: { presences: { orderBy: { numeroJour: "asc" } } },
+      })
+    : null;
 
   return (
     <MembreMarathonDetailClient
@@ -65,7 +66,7 @@ export default async function MembreMarathonDetailPage({
           numeroJour: p.numeroJour, statut: p.statut, date: p.date.toISOString(),
         })),
       } : null}
-      membreId={membre.id}
+      membreId={membre?.id ?? null}
     />
   );
 }

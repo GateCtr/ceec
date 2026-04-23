@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, Calendar, Users, Lock, Plus, CheckCircle } from "lucide-react";
+import { Trophy, Calendar, Users, Lock, Plus, CheckCircle, LogIn } from "lucide-react";
 
 const PRIMARY = "#1e3a8a";
 const GOLD = "#c59b2e";
@@ -14,8 +14,8 @@ interface MarathonItem {
 }
 
 export default function MembreMarathonsClient({
-  marathons, egliseId,
-}: { marathons: MarathonItem[]; egliseId: number }) {
+  marathons, egliseId, isMembre,
+}: { marathons: MarathonItem[]; egliseId: number; isMembre: boolean }) {
   const router = useRouter();
   const [inscriptionLoading, setInscriptionLoading] = useState<number | null>(null);
   const [statuts, setStatuts] = useState<Record<number, boolean>>(
@@ -97,7 +97,14 @@ export default function MembreMarathonsClient({
                   </div>
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  {m.statut === "ouvert" && !inscrit ? (
+                  {!isMembre && m.statut === "ouvert" ? (
+                    <button
+                      onClick={() => router.push("/c/connexion")}
+                      style={{ padding: "8px 14px", background: "transparent", color: PRIMARY, border: `1.5px solid ${PRIMARY}`, borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
+                    >
+                      <LogIn size={14} /> Se connecter
+                    </button>
+                  ) : m.statut === "ouvert" && !inscrit ? (
                     <button
                       onClick={() => handleInscrire(m.id, inscrit)}
                       disabled={inscriptionLoading === m.id}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, ArrowLeft, CheckCircle, XCircle, Download, Plus, Calendar, ExternalLink, LogIn } from "lucide-react";
+import { Trophy, CheckCircle, XCircle, Download, Plus, Calendar, ExternalLink, LogIn } from "lucide-react";
 import QRCode from "qrcode";
 
 const PRIMARY = "#1e3a8a";
@@ -100,11 +100,7 @@ export default function MembreMarathonDetailClient({
   const absences = joursEcoules - presents;
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 800, margin: "0 auto" }}>
-      <button onClick={() => router.push("/c/marathons")} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", color: PRIMARY, fontWeight: 600, fontSize: 13.5, marginBottom: 20, padding: 0 }}>
-        <ArrowLeft size={15} /> Retour aux marathons
-      </button>
-
+    <div style={{ padding: "2rem 1rem", maxWidth: 800, margin: "0 auto" }}>
       {/* Marathon header */}
       <div style={{ background: PRIMARY, borderRadius: 16, padding: "1.75rem", marginBottom: "1.5rem", color: "white" }}>
         {marathon.logoUrl && <img src={marathon.logoUrl} alt="" style={{ height: 40, objectFit: "contain", marginBottom: 12 }} />}

@@ -30,7 +30,14 @@ export default function ChurchNavbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const isHomePage = pathname === "/c";
+  // Pages sans hero sombre — navbar reste opaque
+  const NON_HERO_PATHS = [
+    "/c/connexion", "/c/inscription",
+    "/c/mon-espace", "/c/oauth-callback", "/c/suspendu",
+  ];
+  const isHeroPage = !NON_HERO_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -44,7 +51,7 @@ export default function ChurchNavbar({
   const navBg = primary.startsWith("#") ? primary : "#1e3a8a";
   const accentColor = accent.startsWith("#") ? accent : "#c59b2e";
 
-  const transparent = isHomePage && !scrolled;
+  const transparent = isHeroPage && !scrolled;
 
   const baseLinks = [
     { href: "/c", label: "Accueil" },

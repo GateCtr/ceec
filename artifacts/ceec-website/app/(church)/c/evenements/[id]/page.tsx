@@ -89,7 +89,7 @@ export default async function EvenementDetailPage({ params }: Props) {
           background: evt.imageUrl
             ? `linear-gradient(rgba(15,23,42,0.65), rgba(15,23,42,0.75)), url(${evt.imageUrl}) center/cover no-repeat`
             : "linear-gradient(135deg, var(--church-primary, #1e3a8a), #1e2d6b)",
-          color: "white", padding: "5rem 1rem",
+          color: "white", padding: "7rem 1rem 4rem", marginTop: -64,
         }}
       >
         <div style={{ maxWidth: 820, margin: "0 auto" }}>

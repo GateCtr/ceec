@@ -88,7 +88,8 @@ export default async function ChurchEvenementsPage({
       <section
         style={{
           background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), #1e2d6b)",
-          color: "white", padding: "4rem 1rem", textAlign: "center",
+          color: "white", padding: "7rem 1rem 4rem", textAlign: "center",
+          marginTop: -64,
         }}
       >
         <h1 style={{ fontSize: "clamp(1.8rem,4vw,2.5rem)", fontWeight: 900, marginBottom: 10 }}>Événements</h1>

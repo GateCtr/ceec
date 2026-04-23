@@ -70,7 +70,7 @@ export default async function AnnonceDetailPage({ params }: Props) {
       <section
         style={{
           background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), #1e2d6b)",
-          color: "white", padding: "4rem 1rem",
+          color: "white", padding: "7rem 1rem 4rem", marginTop: -64,
         }}
       >
         <div style={{ maxWidth: 800, margin: "0 auto" }}>

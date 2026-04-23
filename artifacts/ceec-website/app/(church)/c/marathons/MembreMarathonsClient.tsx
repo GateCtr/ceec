@@ -36,31 +36,17 @@ export default function MembreMarathonsClient({
 
   if (marathons.length === 0) {
     return (
-      <div style={{ padding: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "2rem" }}>
-          <Trophy size={24} color={PRIMARY} />
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: PRIMARY }}>Marathons de prière</h1>
-        </div>
-        <div style={{ textAlign: "center", padding: "4rem 2rem", background: "#f9fafb", borderRadius: 16 }}>
-          <Trophy size={36} color="#d1d5db" style={{ marginBottom: 12 }} />
-          <p style={{ color: "#6b7280" }}>Aucun marathon disponible pour le moment.</p>
+      <div style={{ padding: "3rem 2rem", textAlign: "center", background: "#f9fafb", minHeight: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div>
+          <Trophy size={40} color="#d1d5db" style={{ marginBottom: 12 }} />
+          <p style={{ color: "#6b7280", fontSize: 15 }}>Aucun marathon disponible pour le moment.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 900, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "2rem" }}>
-        <div style={{ width: 42, height: 42, borderRadius: 10, background: PRIMARY, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Trophy size={20} color="white" />
-        </div>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: PRIMARY }}>Marathons de prière</h1>
-          <p style={{ margin: 0, fontSize: 13, color: "#6b7280" }}>Retraites spirituelles de votre église</p>
-        </div>
-      </div>
-
+    <div style={{ padding: "2.5rem 1rem 4rem", maxWidth: 900, margin: "0 auto" }}>
       <div style={{ display: "grid", gap: 16 }}>
         {marathons.map((m) => {
           const participant = statuts[m.id];

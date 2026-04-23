@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isSuperAdmin, PLATFORM_ROLES, ROLES } from "@/lib/auth/rbac";
-import AdminUtilisateursClient from "@/components/admin/AdminUtilisateursClient";
+import AdminUtilisateursClient, { type PendingInvite } from "@/components/admin/AdminUtilisateursClient";
 import { Info } from "lucide-react";
 
 export const metadata = { title: "Utilisateurs Admin | CEEC" };
@@ -57,6 +57,31 @@ export default async function AdminUtilisateursPage() {
     email: m.email ?? "",
   }));
 
+  const pendingInviteRaw = await prisma.inviteToken.findMany({
+    where: {
+      egliseId: null,
+      usedAt: null,
+      role: { nom: { in: [ROLES.ADMIN_PLATEFORME, ROLES.MODERATEUR_PLATEFORME] } },
+    },
+    include: { role: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const ROLE_LABELS: Record<string, string> = {
+    admin_plateforme: "Administrateur Plateforme",
+    moderateur_plateforme: "Modérateur Plateforme",
+  };
+
+  const pendingInvitations: PendingInvite[] = pendingInviteRaw.map((inv) => ({
+    id: inv.id,
+    email: inv.email,
+    roleNom: inv.role?.nom ?? "",
+    roleLabel: ROLE_LABELS[inv.role?.nom ?? ""] ?? inv.role?.nom ?? "",
+    expiresAt: inv.expiresAt.toISOString(),
+    createdAt: inv.createdAt.toISOString(),
+    expired: inv.expiresAt < new Date(),
+  }));
+
   return (
     <div style={{ padding: "2rem", maxWidth: 920, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
@@ -88,7 +113,7 @@ export default async function AdminUtilisateursPage() {
         </div>
       </div>
 
-      <AdminUtilisateursClient initialUsers={users} membres={membresOptions} />
+      <AdminUtilisateursClient initialUsers={users} membres={membresOptions} initialInvitations={pendingInvitations} />
     </div>
   );
 }

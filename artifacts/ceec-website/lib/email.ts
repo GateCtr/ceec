@@ -148,6 +148,30 @@ export async function sendInviteEmail(
   return sendEmail(to, `Invitation — Configurez l'espace de ${egliseNom} sur CEEC`, html);
 }
 
+// ─── Template 1b : Invitation admin plateforme ───────────────────────────────
+
+export async function sendAdminPlatformInviteEmail(
+  to: string,
+  token: string,
+  roleLabel: string
+): Promise<{ success: boolean; error?: string }> {
+  const inviteLink = `${BASE_URL}/setup/admin-invite/${token}`;
+  const html = emailWrapper(
+    "Invitation — Administration CEEC",
+    p("Bonjour,") +
+    p(`Vous avez été invité(e) à rejoindre l&apos;équipe d&apos;administration de la plateforme CEEC avec le rôle <strong style="color:#1e3a8a">${roleLabel}</strong>.`) +
+    callout("#1e3a8a", "#eff6ff",
+      `<strong>Rôle :</strong> ${roleLabel}<br>Ce rôle vous donnera accès à l&apos;interface d&apos;administration de la plateforme.`
+    ) +
+    p("Cliquez sur le bouton ci-dessous pour accepter l&apos;invitation. Vous devrez vous connecter ou créer un compte avec cette adresse email.") +
+    cta(inviteLink, "Accepter l'invitation") +
+    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, ignorez cet email.</p>
+     <hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0">
+     <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">Lien direct : <a href="${inviteLink}" style="color:#1e3a8a">${inviteLink}</a></p>`
+  );
+  return sendEmail(to, `Invitation — Accès administration CEEC (${roleLabel})`, html);
+}
+
 // ─── Template 2 : Contenu approuvé ───────────────────────────────────────────
 
 export async function sendContentApprovedEmail(

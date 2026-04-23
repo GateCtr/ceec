@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   description:
     "Bienvenue sur le site officiel de la Communauté des Églises Évangéliques au Congo (CEEC). Découvrez nos paroisses, nos événements et notre communauté.",
   keywords: "CEEC, Église, Évangélique, Congo, Paroisse, Communauté",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    shortcut: [{ url: "/icon.png" }],
+    apple: [{ url: "/icon.png" }],
+  },
 };
 
 export default function RootLayout({

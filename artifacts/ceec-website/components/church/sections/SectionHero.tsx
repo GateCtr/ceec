@@ -8,6 +8,8 @@ type HeroConfig = {
   imageUrl?: string;
   bgColor?: string;
   overlayOpacity?: number;
+  textAlign?: "center" | "left";
+  textColor?: string;
   ctaLabel1?: string;
   ctaHref1?: string;
   ctaLabel2?: string;
@@ -29,15 +31,21 @@ export default function SectionHero({
   const ctaHref1 = config.ctaHref1 ?? "/c/inscription";
   const ctaLabel2 = config.ctaLabel2 ?? "Voir les événements";
   const ctaHref2 = config.ctaHref2 ?? "/c/evenements";
+  const textAlign = config.textAlign ?? "center";
+  const textColor = config.textColor || "white";
+
+  // overlayOpacity may be stored as 0-100 (new) or 0-1 (legacy)
+  const rawOpacity = config.overlayOpacity ?? 60;
+  const overlayOpacity = rawOpacity > 1 ? rawOpacity / 100 : rawOpacity;
 
   return (
     <section
       style={{
         position: "relative",
         overflow: "hidden",
-        color: "white",
+        color: textColor,
         padding: "7rem 1rem 5rem",
-        textAlign: "center",
+        textAlign,
         minHeight: "clamp(480px, 60vh, 700px)",
         marginTop: -64,
         display: "flex",
@@ -58,7 +66,9 @@ export default function SectionHero({
         style={{
           position: "absolute", inset: 0,
           background: imageUrl
-            ? `rgba(15,23,42,${config.overlayOpacity ?? 0.6})`
+            ? `rgba(15,23,42,${overlayOpacity})`
+            : config.bgColor
+            ? config.bgColor
             : "linear-gradient(135deg, var(--church-primary, #1e3a8a) 0%, #1e2d6b 60%, #0f172a 100%)",
         }}
       />
@@ -69,7 +79,7 @@ export default function SectionHero({
           backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E\")",
         }}
       />
-      <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", position: "relative", textAlign }}>
         {eglise.logoUrl && (
           <img
             src={eglise.logoUrl}

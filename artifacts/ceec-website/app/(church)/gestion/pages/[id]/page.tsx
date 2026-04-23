@@ -45,6 +45,7 @@ export default async function GestionPageDetailPage({ params }: Props) {
     <div style={{ padding: "2rem", maxWidth: 900 }}>
       <GestionPageDetailClient
         egliseSlug={eglise?.slug ?? ""}
+        egliseId={egliseId}
         page={{
           ...page,
           sections: page.sections.map(s => ({

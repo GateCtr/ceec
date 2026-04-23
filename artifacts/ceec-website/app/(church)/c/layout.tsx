@@ -53,10 +53,13 @@ export async function generateMetadata(): Promise<Metadata> {
       select: { nom: true, ville: true, description: true, logoUrl: true, config: { select: { faviconUrl: true } } },
     });
     if (!eglise) return {};
-    const icons = eglise.config?.faviconUrl
-      ? [{ url: eglise.config.faviconUrl }]
-      : eglise.logoUrl
-      ? [{ url: eglise.logoUrl }]
+    const faviconUrl = eglise.config?.faviconUrl ?? eglise.logoUrl ?? null;
+    const icons = faviconUrl
+      ? {
+          icon: [{ url: faviconUrl }],
+          shortcut: [{ url: faviconUrl }],
+          apple: [{ url: faviconUrl }],
+        }
       : undefined;
     return {
       title: { default: eglise.nom, template: `%s | ${eglise.nom}` },

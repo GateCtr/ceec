@@ -53,6 +53,7 @@ export default async function GestionPageSectionsPage({ params }: Props) {
       </Link>
       <GestionPageDetailClient
         egliseSlug={eglise?.slug ?? ""}
+        egliseId={egliseId}
         page={{
           ...page,
           sections: page.sections.map((s) => ({

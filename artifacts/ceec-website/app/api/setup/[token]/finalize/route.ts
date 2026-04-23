@@ -116,12 +116,69 @@ export async function POST(
     ]);
 
     const slug = invite.eglise.slug;
+    const egliseId = invite.eglise.id;
+
+    // Auto-create default home page if it doesn't exist yet
+    const existingHome = await prisma.pageEglise.findFirst({
+      where: { egliseId, type: "accueil" },
+    });
+
+    if (!existingHome) {
+      const homePage = await prisma.pageEglise.create({
+        data: {
+          egliseId,
+          titre: "Accueil",
+          slug: "",
+          type: "accueil",
+          ordre: 0,
+          publie: true,
+        },
+      });
+
+      await prisma.sectionPage.createMany({
+        data: [
+          {
+            pageId: homePage.id,
+            type: "hero",
+            ordre: 1,
+            config: {
+              titre: invite.eglise.nom ?? "Bienvenue",
+              sousTitre: "",
+              description: "Rejoignez notre communauté de foi.",
+              ctaLabel1: "Rejoindre l'église",
+              ctaHref1: "/c/inscription",
+              ctaLabel2: "Nos événements",
+              ctaHref2: "/c/evenements",
+            },
+          },
+          {
+            pageId: homePage.id,
+            type: "annonces",
+            ordre: 2,
+            config: { titre: "Annonces", limite: "3" },
+          },
+          {
+            pageId: homePage.id,
+            type: "evenements",
+            ordre: 3,
+            config: { titre: "Événements à venir", limite: "3" },
+          },
+          {
+            pageId: homePage.id,
+            type: "contact",
+            ordre: 4,
+            config: { titre: "Contactez-nous" },
+          },
+        ],
+      });
+    }
+
     const redirectUrl = slug ? buildRedirectUrl(slug) : "/auth/redirect";
 
     return NextResponse.json({
       success: true,
       slug,
-      egliseId: invite.eglise.id,
+      egliseId,
       redirectUrl,
     });
   } catch {

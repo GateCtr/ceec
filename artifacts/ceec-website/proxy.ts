@@ -224,6 +224,15 @@ export default clerkMiddleware(async (auth, req) => {
         rewriteUrl.pathname = `/c${pathSuffix}`;
       }
 
+      // For the root path "/", use a redirect so the browser URL becomes /c
+      // and client-side routing (usePathname, links) works correctly.
+      if (url.pathname === "/" && rewriteUrl.pathname === "/c") {
+        const redirectTarget = new URL("/c", req.url);
+        const redirectResponse = NextResponse.redirect(redirectTarget);
+        setChurchCookie(redirectResponse, church.slug);
+        return redirectResponse;
+      }
+
       const requestHeaders = new Headers(req.headers);
       requestHeaders.set("x-eglise-slug", church.slug);
       requestHeaders.set("x-eglise-id", String(church.id));

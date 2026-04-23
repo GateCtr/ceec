@@ -156,9 +156,14 @@ export default function ChurchFooter({
             <p style={{ fontSize: 13, lineHeight: 1.75, marginBottom: 12 }}>
               Membre de la Communauté des Églises Évangéliques au Congo.
             </p>
-            <Link href="/" style={{ display: "inline-block", fontSize: 13, color: accent, textDecoration: "none" }}>
+            <a
+              href="https://ceec-rdc.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "inline-block", fontSize: 13, color: accent, textDecoration: "none" }}
+            >
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>ceec-rdc.org <ChevronRight size={12} /></span>
-            </Link>
+            </a>
           </div>
         </div>
 

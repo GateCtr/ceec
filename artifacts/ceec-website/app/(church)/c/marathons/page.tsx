@@ -14,6 +14,7 @@ export default async function MembreMarathonsPage() {
 
   // Auth optionnelle — la page est publique, seule la participation est protégée
   const { userId } = await auth();
+  const isConnected = !!userId;
 
   const membre = userId
     ? await prisma.membre.findFirst({
@@ -48,6 +49,7 @@ export default async function MembreMarathonsPage() {
         inscrit: mesMarathonIds.has(m.id),
       }))}
       egliseId={egliseId}
+      isConnected={isConnected}
       isMembre={!!membre}
     />
   );

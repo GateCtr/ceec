@@ -23,11 +23,11 @@ function formatDate(d: string) {
 }
 
 export default function MembreMarathonDetailClient({
-  marathon, participant, membreId, joursEcoules, joursRestants,
-}: { marathon: Marathon; participant: Participant | null; membreId: number | null; joursEcoules: number; joursRestants: number }) {
+  marathon, participant, membreId, isConnected, joursEcoules, joursRestants,
+}: { marathon: Marathon; participant: Participant | null; membreId: number | null; isConnected: boolean; joursEcoules: number; joursRestants: number }) {
   const router = useRouter();
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const [inscrit, setInscrit] = useState(!!participant);
+  const [estParticipant, setEstParticipant] = useState(!!participant);
   const [currentParticipant, setCurrentParticipant] = useState(participant);
   const [inscribing, setInscribing] = useState(false);
   const [printingBadge, setPrintingBadge] = useState(false);
@@ -41,12 +41,12 @@ export default function MembreMarathonDetailClient({
     }
   }, [currentParticipant]);
 
-  const handleInscrire = async () => {
+  const handleParticiper = async () => {
     setInscribing(true);
     const res = await fetch(`/api/membre/marathons/${marathon.id}/inscrire`, { method: "POST" });
     if (res.ok) {
       const data = await res.json();
-      setInscrit(true);
+      setEstParticipant(true);
       setCurrentParticipant({ ...data, presences: [] });
     }
     setInscribing(false);
@@ -130,22 +130,27 @@ export default function MembreMarathonDetailClient({
         )}
       </div>
 
-      {/* Inscription / Carte */}
-      {!inscrit ? (
+      {/* Participation / Carte */}
+      {!estParticipant ? (
         <div style={{ background: "white", border: "2px dashed #e5e7eb", borderRadius: 16, padding: "2.5rem", textAlign: "center", marginBottom: "1.5rem" }}>
           <Trophy size={40} color="#d1d5db" style={{ marginBottom: 14 }} />
           <h3 style={{ color: PRIMARY, marginBottom: 8 }}>Participez au marathon</h3>
-          <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 20 }}>Inscrivez-vous pour recevoir votre carte de participant avec QR code.</p>
-          {!membreId ? (
+          <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 20 }}>Confirmez votre participation pour recevoir votre carte avec QR code.</p>
+          {!isConnected ? (
+            // Visiteur non connecté → invitation à se connecter
             <button onClick={() => router.push("/c/connexion")} style={{ padding: "11px 24px", background: "transparent", color: PRIMARY, border: `2px solid ${PRIMARY}`, borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
               <LogIn size={16} /> Se connecter pour participer
             </button>
+          ) : !membreId ? (
+            // Connecté mais pas membre de cette église → pas d'action possible
+            <span style={{ color: "#9ca3af", fontSize: 14 }}>Vous devez être membre de cette église pour participer.</span>
           ) : marathon.statut === "ouvert" ? (
-            <button onClick={handleInscrire} disabled={inscribing} style={{ padding: "11px 24px", background: PRIMARY, color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: inscribing ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <Plus size={16} /> {inscribing ? "Inscription..." : "S'inscrire au marathon"}
+            // Membre connecté → bouton "Participer"
+            <button onClick={handleParticiper} disabled={inscribing} style={{ padding: "11px 24px", background: PRIMARY, color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: inscribing ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Plus size={16} /> {inscribing ? "Confirmation..." : "Participer au marathon"}
             </button>
           ) : (
-            <span style={{ color: "#9ca3af", fontSize: 14 }}>Les inscriptions sont closes.</span>
+            <span style={{ color: "#9ca3af", fontSize: 14 }}>Les participations sont closes.</span>
           )}
         </div>
       ) : currentParticipant && (

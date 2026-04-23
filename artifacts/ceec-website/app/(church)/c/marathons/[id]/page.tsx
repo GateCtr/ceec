@@ -17,6 +17,7 @@ export default async function MembreMarathonDetailPage({
 
   // Auth optionnelle — la page est publique, seule la participation est protégée
   const { userId } = await auth();
+  const isConnected = !!userId;
 
   const { id } = await params;
   const marathonId = parseInt(id, 10);
@@ -67,6 +68,7 @@ export default async function MembreMarathonDetailPage({
         })),
       } : null}
       membreId={membre?.id ?? null}
+      isConnected={isConnected}
     />
   );
 }

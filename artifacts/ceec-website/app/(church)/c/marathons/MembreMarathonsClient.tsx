@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Trophy, Calendar, Users, Lock, Plus, CheckCircle, LogIn } from "lucide-react";
 
 const PRIMARY = "#1e3a8a";
-const GOLD = "#c59b2e";
 
 interface MarathonItem {
   id: number; titre: string; theme: string | null;
@@ -14,10 +13,10 @@ interface MarathonItem {
 }
 
 export default function MembreMarathonsClient({
-  marathons, egliseId, isMembre,
-}: { marathons: MarathonItem[]; egliseId: number; isMembre: boolean }) {
+  marathons, egliseId, isConnected, isMembre,
+}: { marathons: MarathonItem[]; egliseId: number; isConnected: boolean; isMembre: boolean }) {
   const router = useRouter();
-  const [inscriptionLoading, setInscriptionLoading] = useState<number | null>(null);
+  const [participationLoading, setParticipationLoading] = useState<number | null>(null);
   const [statuts, setStatuts] = useState<Record<number, boolean>>(
     Object.fromEntries(marathons.map((m) => [m.id, m.inscrit]))
   );
@@ -25,15 +24,14 @@ export default function MembreMarathonsClient({
     Object.fromEntries(marathons.map((m) => [m.id, m.nbParticipants]))
   );
 
-  const handleInscrire = async (marathonId: number, currentlyInscrit: boolean) => {
-    if (currentlyInscrit) return;
-    setInscriptionLoading(marathonId);
+  const handleParticiper = async (marathonId: number) => {
+    setParticipationLoading(marathonId);
     const res = await fetch(`/api/membre/marathons/${marathonId}/inscrire`, { method: "POST" });
     if (res.ok) {
       setStatuts((s) => ({ ...s, [marathonId]: true }));
       setCounts((c) => ({ ...c, [marathonId]: (c[marathonId] ?? 0) + 1 }));
     }
-    setInscriptionLoading(null);
+    setParticipationLoading(null);
   };
 
   if (marathons.length === 0) {
@@ -65,12 +63,12 @@ export default function MembreMarathonsClient({
 
       <div style={{ display: "grid", gap: 16 }}>
         {marathons.map((m) => {
-          const inscrit = statuts[m.id];
+          const participant = statuts[m.id];
           const nb = counts[m.id] ?? m.nbParticipants;
           return (
             <div
               key={m.id}
-              style={{ background: "white", border: `1.5px solid ${inscrit ? "#bfdbfe" : "#e5e7eb"}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", cursor: "pointer" }}
+              style={{ background: "white", border: `1.5px solid ${participant ? "#bfdbfe" : "#e5e7eb"}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", cursor: "pointer" }}
               onClick={() => router.push(`/c/marathons/${m.id}`)}
             >
               <div style={{ height: 6, background: m.statut === "ouvert" ? PRIMARY : "#d1d5db" }} />
@@ -84,7 +82,11 @@ export default function MembreMarathonsClient({
                     <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: m.statut === "ouvert" ? "#dcfce7" : "#f3f4f6", color: m.statut === "ouvert" ? "#15803d" : "#6b7280" }}>
                       {m.statut === "ouvert" ? "Ouvert" : "Clos"}
                     </span>
-                    {inscrit && <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: "#eff6ff", color: PRIMARY, display: "flex", alignItems: "center", gap: 4 }}><CheckCircle size={11} /> Inscrit</span>}
+                    {participant && (
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: "#eff6ff", color: PRIMARY, display: "flex", alignItems: "center", gap: 4 }}>
+                        <CheckCircle size={11} /> Participant
+                      </span>
+                    )}
                   </div>
                   {m.theme && <div style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>{m.theme}</div>}
                   <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
@@ -92,29 +94,33 @@ export default function MembreMarathonsClient({
                       <Calendar size={12} /> {new Date(m.dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · {m.nombreJours} jours
                     </span>
                     <span style={{ fontSize: 12, color: "#9ca3af", display: "flex", alignItems: "center", gap: 4 }}>
-                      <Users size={12} /> {nb} inscrit{nb > 1 ? "s" : ""}
+                      <Users size={12} /> {nb} participant{nb > 1 ? "s" : ""}
                     </span>
                   </div>
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  {!isMembre && m.statut === "ouvert" ? (
-                    <button
-                      onClick={() => router.push("/c/connexion")}
-                      style={{ padding: "8px 14px", background: "transparent", color: PRIMARY, border: `1.5px solid ${PRIMARY}`, borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
-                    >
-                      <LogIn size={14} /> Se connecter
-                    </button>
-                  ) : m.statut === "ouvert" && !inscrit ? (
-                    <button
-                      onClick={() => handleInscrire(m.id, inscrit)}
-                      disabled={inscriptionLoading === m.id}
-                      style={{ padding: "8px 16px", background: PRIMARY, color: "white", border: "none", borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: inscriptionLoading === m.id ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
-                    >
-                      <Plus size={14} /> {inscriptionLoading === m.id ? "..." : "S'inscrire"}
-                    </button>
-                  ) : inscrit ? (
+                  {m.statut === "ouvert" && !participant ? (
+                    !isConnected ? (
+                      // Visiteur non connecté → invitation à se connecter
+                      <button
+                        onClick={() => router.push("/c/connexion")}
+                        style={{ padding: "8px 14px", background: "transparent", color: PRIMARY, border: `1.5px solid ${PRIMARY}`, borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
+                      >
+                        <LogIn size={14} /> Se connecter
+                      </button>
+                    ) : isMembre ? (
+                      // Membre connecté → peut participer
+                      <button
+                        onClick={() => handleParticiper(m.id)}
+                        disabled={participationLoading === m.id}
+                        style={{ padding: "8px 16px", background: PRIMARY, color: "white", border: "none", borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: participationLoading === m.id ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
+                      >
+                        <Plus size={14} /> {participationLoading === m.id ? "..." : "Participer"}
+                      </button>
+                    ) : null // Connecté mais pas membre de cette église → pas de bouton
+                  ) : participant ? (
                     <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: "#15803d", fontWeight: 600 }}>
-                      <CheckCircle size={15} /> Inscrit
+                      <CheckCircle size={15} /> Participant
                     </span>
                   ) : (
                     <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: "#9ca3af" }}>

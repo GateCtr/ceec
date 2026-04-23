@@ -18,11 +18,13 @@ En 2011, l'État congolais reconnaît officiellement la CEEC par la personnalit�
 
 La même décennie voit l'Église s'étirer au-delà de Kinshasa. Des paroisses s'implantent à Lubumbashi, à Likasi, puis à Kolwezi — toutes dans le sillage de serviteurs dévoués qui portent la vision dans leur ville, leur quartier, parfois leur village. Dans le Haut-Lomami, des dizaines de paroisses rurales naissent dans le territoire de Mulongo, à Manono, à Kamina Lenge. À Mbandaka et à Gemena, dans la province de l'Équateur, la CEEC plante ses premiers jalons au bord du fleuve Congo.
 
+Du 18 au 24 mai 2015, la CEEC vit l'une des semaines les plus marquantes de son existence. L'Assemblée Générale réunit les délégués du 18 au 22 mai. Le 23 mai, Son Excellence l'Évêque Missionnaire MPANGA MUKUTU Pozard est sacré Président Communautaire et Représentant Légal de la CEEC. Le lendemain, 24 mai, le Temple Nouvelle Jérusalem est solennellement dédié à Dieu — avant que tous les Rev-Pasteurs, Pasteurs, Anciens, Diacres, Diaconesses et Évangélistes de la communauté ne soient consacrés dans leurs ministères respectifs.
+
 En 2016, l'Église adopte son premier manuel complet : statuts, règlement d'ordre intérieur, organisation des cultes, structure des 11 départements ministériels. Ce document fondateur établit pour chaque assemblée locale les bases d'une vie ecclésiale ordonnée et fidèle à la Parole.
 
 En novembre 2021, la CEEC organise son premier grand Marathon de Prière sur le thème "Puissance de la Prière" — trois semaines de rencontres quotidiennes réunissant des centaines de fidèles, conduit personnellement par l'Évêque Missionnaire MPANGA.
 
-Aujourd'hui, la CEEC compte plus de 50 paroisses réparties sur 6 provinces de la RDC, gouvernées par trois organes statutaires et structurées autour de 11 départements ministériels. La plateforme numérique inaugurée en 2024 marque une nouvelle étape de cette histoire qui continue de s'écrire.`;
+Aujourd'hui, en 2026, la CEEC compte plus de 50 paroisses réparties sur 6 provinces de la RDC, gouvernées par trois organes statutaires et structurées autour de 11 départements ministériels. La plateforme numérique inaugurée en 2026 marque une nouvelle étape de cette histoire qui continue de s'écrire.`;
 
 /* ─── Timeline officielle ────────────────────────────── */
 const jalons = [
@@ -51,12 +53,25 @@ const jalons = [
     couleur: "#c59b2e",
   },
   {
-    annee: "2012–2016",
+    annee: "2012–2015",
     titre: "Expansion nationale vers le Katanga et le Lualaba",
     description:
       "La vision déborde Kinshasa. Des paroisses s'implantent à Lubumbashi (Haut-Katanga) : Galilée, Béthanie, La Vérité Libère, Source de Bonheur, Christ Roi. Puis à Likasi et à Kolwezi (Lualaba) : El-Helyon, Rocher de Vie, Jésus sans Frontière. Le Katanga devient la deuxième région d'ancrage de la CEEC.",
     tags: ["Katanga", "Lubumbashi", "Kolwezi"],
     couleur: "#1e3a8a",
+  },
+  {
+    annee: "18 – 24 Mai 2015",
+    titre: "La Grande Semaine Historique",
+    description: "Quatre événements fondateurs en sept jours.",
+    items: [
+      "18–22 mai — Assemblée Générale de la CEEC",
+      "23 mai — Sacre de S.E. l'Évêque Missionnaire MPANGA MUKUTU Pozard, Président Communautaire & Représentant Légal",
+      "24 mai — Dédicace solennelle du Temple Nouvelle Jérusalem",
+      "24 mai — Consécration de tous les Rev-Pasteurs, Pasteurs, Anciens, Diacres, Diaconesses & Évangélistes de la CEEC",
+    ],
+    tags: ["A.G. 2015", "Sacre", "Dédicace", "Consécrations"],
+    couleur: "#c59b2e",
   },
   {
     annee: "2016",
@@ -83,11 +98,11 @@ const jalons = [
     couleur: "#c59b2e",
   },
   {
-    annee: "2024 — Aujourd'hui",
+    annee: "2026 — Aujourd'hui",
     titre: "Plateforme numérique et 50+ paroisses",
     description:
-      "La CEEC entreprend sa transformation numérique avec le lancement de sa plateforme de gestion communautaire. Chaque assemblée dispose d'un espace membre en ligne. La communauté compte désormais plus de 50 paroisses dans 6 provinces, portées par un Comité Exécutif renouvelé et des serviteurs fidèles à la vision de 2009.",
-    tags: ["Digital", "2024", "50+ paroisses"],
+      "La CEEC franchit une nouvelle étape avec le lancement de sa plateforme numérique de gestion communautaire. Chaque assemblée dispose d'un espace membre en ligne pour gérer annonces, événements et fidèles. La communauté compte désormais plus de 50 paroisses dans 6 provinces, portées par un Comité Exécutif renouvelé et des serviteurs fidèles à la vision de 2009.",
+    tags: ["Digital", "2026", "50+ paroisses"],
     couleur: "#1e3a8a",
   },
 ];
@@ -265,9 +280,19 @@ export default function HistoriquePage() {
                           <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1e3a8a", margin: "0 0 10px" }}>
                             {j.titre}
                           </h3>
-                          <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.8, margin: "0 0 14px" }}>
+                          <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.8, margin: "items" in j && j.items ? "0 0 10px" : "0 0 14px" }}>
                             {j.description}
                           </p>
+                          {"items" in j && j.items && (
+                            <ul style={{ margin: "0 0 14px", padding: "0 0 0 4px", listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+                              {(j.items as string[]).map((item, idx) => (
+                                <li key={idx} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: "#334155", lineHeight: 1.6 }}>
+                                  <span style={{ color: j.couleur, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>›</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                             {j.tags.map((t) => (
                               <span key={t} style={{
@@ -312,9 +337,19 @@ export default function HistoriquePage() {
                           <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1e3a8a", margin: "0 0 10px" }}>
                             {j.titre}
                           </h3>
-                          <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.8, margin: "0 0 14px" }}>
+                          <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.8, margin: "items" in j && j.items ? "0 0 10px" : "0 0 14px" }}>
                             {j.description}
                           </p>
+                          {"items" in j && j.items && (
+                            <ul style={{ margin: "0 0 14px", padding: "0 0 0 4px", listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+                              {(j.items as string[]).map((item, idx) => (
+                                <li key={idx} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: "#334155", lineHeight: 1.6 }}>
+                                  <span style={{ color: j.couleur, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>›</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                             {j.tags.map((t) => (
                               <span key={t} style={{

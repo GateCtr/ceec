@@ -50,18 +50,65 @@ export default async function ParoisseDetailPage({
     <>
       <NavbarServer />
       <main>
-        <section style={{ background: "linear-gradient(135deg, #1e3a8a, #1e2d6b)", color: "white", padding: "7rem 1rem 4rem", minHeight: "45vh", display: "flex", alignItems: "center" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <Link href="/paroisses" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 16, display: "inline-block" }}>
-              &larr; Retour aux eglises
+        <section style={{
+          background: "linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%)",
+          color: "white",
+          padding: "8rem 1rem 5rem",
+          minHeight: "55vh",
+          display: "flex",
+          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Motif de fond */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, opacity: 0.04,
+            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }} />
+          {/* Halo or */}
+          <div aria-hidden style={{
+            position: "absolute", top: "20%", right: "15%",
+            width: 500, height: 500, borderRadius: "50%",
+            background: "#c59b2e", opacity: 0.06, filter: "blur(120px)",
+            pointerEvents: "none",
+          }} />
+
+          <div style={{ maxWidth: 1000, margin: "0 auto", width: "100%", position: "relative" }}>
+            <Link href="/paroisses" style={{
+              color: "rgba(255,255,255,0.65)", fontSize: 14,
+              marginBottom: 28, display: "inline-flex", alignItems: "center", gap: 6,
+              textDecoration: "none", transition: "color 0.15s",
+            }}>
+              ← Retour aux paroisses
             </Link>
-            <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
-              <div style={{ width: 80, height: 80, borderRadius: 16, background: "#c59b2e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, fontWeight: 800, color: "#1e3a8a", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
+              <div style={{
+                width: 88, height: 88, borderRadius: 18,
+                background: "rgba(197,155,46,0.25)",
+                border: "2px solid rgba(197,155,46,0.5)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 40, fontWeight: 800, color: "#fcd34d", flexShrink: 0,
+              }}>
                 {eglise.nom.charAt(0)}
               </div>
               <div>
-                <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: 6 }}>{eglise.nom}</h1>
-                <p style={{ color: "#fcd34d", fontWeight: 600 }}>{eglise.ville}</p>
+                <span style={{
+                  display: "inline-block", fontSize: 11, fontWeight: 700,
+                  letterSpacing: "0.1em", textTransform: "uppercase",
+                  color: "rgba(197,155,46,1)", background: "rgba(197,155,46,0.12)",
+                  borderRadius: 20, padding: "3px 14px", marginBottom: 12,
+                }}>
+                  Paroisse CEEC
+                </span>
+                <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.6rem)", fontWeight: 900, margin: "0 0 8px", lineHeight: 1.15 }}>
+                  {eglise.nom}
+                </h1>
+                {eglise.ville && (
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 15, fontWeight: 500, margin: 0 }}>
+                    📍 {eglise.ville}
+                  </p>
+                )}
               </div>
             </div>
           </div>

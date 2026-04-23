@@ -61,8 +61,11 @@ export default function Navbar({ initialNavInfo }: Props) {
     pathname === "/a-propos" ||
     pathname === "/historique" ||
     pathname === "/paroisses" ||
+    pathname.startsWith("/paroisses/") ||
     pathname === "/evenements" ||
+    pathname.startsWith("/evenements/") ||
     pathname === "/annonces" ||
+    pathname.startsWith("/annonces/") ||
     pathname === "/contact";
 
   const navLinkClass = (href: string) =>

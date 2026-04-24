@@ -9,6 +9,7 @@ import {
   Radio, UserCheck, UserX, Clock, RefreshCw, Mail, Send
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 const PRIMARY = "#1e3a8a";
 const GOLD = "#c59b2e";
@@ -36,6 +37,7 @@ function btn(extra?: object): React.CSSProperties { return { padding: "8px 16px"
 
 export default function GestionMarathonDetailClient({ marathonId, egliseId }: { marathonId: number; egliseId: number }) {
   const router = useRouter();
+  const [ConfirmDialog, confirm] = useConfirm();
   const [marathon, setMarathon] = useState<Marathon | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -241,7 +243,8 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
 
   const handleCloseDay = async () => {
     if (!stats?.todayDayNum) return;
-    if (!confirm(`Clôturer la présence du jour ${stats.todayDayNum} ? Les absents seront marqués définitivement.`)) return;
+    const ok = await confirm({ title: `Clôturer le jour ${stats.todayDayNum} ?`, description: "Les participants non scannés seront marqués comme absents. Cette action est irréversible.", confirmLabel: "Clôturer", variant: "warning" });
+    if (!ok) return;
     setClosingDay(true);
     await fetch(`/api/gestion/marathons/${marathonId}/cloturer-journee`, {
       method: "POST",
@@ -328,7 +331,8 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
       setTimeout(() => setEmailMsg(null), 4000);
       return;
     }
-    if (!confirm(`Envoyer le badge par email à ${withEmail} participant(s) ?`)) return;
+    const ok = await confirm({ title: "Envoyer les badges par email ?", description: `${withEmail} participant(s) recevront leur badge par email.`, confirmLabel: "Envoyer", variant: "default" });
+    if (!ok) return;
     setSendingAll(true);
     setEmailMsg(null);
     const res = await fetch(`/api/gestion/marathons/${marathonId}/send-badges-all`, {
@@ -367,6 +371,7 @@ export default function GestionMarathonDetailClient({ marathonId, egliseId }: { 
 
   return (
     <div style={{ padding: "2rem", maxWidth: 1100, margin: "0 auto" }}>
+      <ConfirmDialog />
       {/* Header */}
       <div style={{ marginBottom: "1.5rem" }}>
         <button onClick={() => router.push("/gestion/marathons")} style={{ ...btn({ background: "transparent", color: PRIMARY, padding: "6px 0" }), marginBottom: 12, border: "none" }}>

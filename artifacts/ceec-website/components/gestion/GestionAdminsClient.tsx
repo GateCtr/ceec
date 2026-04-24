@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CheckCircle, Plus } from "lucide-react";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 interface UserRoleItem {
   id: number;
@@ -30,6 +31,7 @@ const roleLabels: Record<string, { label: string; bg: string; color: string }> =
 };
 
 export default function GestionAdminsClient({ initialUserRoles, pendingInvites: initialInvites, currentUserId }: Props) {
+  const [ConfirmDialog, confirm] = useConfirm();
   const [userRoles, setUserRoles] = useState<UserRoleItem[]>(initialUserRoles);
   const [invites, setInvites] = useState<InviteItem[]>(initialInvites);
   const [showInviteForm, setShowInviteForm] = useState(false);
@@ -69,7 +71,8 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
   }
 
   async function handleRevoke(id: number) {
-    if (!confirm("Révoquer l'accès de cet administrateur ?")) return;
+    const ok = await confirm({ title: "Révoquer cet administrateur ?", description: "Cette personne perdra son accès à l'espace de gestion.", confirmLabel: "Révoquer", variant: "danger" });
+    if (!ok) return;
     const res = await fetch(`/api/gestion/admins/${id}/revoke`, { method: "DELETE" });
     if (res.ok) {
       setUserRoles((prev) => prev.filter((ur) => ur.id !== id));
@@ -89,6 +92,7 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      <ConfirmDialog />
       {successMsg && (
         <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
           <CheckCircle size={16} color="#15803d" />

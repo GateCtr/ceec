@@ -5,6 +5,7 @@ import type { Evenement } from "@prisma/client";
 import { Calendar as CalendarIcon, MapPin, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 import VideoPicker from "@/components/gestion/VideoPicker";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 interface Props {
   initialEvenements: Evenement[];
@@ -47,6 +48,7 @@ const emptyForm: FormData = {
 };
 
 export default function GestionEvenementsClient({ initialEvenements, canAutoPublish, egliseId }: Props) {
+  const [ConfirmDialog, confirm] = useConfirm();
   const [evenements, setEvenements] = useState<Evenement[]>(initialEvenements);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Evenement | null>(null);
@@ -133,7 +135,8 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Supprimer cet événement ?")) return;
+    const ok = await confirm({ title: "Supprimer cet événement ?", description: "Cette action est irréversible.", confirmLabel: "Supprimer", variant: "danger" });
+    if (!ok) return;
     const res = await fetch(`/api/gestion/evenements/${id}`, { method: "DELETE" });
     if (res.ok) setEvenements((prev) => prev.filter((e) => e.id !== id));
   }
@@ -162,6 +165,7 @@ export default function GestionEvenementsClient({ initialEvenements, canAutoPubl
 
   return (
     <div>
+      <ConfirmDialog />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         {!canAutoPublish && (
           <div style={{ fontSize: 13, color: "#64748b", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px" }}>

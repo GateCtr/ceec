@@ -5,6 +5,7 @@ import type { Annonce } from "@prisma/client";
 import { Megaphone, Pencil, Trash2, Send, Eye, EyeOff, Download, Plus, Globe, Users, Lock } from "lucide-react";
 import ImagePicker from "@/components/gestion/ImagePicker";
 import VideoPicker from "@/components/gestion/VideoPicker";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 interface Props {
   initialAnnonces: Annonce[];
@@ -48,6 +49,7 @@ type FormData = {
 const emptyForm: FormData = { titre: "", contenu: "", priorite: "normale", publie: true, dateExpiration: "", imageUrl: "", videoUrl: "", categorie: "", visibilite: "public" };
 
 export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish, egliseId }: Props) {
+  const [ConfirmDialog, confirm] = useConfirm();
   const [annonces, setAnnonces] = useState<Annonce[]>(initialAnnonces);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Annonce | null>(null);
@@ -124,7 +126,8 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Supprimer cette annonce ?")) return;
+    const ok = await confirm({ title: "Supprimer cette annonce ?", description: "Cette action est irréversible.", confirmLabel: "Supprimer", variant: "danger" });
+    if (!ok) return;
     const res = await fetch(`/api/gestion/annonces/${id}`, { method: "DELETE" });
     if (res.ok) {
       setAnnonces((prev) => prev.filter((a) => a.id !== id));
@@ -153,6 +156,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
 
   return (
     <div>
+      <ConfirmDialog />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         {!canAutoPublish && (
           <div style={{ fontSize: 13, color: "#64748b", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px" }}>

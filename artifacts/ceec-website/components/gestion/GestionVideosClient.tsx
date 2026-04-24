@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { LiveStream } from "@prisma/client";
 import { Play, Pin, Radio, Plus, X } from "lucide-react";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 function getYoutubeId(url: string): string | null {
   try {
@@ -28,6 +29,7 @@ const emptyForm: FormData = {
 };
 
 export default function GestionVideosClient({ initialVideos }: { initialVideos: LiveStream[] }) {
+  const [ConfirmDialog, confirm] = useConfirm();
   const [videos, setVideos] = useState<LiveStream[]>(initialVideos);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<LiveStream | null>(null);
@@ -93,7 +95,8 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Supprimer cette vidéo ?")) return;
+    const ok = await confirm({ title: "Supprimer cette vidéo ?", description: "Cette action est irréversible.", confirmLabel: "Supprimer", variant: "danger" });
+    if (!ok) return;
     const res = await fetch(`/api/gestion/videos/${id}`, { method: "DELETE" });
     if (res.ok) setVideos((vs) => vs.filter((v) => v.id !== id));
   }
@@ -110,6 +113,7 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
 
   return (
     <>
+      <ConfirmDialog />
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
         <button
           onClick={openCreate}

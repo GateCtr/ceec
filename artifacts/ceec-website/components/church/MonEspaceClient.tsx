@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Megaphone, MapPin, CheckCircle, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Calendar, Megaphone, MapPin, CheckCircle, ChevronRight, Pencil, X } from "lucide-react";
 import { CHURCH_ROLE_LABELS } from "@/lib/membre-role-constants";
 
 interface ProfilData {
@@ -26,38 +27,34 @@ interface EventInscrit {
   aVenir: boolean;
 }
 
+interface AnnonceData {
+  id: number;
+  titre: string;
+  contenu: string;
+  priorite: string;
+  datePublication: string;
+  imageUrl: string | null;
+  categorie: string | null;
+}
+
 interface Props {
   profil: ProfilData;
   evenementsInscrits: EventInscrit[];
-  annonces: Array<{
-    id: number;
-    titre: string;
-    contenu: string;
-    priorite: string;
-    datePublication: string;
-    imageUrl: string | null;
-    categorie: string | null;
-  }>;
+  annonces: AnnonceData[];
   eglise: { nom: string; slug: string };
 }
 
-function roleFR(role: string) {
-  const map: Record<string, string> = {
-    fidele: "Fidèle",
-    diacre: "Diacre",
-    pasteur: "Pasteur",
-    secretaire: "Secrétaire",
-    tresorier: "Trésorier",
-    admin_eglise: "Administrateur",
-    super_admin: "Super Admin",
-    admin_plateforme: "Admin Plateforme",
-    moderateur_plateforme: "Modérateur",
-  };
-  return map[role] ?? role;
-}
+const ROLE_FR: Record<string, string> = {
+  fidele: "Fidèle", diacre: "Diacre", pasteur: "Pasteur",
+  secretaire: "Secrétaire", tresorier: "Trésorier",
+  admin_eglise: "Administrateur", super_admin: "Super Admin",
+  admin_plateforme: "Admin Plateforme", moderateur_plateforme: "Modérateur",
+};
+
+type Tab = "profil" | "evenements" | "annonces";
 
 export default function MonEspaceClient({ profil, evenementsInscrits, annonces, eglise }: Props) {
-  const [tab, setTab] = useState<"profil" | "evenements" | "annonces">("profil");
+  const [tab, setTab] = useState<Tab>("profil");
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ nom: profil.nom, prenom: profil.prenom, telephone: profil.telephone ?? "" });
@@ -65,8 +62,8 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
-  const primary = "var(--church-primary, #1e3a8a)";
-  const accent = "var(--church-accent, #c59b2e)";
+  const aVenir = evenementsInscrits.filter((e) => e.aVenir);
+  const passes = evenementsInscrits.filter((e) => !e.aVenir);
 
   async function handleSave() {
     if (!form.nom.trim() || !form.prenom.trim()) {
@@ -97,173 +94,154 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
     }
   }
 
-  const aVenir = evenementsInscrits.filter((e) => e.aVenir);
-  const passes = evenementsInscrits.filter((e) => !e.aVenir);
+  const tabs: { key: Tab; label: string; count?: number }[] = [
+    { key: "profil", label: "Profil" },
+    { key: "evenements", label: "Événements", count: aVenir.length || undefined },
+    { key: "annonces", label: "Annonces", count: annonces.length || undefined },
+  ];
 
-  const tabStyle = (active: boolean): React.CSSProperties => ({
-    padding: "8px 20px", borderRadius: 8, fontWeight: active ? 700 : 500, fontSize: 14,
-    background: active ? primary : "transparent",
-    color: active ? "white" : "#64748b",
-    border: "none", cursor: "pointer", transition: "all 0.15s",
-  });
+  const roleInfo = CHURCH_ROLE_LABELS[currentProfil.role];
 
   return (
-    <div style={{ minHeight: "80vh", background: "#f8fafc", padding: "2rem 1rem 4rem" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div className="min-h-[80vh] bg-primary-50 py-8 px-4 pb-16">
+      <div className="max-w-[900px] mx-auto">
 
-        {/* Header */}
-        <div style={{
-          background: `linear-gradient(135deg, ${primary}, #1e2d6b)`,
-          borderRadius: 16, padding: "2rem", color: "white", marginBottom: 24,
-          display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap",
-        }}>
+        {/* ── Header profil ────────────────────────────── */}
+        <div
+          className="rounded-2xl p-6 sm:p-8 text-white mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-5"
+          style={{ background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), color-mix(in srgb, var(--church-primary, #1e3a8a) 80%, black))" }}
+        >
+          {/* Avatar */}
           {currentProfil.photoUrl ? (
             <img
               src={currentProfil.photoUrl}
               alt={`${currentProfil.prenom} ${currentProfil.nom}`}
-              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: `3px solid ${accent}` }}
+              className="w-[72px] h-[72px] rounded-full object-cover shrink-0 border-[3px]"
+              style={{ borderColor: "var(--church-accent, #c59b2e)" }}
             />
           ) : (
-            <div style={{
-              width: 72, height: 72, borderRadius: "50%",
-              background: accent, display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 900, fontSize: 28, color: "#1e3a8a", flexShrink: 0,
-            }}>
-              {currentProfil.prenom.charAt(0).toUpperCase()}{currentProfil.nom.charAt(0).toUpperCase()}
+            <div
+              className="w-[72px] h-[72px] rounded-full flex items-center justify-center font-black text-[28px] shrink-0"
+              style={{ background: "var(--church-accent, #c59b2e)", color: "var(--church-primary, #1e3a8a)" }}
+            >
+              {currentProfil.prenom.charAt(0)}{currentProfil.nom.charAt(0)}
             </div>
           )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1.2 }}>
+
+          {/* Infos */}
+          <div className="flex-1 min-w-0 text-center sm:text-left">
+            <h1 className="font-extrabold text-xl sm:text-2xl leading-tight">
               {currentProfil.prenom} {currentProfil.nom}
+            </h1>
+            <div className="mt-2 flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+              {roleInfo ? (
+                <span
+                  className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                  style={{ background: roleInfo.bg, color: roleInfo.color }}
+                >
+                  {roleInfo.label}
+                </span>
+              ) : (
+                <span className="text-[13px] text-white/80">{ROLE_FR[currentProfil.role] ?? currentProfil.role}</span>
+              )}
+              <span className="text-[13px] text-white/75">{eglise.nom}</span>
             </div>
-            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              {(() => {
-                const roleInfo = CHURCH_ROLE_LABELS[currentProfil.role];
-                return roleInfo ? (
-                  <span style={{
-                    display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px",
-                    borderRadius: 99, background: roleInfo.bg, color: roleInfo.color,
-                  }}>
-                    {roleInfo.label}
-                  </span>
-                ) : (
-                  <span style={{ fontSize: 13, opacity: 0.8 }}>{roleFR(currentProfil.role)}</span>
-                );
-              })()}
-              <span style={{ fontSize: 13, opacity: 0.75 }}>{eglise.nom}</span>
-            </div>
-            <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>
-              Membre depuis {currentProfil.dateAdhesion
-                ? new Date(currentProfil.dateAdhesion).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
-                : new Date(currentProfil.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
-            </div>
+            <p className="text-xs text-white/60 mt-1.5">
+              Membre depuis{" "}
+              {new Date(currentProfil.dateAdhesion ?? currentProfil.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+            </p>
           </div>
-          <div style={{
-            background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "6px 14px",
-            fontSize: 12, fontWeight: 700,
-          }}>
+
+          {/* Badge statut */}
+          <div className="bg-white/15 rounded-lg px-3.5 py-1.5 text-xs font-bold shrink-0">
             {currentProfil.statut === "actif" ? (
-              <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <CheckCircle size={13} />Actif
+              <span className="flex items-center gap-1.5">
+                <CheckCircle size={13} /> Actif
               </span>
-            ) : currentProfil.statut}
+            ) : (
+              currentProfil.statut
+            )}
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-          <button style={tabStyle(tab === "profil")} onClick={() => setTab("profil")}>Profil</button>
-          <button style={tabStyle(tab === "evenements")} onClick={() => setTab("evenements")}>
-            Mes événements {aVenir.length > 0 && `(${aVenir.length})`}
-          </button>
-          <button style={tabStyle(tab === "annonces")} onClick={() => setTab("annonces")}>
-            Annonces ({annonces.length})
-          </button>
+        {/* ── Tabs ─────────────────────────────────────── */}
+        <div className="flex gap-1 mb-5 bg-white rounded-xl p-1 border border-border w-fit">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer border-none ${
+                tab === t.key
+                  ? "text-white shadow-sm"
+                  : "bg-transparent text-muted-foreground hover:bg-slate-50"
+              }`}
+              style={tab === t.key ? { background: "var(--church-primary, #1e3a8a)" } : undefined}
+            >
+              {t.label}
+              {t.count != null && (
+                <span className={`ml-1.5 text-xs ${tab === t.key ? "text-white/70" : "text-slate-400"}`}>
+                  {t.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Profil Tab */}
+        {/* ── Tab : Profil ─────────────────────────────── */}
         {tab === "profil" && (
-          <div style={{ background: "white", borderRadius: 16, padding: "2rem", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h2 style={{ fontWeight: 800, fontSize: 18, color: "#0f172a", margin: 0 }}>Mes informations</h2>
+          <div className="card card-body">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="font-extrabold text-lg text-foreground m-0">Mes informations</h2>
               {!editMode && (
                 <button
                   onClick={() => { setEditMode(true); setForm({ nom: currentProfil.nom, prenom: currentProfil.prenom, telephone: currentProfil.telephone ?? "" }); }}
-                  style={{ padding: "7px 16px", borderRadius: 8, border: `1px solid ${primary}`, background: "transparent", color: primary, fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                  className="btn btn-outline btn-sm"
                 >
-                  Modifier
+                  <Pencil size={14} /> Modifier
                 </button>
               )}
             </div>
 
-            {formSuccess && (
-              <div style={{ background: "#dcfce7", color: "#16a34a", padding: "10px 14px", borderRadius: 8, fontSize: 13, marginBottom: 16 }}>
-                {formSuccess}
-              </div>
-            )}
+            {formSuccess && <div className="alert alert-success mb-4">{formSuccess}</div>}
 
             {editMode ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {formError && (
-                  <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, fontSize: 13 }}>
-                    {formError}
+              <div className="flex flex-col gap-4">
+                {formError && <div className="alert alert-danger">{formError}</div>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="form-group">
+                    <label className="label">Prénom <span className="required">*</span></label>
+                    <input className="input" value={form.prenom} onChange={(e) => setForm((f) => ({ ...f, prenom: e.target.value }))} />
                   </div>
-                )}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}>Prénom *</span>
-                    <input
-                      value={form.prenom}
-                      onChange={(e) => setForm((f) => ({ ...f, prenom: e.target.value }))}
-                      style={{ padding: "9px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 14, outline: "none" }}
-                    />
-                  </label>
-                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}>Nom *</span>
-                    <input
-                      value={form.nom}
-                      onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))}
-                      style={{ padding: "9px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 14, outline: "none" }}
-                    />
-                  </label>
+                  <div className="form-group">
+                    <label className="label">Nom <span className="required">*</span></label>
+                    <input className="input" value={form.nom} onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))} />
+                  </div>
                 </div>
-                <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}>Téléphone</span>
-                  <input
-                    value={form.telephone}
-                    onChange={(e) => setForm((f) => ({ ...f, telephone: e.target.value }))}
-                    placeholder="+243 xxx xxx xxx"
-                    style={{ padding: "9px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 14, outline: "none" }}
-                  />
-                </label>
-                <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                  <button
-                    onClick={() => setEditMode(false)}
-                    style={{ flex: 1, padding: "9px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
-                  >
-                    Annuler
+                <div className="form-group">
+                  <label className="label">Téléphone</label>
+                  <input className="input" value={form.telephone} onChange={(e) => setForm((f) => ({ ...f, telephone: e.target.value }))} placeholder="+243 xxx xxx xxx" />
+                </div>
+                <div className="flex gap-3 mt-1">
+                  <button onClick={() => setEditMode(false)} className="btn btn-ghost flex-1">
+                    <X size={14} /> Annuler
                   </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    style={{ flex: 2, padding: "9px", borderRadius: 8, border: "none", background: primary, color: "white", fontWeight: 700, fontSize: 14, cursor: saving ? "wait" : "pointer" }}
-                  >
+                  <button onClick={handleSave} disabled={saving} className="btn btn-primary flex-2">
                     {saving ? "Enregistrement…" : "Enregistrer"}
                   </button>
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
                 {[
                   { label: "Prénom", value: currentProfil.prenom },
                   { label: "Nom", value: currentProfil.nom },
                   { label: "Email", value: currentProfil.email },
                   { label: "Téléphone", value: currentProfil.telephone ?? "—" },
-                  { label: "Rôle", value: roleFR(currentProfil.role) },
+                  { label: "Rôle", value: ROLE_FR[currentProfil.role] ?? currentProfil.role },
                 ].map(({ label, value }) => (
-                  <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
-                    <span style={{ fontSize: 15, color: "#0f172a", fontWeight: 500 }}>{value}</span>
+                  <div key={label}>
+                    <span className="overline text-slate-400">{label}</span>
+                    <p className="text-[15px] text-foreground font-medium mt-1 m-0">{value}</p>
                   </div>
                 ))}
               </div>
@@ -271,76 +249,69 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
           </div>
         )}
 
-        {/* Événements Tab */}
+        {/* ── Tab : Événements ─────────────────────────── */}
         {tab === "evenements" && (
-          <div>
+          <div className="flex flex-col gap-6">
             {aVenir.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", marginBottom: 12 }}>
-                  À venir ({aVenir.length})
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {aVenir.map((evt) => <EventCard key={evt.id} evt={evt} primary={primary} />)}
+              <div>
+                <h3 className="font-bold text-base text-foreground mb-3">À venir ({aVenir.length})</h3>
+                <div className="flex flex-col gap-3">
+                  {aVenir.map((evt) => <EventCard key={evt.id} evt={evt} />)}
                 </div>
               </div>
             )}
             {passes.length > 0 && (
               <div>
-                <h3 style={{ fontWeight: 700, fontSize: 16, color: "#64748b", marginBottom: 12 }}>
-                  Passés
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, opacity: 0.7 }}>
-                  {passes.map((evt) => <EventCard key={evt.id} evt={evt} primary={primary} />)}
+                <h3 className="font-bold text-base text-muted-foreground mb-3">Passés</h3>
+                <div className="flex flex-col gap-3 opacity-70">
+                  {passes.map((evt) => <EventCard key={evt.id} evt={evt} />)}
                 </div>
               </div>
             )}
             {evenementsInscrits.length === 0 && (
-              <div style={{ background: "white", borderRadius: 16, padding: "3rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
-                  <Calendar size={40} color="#94a3b8" strokeWidth={1.5} />
-                </div>
-                <p style={{ color: "#64748b", fontSize: 15 }}>Vous n&apos;êtes inscrit à aucun événement pour le moment.</p>
-                <a href="/c/evenements" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, padding: "9px 20px", borderRadius: 8, background: primary, color: "white", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+              <div className="card card-body text-center py-12">
+                <Calendar size={40} className="mx-auto mb-3 text-slate-400" strokeWidth={1.5} />
+                <p className="text-muted-foreground text-[15px] mb-4">
+                  Vous n&apos;êtes inscrit à aucun événement pour le moment.
+                </p>
+                <Link
+                  href="/c/evenements"
+                  className="btn btn-primary btn-sm mx-auto"
+                >
                   Voir les événements <ChevronRight size={15} />
-                </a>
+                </Link>
               </div>
             )}
           </div>
         )}
 
-        {/* Annonces Tab */}
+        {/* ── Tab : Annonces ───────────────────────────── */}
         {tab === "annonces" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="flex flex-col gap-3">
             {annonces.length === 0 ? (
-              <div style={{ background: "white", borderRadius: 16, padding: "3rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
-                  <Megaphone size={40} color="#94a3b8" strokeWidth={1.5} />
-                </div>
-                <p style={{ color: "#64748b", fontSize: 15 }}>Aucune annonce pour le moment.</p>
+              <div className="card card-body text-center py-12">
+                <Megaphone size={40} className="mx-auto mb-3 text-slate-400" strokeWidth={1.5} />
+                <p className="text-muted-foreground text-[15px]">Aucune annonce pour le moment.</p>
               </div>
             ) : (
               annonces.map((a) => (
-                <a key={a.id} href={`/c/annonces/${a.id}`} style={{ textDecoration: "none" }}>
-                  <div style={{ background: "white", borderRadius: 14, padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <Link key={a.id} href={`/c/annonces/${a.id}`} className="no-underline">
+                  <div className="card card-hover p-5 flex gap-4 items-start">
                     {a.imageUrl && (
-                      <img src={a.imageUrl} alt={a.titre} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
+                      <img src={a.imageUrl} alt={a.titre} className="w-[72px] h-[72px] rounded-lg object-cover shrink-0 hidden sm:block" />
                     )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="flex-1 min-w-0">
                       {a.priorite === "urgente" && (
-                        <span style={{ fontSize: 10, fontWeight: 700, background: "#fee2e2", color: "#b91c1c", padding: "2px 8px", borderRadius: 99, marginBottom: 6, display: "inline-block" }}>
-                          URGENT
-                        </span>
+                        <span className="badge badge-danger text-[10px] mb-1.5">URGENT</span>
                       )}
-                      <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 15, lineHeight: 1.3 }}>{a.titre}</div>
-                      <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>
-                        {a.contenu}
-                      </p>
-                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>
+                      <h4 className="font-bold text-foreground text-[15px] leading-snug mb-1">{a.titre}</h4>
+                      <p className="text-[13px] text-muted-foreground m-0 line-clamp-2">{a.contenu}</p>
+                      <span className="text-[11px] text-slate-400 mt-1.5 block">
                         {new Date(a.datePublication).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                      </div>
+                      </span>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))
             )}
           </div>
@@ -350,25 +321,29 @@ export default function MonEspaceClient({ profil, evenementsInscrits, annonces, 
   );
 }
 
-function EventCard({ evt, primary }: { evt: { id: number; titre: string; dateDebut: string; lieu: string | null; imageUrl: string | null; aVenir: boolean }; primary: string }) {
+/* ── EventCard ──────────────────────────────────────── */
+function EventCard({ evt }: { evt: EventInscrit }) {
   const date = new Date(evt.dateDebut);
   return (
-    <a href={`/c/evenements/${evt.id}`} style={{ textDecoration: "none" }}>
-      <div style={{ background: "white", borderRadius: 12, overflow: "hidden", border: "1px solid #e2e8f0", display: "flex", alignItems: "stretch" }}>
-        <div style={{ width: 72, flexShrink: 0, background: `linear-gradient(135deg, ${primary}, #1e2d6b)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", padding: "0.75rem 0.5rem" }}>
-          <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{date.getDate()}</div>
-          <div style={{ fontSize: 10, opacity: 0.8 }}>{date.toLocaleString("fr-FR", { month: "short" }).toUpperCase()}</div>
-          <div style={{ fontSize: 10, opacity: 0.65 }}>{date.getFullYear()}</div>
+    <Link href={`/c/evenements/${evt.id}`} className="no-underline">
+      <div className="card card-hover flex overflow-hidden">
+        <div
+          className="w-[72px] shrink-0 flex flex-col items-center justify-center text-white py-3 px-2"
+          style={{ background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), color-mix(in srgb, var(--church-primary, #1e3a8a) 80%, black))" }}
+        >
+          <span className="text-xl font-black leading-none">{date.getDate()}</span>
+          <span className="text-[10px] opacity-80 mt-0.5">{date.toLocaleString("fr-FR", { month: "short" }).toUpperCase()}</span>
+          <span className="text-[10px] opacity-65">{date.getFullYear()}</span>
         </div>
-        <div style={{ padding: "0.875rem 1rem", flex: 1 }}>
-          <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{evt.titre}</div>
+        <div className="p-3.5 sm:p-4 flex-1 min-w-0">
+          <h4 className="font-bold text-foreground text-sm">{evt.titre}</h4>
           {evt.lieu && (
-            <div style={{ color: "#64748b", fontSize: 12, marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
-              <MapPin size={11} />{evt.lieu}
-            </div>
+            <p className="text-muted-foreground text-xs mt-1 flex items-center gap-1">
+              <MapPin size={11} /> {evt.lieu}
+            </p>
           )}
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Trophy, Plus, Search, Users, Calendar, ChevronRight, Trash2, Lock, Unlock, X } from "lucide-react";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 interface Marathon {
   id: number;
@@ -23,6 +24,7 @@ function formatDate(d: string) {
 
 export default function GestionMarathonsClient({ egliseId }: { egliseId: number }) {
   const router = useRouter();
+  const [ConfirmDialog, confirm] = useConfirm();
   const [marathons, setMarathons] = useState<Marathon[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -72,7 +74,8 @@ export default function GestionMarathonsClient({ egliseId }: { egliseId: number 
   };
 
   const handleDelete = async (id: number, titre: string) => {
-    if (!confirm(`Supprimer le marathon "${titre}" et toutes ses données ?`)) return;
+    const ok = await confirm({ title: `Supprimer le marathon "${titre}" ?`, description: "Toutes les données de ce marathon (participants, présences) seront supprimées. Cette action est irréversible.", confirmLabel: "Supprimer", variant: "danger" });
+    if (!ok) return;
     await fetch(`/api/gestion/marathons/${id}`, {
       method: "DELETE",
       headers: { "x-eglise-id": String(egliseId) },
@@ -97,6 +100,7 @@ export default function GestionMarathonsClient({ egliseId }: { egliseId: number 
 
   return (
     <div style={{ padding: "2rem", maxWidth: 1100, margin: "0 auto" }}>
+      <ConfirmDialog />
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>

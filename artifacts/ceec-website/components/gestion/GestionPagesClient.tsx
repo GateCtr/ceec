@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FileText, Plus, Home, Settings, Eye, EyeOff } from "lucide-react";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 type Page = {
   id: number;
@@ -189,6 +190,7 @@ function HomePageCard({ homePage, onCreated }: { homePage: Page | null; onCreate
 }
 
 export default function GestionPagesClient({ initialPages, homePage }: { initialPages: Page[]; homePage: Page | null }) {
+  const [ConfirmDialog, confirm] = useConfirm();
   const [pages, setPages] = useState<Page[]>(initialPages);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -205,7 +207,8 @@ export default function GestionPagesClient({ initialPages, homePage }: { initial
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Supprimer cette page et toutes ses sections ?")) return;
+    const ok = await confirm({ title: "Supprimer cette page ?", description: "Toutes les sections de cette page seront supprimées. Cette action est irréversible.", confirmLabel: "Supprimer", variant: "danger" });
+    if (!ok) return;
     const res = await fetch(`/api/gestion/pages/${id}`, { method: "DELETE" });
     if (res.ok) setPages((ps) => ps.filter((p) => p.id !== id));
   }
@@ -225,6 +228,7 @@ export default function GestionPagesClient({ initialPages, homePage }: { initial
 
   return (
     <>
+      <ConfirmDialog />
       <HomePageCard homePage={homePage} onCreated={(p) => setPages((ps) => [...ps, p])} />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>

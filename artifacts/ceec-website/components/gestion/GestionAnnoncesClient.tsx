@@ -13,23 +13,23 @@ interface Props {
   egliseId: number;
 }
 
-const prioriteLabels: Record<string, { label: string; bg: string; color: string }> = {
-  haute:   { label: "Haute",   bg: "#fee2e2", color: "#b91c1c" },
-  normale: { label: "Normale", bg: "#e0e7ff", color: "#3730a3" },
-  basse:   { label: "Basse",   bg: "#f1f5f9", color: "#64748b" },
+const prioriteLabels: Record<string, { label: string; className: string }> = {
+  haute:   { label: "Haute",   className: "badge badge-danger" },
+  normale: { label: "Normale", className: "badge badge-primary" },
+  basse:   { label: "Basse",   className: "badge badge-muted" },
 };
 
-const statutLabels: Record<string, { label: string; bg: string; color: string }> = {
-  publie:     { label: "Publié",      bg: "#dcfce7", color: "#15803d" },
-  brouillon:  { label: "Brouillon",   bg: "#f1f5f9", color: "#64748b" },
-  en_attente: { label: "En attente",  bg: "#fef9c3", color: "#a16207" },
-  rejete:     { label: "Rejeté",      bg: "#fee2e2", color: "#b91c1c" },
+const statutLabels: Record<string, { label: string; className: string }> = {
+  publie:     { label: "Publié",      className: "badge badge-success" },
+  brouillon:  { label: "Brouillon",   className: "badge badge-muted" },
+  en_attente: { label: "En attente",  className: "badge badge-warning" },
+  rejete:     { label: "Rejeté",      className: "badge badge-danger" },
 };
 
-const visibiliteConfig: Record<string, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
-  public:     { label: "Public",       bg: "#f0fdf4", color: "#15803d", icon: <Globe size={11} /> },
-  communaute: { label: "Communauté",   bg: "#eff6ff", color: "#1e40af", icon: <Users size={11} /> },
-  prive:      { label: "Privé",        bg: "#faf5ff", color: "#7c3aed", icon: <Lock size={11} /> },
+const visibiliteConfig: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
+  public:     { label: "Public",       className: "badge bg-green-50 text-green-700", icon: <Globe size={11} /> },
+  communaute: { label: "Communauté",   className: "badge bg-blue-50 text-blue-800",   icon: <Users size={11} /> },
+  prive:      { label: "Privé",        className: "badge bg-purple-50 text-purple-600", icon: <Lock size={11} /> },
 };
 
 const CATEGORIES = ["", "Culte", "Formation", "Prière", "Mission", "Social", "Jeunesse", "Femmes", "Hommes", "Autre"];
@@ -157,60 +157,56 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
   return (
     <div>
       <ConfirmDialog />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
+      <div className="flex justify-between items-center mb-5 flex-wrap gap-2.5">
         {!canAutoPublish && (
-          <div style={{ fontSize: 13, color: "#64748b", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px" }}>
+          <div className="text-[13px] text-muted-foreground bg-slate-50 border border-border rounded-lg px-3 py-1.5">
             Votre contenu sera soumis pour validation avant publication.
           </div>
         )}
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+        <div className="ml-auto flex gap-2">
           <a
             href="/api/gestion/annonces/export"
             download
-            style={{ padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
+            className="btn btn-outline text-slate-700 border-border bg-white text-[13px]"
           >
             <Download size={14} /> Exporter CSV
           </a>
-          <button onClick={openCreate} style={{
-            background: "#1e3a8a", color: "white", border: "none", borderRadius: 8,
-            padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer",
-            display: "inline-flex", alignItems: "center", gap: 6,
-          }}>
+          <button onClick={openCreate} className="btn btn-primary font-bold">
             <Plus size={16} /> Nouvelle annonce
           </button>
         </div>
       </div>
 
       {showForm && (
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
-          <h2 style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#0f172a" }}>
+        <div className="card p-6 mb-6 shadow-md">
+          <h2 className="mb-4 text-[17px] font-bold text-foreground">
             {editing ? "Modifier l\u2019annonce" : "Nouvelle annonce"}
           </h2>
           {!canAutoPublish && !editing && (
-            <div style={{ background: "#fef9c3", border: "1px solid #fcd34d", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 13, color: "#a16207" }}>
+            <div className="alert alert-warning mb-3 text-[13px]">
               Cette annonce sera créée en brouillon. Soumettez-la pour qu&apos;elle soit examinée et publiée.
             </div>
           )}
-          {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "8px 12px", borderRadius: 6, marginBottom: 12, fontSize: 13 }}>{error}</div>}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div>
-              <label style={s.label}>Titre *</label>
-              <input style={s.input} value={form.titre} onChange={(e) => setForm({ ...form, titre: e.target.value })} required />
+          {error && <div className="alert alert-danger mb-3 text-[13px]">{error}</div>}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+            <div className="form-group mb-0">
+              <label className="label">Titre *</label>
+              <input className="input" value={form.titre} onChange={(e) => setForm({ ...form, titre: e.target.value })} required />
             </div>
-            <div>
-              <label style={s.label}>Contenu *</label>
-              <textarea style={{ ...s.input, minHeight: 120, resize: "vertical" }} value={form.contenu} onChange={(e) => setForm({ ...form, contenu: e.target.value })} required />
+            <div className="form-group mb-0">
+              <label className="label">Contenu *</label>
+              <textarea className="input textarea" value={form.contenu} onChange={(e) => setForm({ ...form, contenu: e.target.value })} required />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <div>
-                <label style={s.label}>Catégorie</label>
-                <select style={s.input} value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div className="form-group mb-0">
+                <label className="label">Catégorie</label>
+                <select className="input select" value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}>
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c || "— Aucune —"}</option>)}
                 </select>
               </div>
-              <div>
-                <label style={s.label}>Priorité</label>
-                <select style={s.input} value={form.priorite} onChange={(e) => setForm({ ...form, priorite: e.target.value })}>
+              <div className="form-group mb-0">
+                <label className="label">Priorité</label>
+                <select className="input select" value={form.priorite} onChange={(e) => setForm({ ...form, priorite: e.target.value })}>
                   <option value="basse">Basse</option>
                   <option value="normale">Normale</option>
                   <option value="haute">Haute</option>
@@ -218,8 +214,8 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
               </div>
             </div>
             <div>
-              <label style={s.label}>Visibilité</label>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <label className="label">Visibilité</label>
+              <div className="flex gap-2 flex-wrap">
                 {(["public", "communaute", "prive"] as const).map((v) => {
                   const cfg = visibiliteConfig[v];
                   const selected = form.visibilite === v;
@@ -228,14 +224,15 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
                       key={v}
                       type="button"
                       onClick={() => setForm({ ...form, visibilite: v })}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
-                        padding: "8px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
-                        border: selected ? `2px solid ${cfg.color}` : "2px solid #e2e8f0",
-                        background: selected ? cfg.bg : "white",
-                        color: selected ? cfg.color : "#64748b",
-                        transition: "all 0.15s",
-                      }}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-2 transition-all duration-150 ${
+                        selected
+                          ? v === "public"
+                            ? "border-green-700 bg-green-50 text-green-700"
+                            : v === "communaute"
+                              ? "border-blue-800 bg-blue-50 text-blue-800"
+                              : "border-purple-600 bg-purple-50 text-purple-600"
+                          : "border-border bg-white text-muted-foreground"
+                      }`}
                     >
                       {cfg.icon}
                       {v === "public" ? "Public" : v === "communaute" ? "Communauté CEEC" : "Membres de l\u2019église"}
@@ -243,7 +240,7 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
                   );
                 })}
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#94a3b8" }}>
+              <p className="mt-1.5 text-xs text-slate-400">
                 {form.visibilite === "public" && "Visible par tous les visiteurs du site."}
                 {form.visibilite === "communaute" && "Visible uniquement par les membres connectés de la CEEC."}
                 {form.visibilite === "prive" && "Visible uniquement par les membres de cette église."}
@@ -261,23 +258,23 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
               egliseId={egliseId}
               onChange={(url) => setForm({ ...form, videoUrl: url })}
             />
-            <div style={{ display: "flex", gap: 16 }}>
-              <div style={{ flex: 1 }}>
-                <label style={s.label}>Date d&apos;expiration</label>
-                <input type="date" style={s.input} value={form.dateExpiration} onChange={(e) => setForm({ ...form, dateExpiration: e.target.value })} />
+            <div className="flex gap-4">
+              <div className="flex-1 form-group mb-0">
+                <label className="label">Date d&apos;expiration</label>
+                <input type="date" className="input" value={form.dateExpiration} onChange={(e) => setForm({ ...form, dateExpiration: e.target.value })} />
               </div>
               {canAutoPublish && (
-                <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+                <div className="flex items-end pb-1">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" checked={form.publie} onChange={(e) => setForm({ ...form, publie: e.target.checked })} />
                     Publier immédiatement
                   </label>
                 </div>
               )}
             </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => setShowForm(false)} style={s.cancelBtn}>Annuler</button>
-              <button type="submit" style={s.submitBtn} disabled={loading}>
+            <div className="flex gap-2.5 justify-end">
+              <button type="button" onClick={() => setShowForm(false)} className="btn btn-outline text-slate-700 border-border bg-white">Annuler</button>
+              <button type="submit" className="btn btn-primary font-bold" disabled={loading}>
                 {loading ? "Enregistrement…" : (editing ? "Mettre à jour" : "Créer")}
               </button>
             </div>
@@ -286,91 +283,91 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
       )}
 
       {annonces.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <Megaphone size={40} color="#cbd5e1" />
+        <div className="text-center py-12 px-6 bg-white rounded-xl border border-dashed border-slate-300">
+          <div className="flex justify-center mb-3">
+            <Megaphone size={40} className="text-slate-300" />
           </div>
-          <p style={{ color: "#64748b" }}>Aucune annonce pour l&apos;instant.</p>
+          <p className="text-muted-foreground">Aucune annonce pour l&apos;instant.</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="flex flex-col gap-3">
           {annonces.map((a) => {
             const pr = prioriteLabels[a.priorite] ?? prioriteLabels.normale;
             const statut = statutLabels[a.statutContenu as string] ?? statutLabels.brouillon;
             const visib = visibiliteConfig[(a as Annonce & { visibilite?: string }).visibilite ?? "public"] ?? visibiliteConfig.public;
             const isLoading = actionLoading === a.id;
             return (
-              <div key={a.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", overflow: "hidden" }}>
+              <div key={a.id} className="card flex overflow-hidden">
                 {a.imageUrl && (
-                  <div style={{ width: 100, flexShrink: 0, background: "#f1f5f9" }}>
-                    <img src={a.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  <div className="w-[100px] shrink-0 bg-slate-100">
+                    <img src={a.imageUrl} alt="" className="w-full h-full object-cover block" />
                   </div>
                 )}
-                <div style={{ flex: 1, padding: "1rem 1.25rem" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{a.titre}</span>
-                        <span style={{ ...s.badge, background: pr.bg, color: pr.color }}>{pr.label}</span>
-                        <span style={{ ...s.badge, background: statut.bg, color: statut.color }}>{statut.label}</span>
-                        <span style={{ ...s.badge, background: visib.bg, color: visib.color, display: "inline-flex", alignItems: "center", gap: 4 }}>{visib.icon}{visib.label}</span>
-                        {a.categorie && <span style={{ ...s.badge, background: "#f0fdf4", color: "#15803d" }}>{a.categorie}</span>}
+                <div className="flex-1 px-5 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="font-bold text-[15px] text-foreground">{a.titre}</span>
+                        <span className={pr.className}>{pr.label}</span>
+                        <span className={statut.className}>{statut.label}</span>
+                        <span className={`${visib.className} inline-flex items-center gap-1`}>{visib.icon}{visib.label}</span>
+                        {a.categorie && <span className="badge badge-success">{a.categorie}</span>}
                       </div>
-                      <p style={{ color: "#64748b", fontSize: 13, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{a.contenu}</p>
-                      <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
+                      <p className="text-muted-foreground text-[13px] m-0 overflow-hidden line-clamp-2">{a.contenu}</p>
+                      <div className="mt-1.5 text-xs text-slate-400">
                         {new Date(a.datePublication).toLocaleDateString("fr-FR")}
                         {a.dateExpiration && <> — expire le {new Date(a.dateExpiration).toLocaleDateString("fr-FR")}</>}
                       </div>
                       {(a.statutContenu as string) === "rejete" && (a as Annonce & { commentaireRejet?: string | null }).commentaireRejet && (
-                        <div style={{ marginTop: 6, background: "#fee2e2", borderRadius: 6, padding: "4px 10px", fontSize: 12, color: "#b91c1c" }}>
+                        <div className="mt-1.5 bg-red-100 rounded-md px-2.5 py-1 text-xs text-red-700">
                           Motif : {(a as Annonce & { commentaireRejet?: string | null }).commentaireRejet}
                         </div>
                       )}
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0, alignItems: "flex-end" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => openEdit(a)} style={s.editBtn} disabled={isLoading} title="Modifier">
+                    <div className="flex flex-col gap-1.5 shrink-0 items-end">
+                      <div className="flex gap-1.5">
+                        <button onClick={() => openEdit(a)} className="btn btn-outline btn-sm text-primary border-border bg-white" disabled={isLoading} title="Modifier">
                           <Pencil size={13} /> Modifier
                         </button>
-                        <button onClick={() => handleDelete(a.id)} style={s.deleteBtn} disabled={isLoading} title="Supprimer">
+                        <button onClick={() => handleDelete(a.id)} className="btn btn-danger btn-sm" disabled={isLoading} title="Supprimer">
                           <Trash2 size={13} /> Supprimer
                         </button>
                       </div>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                      <div className="flex gap-1.5 flex-wrap justify-end">
                         {(a.statutContenu as string) !== "en_attente" && (a.statutContenu as string) !== "publie" && (
                           <button
                             onClick={() => handleStatut(a.id, "soumettre")}
                             disabled={isLoading}
-                            style={{ ...s.actionBtn, background: "#fef9c3", color: "#a16207", border: "1px solid #fde68a" }}
+                            className="btn btn-xs bg-yellow-100 text-yellow-700 border-yellow-300"
                           >
-                            {isLoading ? "…" : <><Send size={11} style={{ marginRight: 4 }} />Soumettre</>}
+                            {isLoading ? "…" : <><Send size={11} className="mr-1" />Soumettre</>}
                           </button>
                         )}
                         {(a.statutContenu as string) === "publie" && (
                           <button
                             onClick={() => handleStatut(a.id, "depublier")}
                             disabled={isLoading}
-                            style={{ ...s.actionBtn, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}
+                            className="btn btn-xs bg-slate-100 text-muted-foreground border-border"
                           >
-                            {isLoading ? "…" : <><EyeOff size={11} style={{ marginRight: 4 }} />Dépublier</>}
+                            {isLoading ? "…" : <><EyeOff size={11} className="mr-1" />Dépublier</>}
                           </button>
                         )}
                         {(a.statutContenu as string) === "en_attente" && (
                           <button
                             onClick={() => handleStatut(a.id, "depublier")}
                             disabled={isLoading}
-                            style={{ ...s.actionBtn, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}
+                            className="btn btn-xs bg-slate-100 text-muted-foreground border-border"
                           >
-                            {isLoading ? "…" : <><EyeOff size={11} style={{ marginRight: 4 }} />Retirer</>}
+                            {isLoading ? "…" : <><EyeOff size={11} className="mr-1" />Retirer</>}
                           </button>
                         )}
                         {canAutoPublish && (a.statutContenu as string) !== "publie" && (
                           <button
                             onClick={() => handleStatut(a.id, "publier")}
                             disabled={isLoading}
-                            style={{ ...s.actionBtn, background: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0" }}
+                            className="btn btn-xs bg-green-100 text-green-700 border-green-200"
                           >
-                            {isLoading ? "…" : <><Eye size={11} style={{ marginRight: 4 }} />Publier</>}
+                            {isLoading ? "…" : <><Eye size={11} className="mr-1" />Publier</>}
                           </button>
                         )}
                       </div>
@@ -385,14 +382,3 @@ export default function GestionAnnoncesClient({ initialAnnonces, canAutoPublish,
     </div>
   );
 }
-
-const s = {
-  label:     { fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 } as React.CSSProperties,
-  input:     { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" as const } as React.CSSProperties,
-  badge:     { padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600 } as React.CSSProperties,
-  actionBtn: { padding: "5px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center" } as React.CSSProperties,
-  editBtn:   { padding: "7px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 } as React.CSSProperties,
-  deleteBtn: { padding: "7px 14px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 } as React.CSSProperties,
-  cancelBtn: { padding: "9px 20px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
-  submitBtn: { padding: "9px 24px", borderRadius: 8, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" } as React.CSSProperties,
-};

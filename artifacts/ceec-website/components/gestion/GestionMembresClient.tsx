@@ -21,10 +21,19 @@ interface Props {
   initialMembres: MembreEnrichi[];
 }
 
-const statutLabels: Record<string, { label: string; bg: string; color: string }> = {
-  actif: { label: "Actif", bg: "#dcfce7", color: "#15803d" },
-  inactif: { label: "Inactif", bg: "#f1f5f9", color: "#64748b" },
-  suspendu: { label: "Suspendu", bg: "#fee2e2", color: "#b91c1c" },
+const statutLabels: Record<string, { label: string; badgeClass: string }> = {
+  actif:    { label: "Actif",    badgeClass: "badge badge-success" },
+  inactif:  { label: "Inactif",  badgeClass: "badge badge-muted" },
+  suspendu: { label: "Suspendu", badgeClass: "badge badge-danger" },
+};
+
+const roleBadgeClassMap: Record<string, string> = {
+  admin_eglise: "badge bg-green-100 text-green-700",
+  pasteur:      "badge bg-violet-100 text-violet-700",
+  diacre:       "badge bg-yellow-100 text-yellow-700",
+  tresorier:    "badge bg-orange-100 text-orange-700",
+  secretaire:   "badge bg-sky-100 text-sky-700",
+  fidele:       "badge bg-indigo-100 text-indigo-800",
 };
 
 type StatutFilter = "all" | "actif" | "inactif" | "suspendu";
@@ -73,113 +82,118 @@ export default function GestionMembresClient({ initialMembres }: Props) {
 
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Statut :</span>
+      {/* ── Filters bar ── */}
+      <div className="flex flex-wrap gap-3 mb-5">
+        <div className="flex gap-1.5 items-center">
+          <span className="text-xs text-muted-foreground font-semibold">Statut :</span>
           {(["all", "actif", "inactif", "suspendu"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setStatutFilter(f)}
-              style={{
-                padding: "5px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-                border: statutFilter === f ? "none" : "1.5px solid #e2e8f0",
-                background: statutFilter === f ? "#1e3a8a" : "white",
-                color: statutFilter === f ? "white" : "#374151",
-                fontWeight: statutFilter === f ? 700 : 400,
-              }}
+              className={`btn btn-sm ${
+                statutFilter === f
+                  ? "btn-primary"
+                  : "btn-ghost border border-border text-slate-700"
+              }`}
             >
               {f === "all" ? "Tous" : f === "actif" ? "Actifs" : f === "inactif" ? "Inactifs" : "Suspendus"}
             </button>
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Rôle :</span>
+        <div className="flex gap-1.5 items-center flex-wrap">
+          <span className="text-xs text-muted-foreground font-semibold">Rôle :</span>
           {ROLE_FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setRoleFilter(opt.value)}
-              style={{
-                padding: "5px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-                border: roleFilter === opt.value ? "none" : "1.5px solid #e2e8f0",
-                background: roleFilter === opt.value ? "#1e3a8a" : "white",
-                color: roleFilter === opt.value ? "white" : "#374151",
-                fontWeight: roleFilter === opt.value ? 700 : 400,
-              }}
+              className={`btn btn-sm ${
+                roleFilter === opt.value
+                  ? "btn-primary"
+                  : "btn-ghost border border-border text-slate-700"
+              }`}
             >
               {opt.label}
             </button>
           ))}
         </div>
 
-        <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b", alignSelf: "center" }}>
+        <span className="ml-auto text-[13px] text-muted-foreground self-center">
           {filtered.length} membre{filtered.length !== 1 ? "s" : ""}
         </span>
+
         <a
           href="/api/gestion/membres/export"
           download
-          style={{ padding: "6px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}
+          className="btn btn-sm btn-outline border-border bg-white text-slate-700 no-underline"
         >
           <Download size={13} /> Exporter CSV
         </a>
       </div>
 
+      {/* ── Empty state ── */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <Users size={40} color="#cbd5e1" />
+        <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
+          <div className="flex justify-center mb-3">
+            <Users size={40} className="text-slate-300" />
           </div>
-          <p style={{ color: "#64748b" }}>Aucun membre dans cette catégorie.</p>
+          <p className="text-muted-foreground">Aucun membre dans cette catégorie.</p>
         </div>
       ) : (
-        <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+        /* ── Members list ── */
+        <div className="card">
           {filtered.map((m, idx) => {
             const statut = statutLabels[m.statut] ?? statutLabels.actif;
             const role = CHURCH_ROLE_LABELS[m.roleNom] ?? CHURCH_ROLE_LABELS.fidele;
+            const roleBadgeCls = roleBadgeClassMap[m.roleNom] ?? roleBadgeClassMap.fidele;
             const isLoading = loading === m.id;
             const isAdminRole = m.roleNom === "admin_eglise" || m.roleNom === "pasteur";
 
             return (
-              <div key={m.id} style={{
-                padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: 12,
-                justifyContent: "space-between", flexWrap: "wrap",
-                borderTop: idx > 0 ? "1px solid #f1f5f9" : "none",
-                opacity: isLoading ? 0.6 : 1,
-              }}>
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <div style={{ fontWeight: 600, color: "#0f172a", fontSize: 14 }}>{m.prenom} {m.nom}</div>
-                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{m.email}</div>
+              <div
+                key={m.id}
+                className={`px-6 py-4 flex items-center gap-3 justify-between flex-wrap ${
+                  idx > 0 ? "border-t border-slate-100" : ""
+                } ${isLoading ? "opacity-60" : ""}`}
+              >
+                <div className="flex-1 min-w-[200px]">
+                  <div className="font-semibold text-foreground text-sm">
+                    {m.prenom} {m.nom}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{m.email}</div>
                   {m.dateAdhesion && (
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
                       Membre depuis {new Date(m.dateAdhesion).toLocaleDateString("fr-FR")}
                     </div>
                   )}
                 </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: role.bg, color: role.color }}>
+
+                <div className="flex gap-2 items-center flex-wrap">
+                  <span className={roleBadgeCls}>
                     {role.label}
                   </span>
-                  <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: statut.bg, color: statut.color }}>
+                  <span className={statut.badgeClass}>
                     {statut.label}
                   </span>
+
                   <select
                     value={m.statut}
                     disabled={isLoading}
                     onChange={(e) => updateMembre(m.id, { statut: e.target.value })}
-                    style={{ padding: "5px 10px", borderRadius: 7, border: "1.5px solid #e2e8f0", fontSize: 12, cursor: "pointer", color: "#374151" }}
+                    className="input select w-auto text-xs py-1.5! px-2.5!"
                   >
                     <option value="actif">Actif</option>
                     <option value="inactif">Inactif</option>
                     <option value="suspendu">Suspendu</option>
                   </select>
+
                   <select
-                    value={isAdminRole ? m.roleNom : m.roleNom}
+                    value={m.roleNom}
                     disabled={isLoading || isAdminRole}
                     onChange={(e) => updateMembre(m.id, { role: e.target.value })}
-                    style={{
-                      padding: "5px 10px", borderRadius: 7, border: "1.5px solid #e2e8f0", fontSize: 12,
-                      cursor: isAdminRole ? "not-allowed" : "pointer", color: "#374151",
-                    }}
+                    className={`input select w-auto text-xs py-1.5! px-2.5! ${
+                      isAdminRole ? "cursor-not-allowed" : "cursor-pointer"
+                    }`}
                     title={isAdminRole ? "Gérez les admins depuis l'onglet Admins" : undefined}
                   >
                     {isAdminRole ? (

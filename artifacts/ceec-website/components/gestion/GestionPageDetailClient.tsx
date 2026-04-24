@@ -151,7 +151,7 @@ function FieldRenderer({
 
   if (f.type === "checkbox") {
     return (
-      <label key={f.key} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, cursor: "pointer" }}>
+      <label key={f.key} className="flex items-center gap-2.5 text-sm cursor-pointer">
         <input type="checkbox" checked={!!val} onChange={(e) => onChange({ ...config, [f.key]: e.target.checked })} />
         {f.label}
       </label>
@@ -170,19 +170,19 @@ function FieldRenderer({
   }
   if (f.type === "color") {
     return (
-      <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", flex: 1 }}>{f.label}</label>
+      <div key={f.key} className="flex items-center gap-2.5">
+        <label className="label flex-1 text-[13px]! mb-0!">{f.label}</label>
         <input
           type="color"
           value={(val as string) || "#ffffff"}
           onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
-          style={{ width: 40, height: 32, borderRadius: 6, border: "1px solid #d1d5db", cursor: "pointer", padding: 2 }}
+          className="w-10 h-8 rounded-md border border-gray-300 cursor-pointer p-0.5"
         />
         {!!val && (
           <button
             type="button"
             onClick={() => onChange({ ...config, [f.key]: "" })}
-            style={{ fontSize: 11, color: "#94a3b8", background: "none", border: "none", cursor: "pointer" }}
+            className="text-[11px] text-slate-400 bg-transparent border-none cursor-pointer"
           >
             Réinitialiser
           </button>
@@ -194,7 +194,7 @@ function FieldRenderer({
     const numVal = val !== undefined && val !== "" ? Number(val) : 50;
     return (
       <div key={f.key}>
-        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+        <label className="label text-[13px]! mb-1!">
           {f.label}: <strong>{numVal}%</strong>
         </label>
         <input
@@ -202,7 +202,7 @@ function FieldRenderer({
           min={0} max={100} step={5}
           value={numVal}
           onChange={(e) => onChange({ ...config, [f.key]: Number(e.target.value) })}
-          style={{ width: "100%", accentColor: "#1e3a8a" }}
+          className="w-full accent-primary"
         />
       </div>
     );
@@ -210,11 +210,11 @@ function FieldRenderer({
   if (f.type === "select") {
     return (
       <div key={f.key}>
-        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>{f.label}</label>
+        <label className="label text-[13px]! mb-1!">{f.label}</label>
         <select
           value={(val as string) ?? ""}
           onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
-          style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, background: "white" }}
+          className="input select"
         >
           {(f.options ?? []).map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -226,25 +226,25 @@ function FieldRenderer({
   if (f.type === "textarea") {
     return (
       <div key={f.key}>
-        <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>{f.label}</label>
+        <label className="label text-[13px]! mb-1!">{f.label}</label>
         <textarea
           value={(val as string) ?? ""}
           onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
           placeholder={f.placeholder}
           rows={3}
-          style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box", resize: "vertical" }}
+          className="input textarea"
         />
       </div>
     );
   }
   return (
     <div key={f.key}>
-      <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>{f.label}</label>
+      <label className="label text-[13px]! mb-1!">{f.label}</label>
       <input
         value={(val as string) ?? ""}
         onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
         placeholder={f.placeholder}
-        style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
+        className="input"
       />
     </div>
   );
@@ -265,25 +265,18 @@ function GalerieImagesList({
 
   return (
     <div>
-      <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 8 }}>
+      <label className="label text-[13px]! mb-2">
         Images de la galerie ({images.length})
       </label>
       {images.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+        <div className="flex flex-wrap gap-2 mb-3">
           {images.map((src, idx) => (
-            <div key={idx} style={{ position: "relative" }}>
-              <img src={src} alt="" style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid #e2e8f0" }} />
+            <div key={idx} className="relative">
+              <img src={src} alt="" className="w-20 h-15 object-cover rounded-md border border-border" />
               <button
                 type="button"
                 onClick={() => removeImage(idx)}
-                style={{
-                  position: "absolute", top: -6, right: -6,
-                  width: 18, height: 18, borderRadius: "50%",
-                  background: "#ef4444", border: "2px solid white",
-                  color: "white", fontSize: 10, fontWeight: 700,
-                  cursor: "pointer", display: "flex", alignItems: "center",
-                  justifyContent: "center", padding: 0,
-                }}
+                className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] rounded-full bg-red-500 border-2 border-white text-white text-[10px] font-bold cursor-pointer flex items-center justify-center p-0"
               >×</button>
             </div>
           ))}
@@ -307,7 +300,7 @@ function SectionConfigForm({
   const designFields = DESIGN_FIELDS[type] ?? [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="flex flex-col gap-3">
       {contentFields.map((f) => (
         <FieldRenderer key={f.key} f={f} config={config} onChange={onChange} egliseId={egliseId} />
       ))}
@@ -317,21 +310,17 @@ function SectionConfigForm({
       )}
 
       {designFields.length > 0 && (
-        <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: 12, marginTop: 4 }}>
+        <div className="border-t border-border pt-3 mt-1">
           <button
             type="button"
             onClick={() => setShowDesign((v) => !v)}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              fontSize: 12, fontWeight: 700, color: "#6366f1",
-              background: "none", border: "none", cursor: "pointer", padding: 0,
-            }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-500 bg-transparent border-none cursor-pointer p-0"
           >
             <Palette size={14} />
             {showDesign ? "Masquer les options de design" : "Options de design"}
           </button>
           {showDesign && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
+            <div className="flex flex-col gap-3 mt-3">
               {designFields.map((f) => (
                 <FieldRenderer key={f.key} f={f} config={config} onChange={onChange} egliseId={egliseId} />
               ))}
@@ -341,7 +330,7 @@ function SectionConfigForm({
       )}
 
       {contentFields.length === 0 && designFields.length === 0 && (
-        <p style={{ color: "#64748b", fontSize: 13 }}>Aucune configuration disponible pour ce type de section.</p>
+        <p className="text-muted-foreground text-[13px]">Aucune configuration disponible pour ce type de section.</p>
       )}
     </div>
   );
@@ -351,34 +340,22 @@ function ConfirmDeleteDialog({
   onConfirm, onCancel,
 }: { onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 1000,
-      display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
-    }}>
-      <div style={{
-        background: "white", borderRadius: 16, padding: "2rem", maxWidth: 400, width: "100%",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-          <AlertTriangle size={36} color="#f59e0b" />
+    <div className="fixed inset-0 bg-black/40 z-1000 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-[400px] w-full shadow-xl">
+        <div className="flex justify-center mb-3">
+          <AlertTriangle size={36} className="text-amber-500" />
         </div>
-        <h3 style={{ fontWeight: 800, fontSize: "1.1rem", color: "#0f172a", textAlign: "center", marginBottom: 8 }}>
+        <h3 className="font-extrabold text-[1.1rem] text-foreground text-center mb-2">
           Supprimer cette section ?
         </h3>
-        <p style={{ color: "#64748b", fontSize: 14, textAlign: "center", marginBottom: 24 }}>
+        <p className="text-muted-foreground text-sm text-center mb-6">
           Cette action est irréversible. La section et sa configuration seront définitivement supprimées.
         </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-          <button
-            onClick={onCancel}
-            style={{ padding: "9px 22px", borderRadius: 8, border: "1px solid #d1d5db", background: "white", fontSize: 14, fontWeight: 600, cursor: "pointer", color: "#374151" }}
-          >
+        <div className="flex gap-2.5 justify-center">
+          <button onClick={onCancel} className="btn btn-outline">
             Annuler
           </button>
-          <button
-            onClick={onConfirm}
-            style={{ padding: "9px 22px", borderRadius: 8, border: "none", background: "#dc2626", color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
-          >
+          <button onClick={onConfirm} className="btn btn-danger">
             Supprimer
           </button>
         </div>
@@ -423,76 +400,69 @@ function SortableSectionCard({
     isDragging,
   } = useSortable({ id: section.id });
 
-  const style: React.CSSProperties = {
+  const dragStyle: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    background: "white",
-    borderRadius: 12,
-    border: `2px solid ${isExpanded ? "#1e3a8a" : isDragging ? "#93c5fd" : "#e2e8f0"}`,
-    overflow: "hidden",
-    cursor: "default",
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px" }}>
+    <div
+      ref={setNodeRef}
+      style={dragStyle}
+      className={`bg-white rounded-xl border-2 overflow-hidden ${
+        isDragging ? "opacity-50" : "opacity-100"
+      } ${
+        isExpanded ? "border-primary" : isDragging ? "border-blue-300" : "border-border"
+      }`}
+    >
+      <div className="flex items-center gap-2.5 px-4 py-3">
         <div
           {...attributes}
           {...listeners}
           title="Glisser pour réordonner"
-          style={{
-            cursor: isDragging ? "grabbing" : "grab",
-            color: "#94a3b8",
-            padding: "4px 6px",
-            borderRadius: 6,
-            userSelect: "none",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-          }}
+          className={`${isDragging ? "cursor-grabbing" : "cursor-grab"} text-slate-400 p-1 px-1.5 rounded-md select-none shrink-0 flex items-center`}
         >
           <GripVertical size={16} />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{sectionLabel(section.type)}</span>
+        <div className="flex-1 min-w-0">
+          <span className="font-bold text-foreground text-sm">{sectionLabel(section.type)}</span>
           {(section.config?.titre as string) ? (
-            <span style={{ marginLeft: 8, fontSize: 12, color: "#94a3b8" }}>
+            <span className="ml-2 text-xs text-slate-400">
               — {String(section.config.titre).slice(0, 40)}
             </span>
           ) : null}
         </div>
-        <span style={{ fontSize: 11, color: "#94a3b8", background: "#f1f5f9", padding: "2px 8px", borderRadius: 99, flexShrink: 0 }}>
+        <span className="text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
           #{idx + 1} / {totalCount}
         </span>
         <button
           onClick={() => onToggle(section)}
-          style={{ padding: "6px 14px", borderRadius: 7, border: "1px solid #e2e8f0", background: isExpanded ? "#eff6ff" : "white", fontSize: 12, fontWeight: 600, color: "#1e3a8a", cursor: "pointer", flexShrink: 0 }}
+          className={`btn btn-sm shrink-0 ${isExpanded ? "btn-primary" : "btn-outline"}`}
         >
           {isExpanded ? "Fermer" : "Configurer"}
         </button>
         <button
           onClick={() => onDeleteRequest(section.id)}
           title="Supprimer cette section"
-          style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
+          className="px-2 py-1.5 rounded-lg border border-red-300 bg-red-100 text-red-700 cursor-pointer shrink-0 flex items-center"
         >
           <X size={13} />
         </button>
       </div>
 
       {isExpanded && (
-        <div style={{ borderTop: "1px solid #e2e8f0", padding: "16px 20px", background: "#f8fafc" }}>
+        <div className="border-t border-border px-5 py-4 bg-slate-50">
           <SectionConfigForm
             type={section.type}
             config={editingConfig}
             onChange={onConfigChange}
             egliseId={egliseId}
           />
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+          <div className="flex justify-end mt-3.5">
             <button
               onClick={() => onSave(section.id)}
               disabled={savingSection === section.id}
-              style={{ padding: "9px 20px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: savingSection === section.id ? 0.7 : 1 }}
+              className={`btn btn-primary ${savingSection === section.id ? "opacity-70" : ""}`}
             >
               {savingSection === section.id ? "Sauvegarde…" : "Sauvegarder"}
             </button>
@@ -644,77 +614,76 @@ export default function GestionPageDetailClient({
         />
       )}
 
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
+      <div className="flex items-start justify-between flex-wrap gap-3 mb-6">
         <div>
-          <Link href="/gestion/pages" style={{ color: "#64748b", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
+          <Link href="/gestion/pages" className="text-muted-foreground text-[13px] no-underline inline-flex items-center gap-1 mb-2">
             <ArrowLeft size={13} /> Retour aux pages
           </Link>
-          <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>{page.titre}</h1>
-          <div style={{ display: "flex", gap: 10, marginTop: 6, alignItems: "center" }}>
-            <span style={{ fontSize: 12, color: "#94a3b8" }}>/c/{page.slug}</span>
-            <span style={{
-              fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 99,
-              background: page.publie ? "#dcfce7" : "#f1f5f9",
-              color: page.publie ? "#15803d" : "#64748b",
-            }}>
+          <h1 className="text-[1.4rem] font-extrabold text-foreground m-0">{page.titre}</h1>
+          <div className="flex gap-2.5 mt-1.5 items-center">
+            <span className="text-xs text-slate-400">/c/{page.slug}</span>
+            <span className={`badge ${page.publie ? "badge-success" : "badge-muted"}`}>
               {page.publie ? "Publié" : "Brouillon"}
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="flex gap-2.5 flex-wrap">
           <a
             href={previewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+            className="btn btn-outline"
           >
             <ExternalLink size={13} /> Voir la page publique
           </a>
           <button
             onClick={togglePublish}
-            style={{ padding: "9px 18px", borderRadius: 8, border: "1px solid #e2e8f0", background: page.publie ? "#fef3c7" : "#dcfce7", color: page.publie ? "#b45309" : "#15803d", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+            className={`btn ${page.publie ? "bg-amber-100 border-amber-200 text-amber-700 hover:bg-amber-200" : "bg-green-100 border-green-200 text-green-700 hover:bg-green-200"}`}
           >
             {page.publie ? <><EyeOff size={14} /> Dépublier</> : <><Eye size={14} /> Publier</>}
           </button>
           <button
             onClick={() => setShowAddSection(true)}
-            style={{ padding: "9px 18px", borderRadius: 8, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+            className="btn btn-primary"
           >
             <Plus size={15} /> Ajouter une section
           </button>
         </div>
       </div>
 
-      {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{error}</div>}
+      {error && (
+        <div className="alert alert-danger mb-4">{error}</div>
+      )}
       {reordering && (
-        <div style={{ background: "#eff6ff", color: "#1d4ed8", padding: "6px 14px", borderRadius: 8, marginBottom: 12, fontSize: 12, fontWeight: 600 }}>
+        <div className="bg-blue-50 text-blue-700 px-3.5 py-1.5 rounded-lg mb-3 text-xs font-semibold">
           Sauvegarde de l'ordre en cours…
         </div>
       )}
 
       {showAddSection && (
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-          <h3 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 16 }}>Choisir le type de section</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginBottom: 16 }}>
+        <div className="card p-6 mb-5 shadow-md">
+          <h3 className="font-bold text-[15px] text-foreground mb-4">Choisir le type de section</h3>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2.5 mb-4">
             {SECTION_TYPES.map((t) => (
               <div
                 key={t.value}
                 onClick={() => setSelectedType(t.value)}
-                style={{
-                  padding: "12px 14px", borderRadius: 10, border: `2px solid ${selectedType === t.value ? "#1e3a8a" : "#e2e8f0"}`,
-                  background: selectedType === t.value ? "#eff6ff" : "white", cursor: "pointer",
-                }}
+                className={`p-3 px-3.5 rounded-[10px] border-2 cursor-pointer ${
+                  selectedType === t.value
+                    ? "border-primary bg-primary-50"
+                    : "border-border bg-white"
+                }`}
               >
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#0f172a", marginBottom: 4 }}>{t.label}</div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>{t.description}</div>
+                <div className="font-bold text-[13px] text-foreground mb-1">{t.label}</div>
+                <div className="text-xs text-muted-foreground">{t.description}</div>
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={() => setShowAddSection(false)} style={{ padding: "9px 18px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 14, cursor: "pointer" }}>
+          <div className="flex gap-2.5 justify-end">
+            <button onClick={() => setShowAddSection(false)} className="btn btn-outline">
               Annuler
             </button>
-            <button onClick={handleAddSection} disabled={loading} style={{ padding: "9px 18px", borderRadius: 7, background: "#1e3a8a", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
+            <button onClick={handleAddSection} disabled={loading} className={`btn btn-primary ${loading ? "opacity-70" : ""}`}>
               {loading ? "Ajout…" : "Ajouter"}
             </button>
           </div>
@@ -722,21 +691,21 @@ export default function GestionPageDetailClient({
       )}
 
       {page.sections.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <LayoutGrid size={40} color="#e2e8f0" />
+        <div className="text-center py-16 px-8 bg-white rounded-xl border border-dashed border-border">
+          <div className="flex justify-center mb-3">
+            <LayoutGrid size={40} className="text-border" />
           </div>
-          <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune section</h3>
-          <p style={{ color: "#64748b", fontSize: 14 }}>Ajoutez des sections pour composer le contenu de cette page.</p>
+          <h3 className="text-foreground font-bold mb-2">Aucune section</h3>
+          <p className="text-muted-foreground text-sm">Ajoutez des sections pour composer le contenu de cette page.</p>
         </div>
       ) : (
         <>
-          <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 10 }}>
+          <p className="text-xs text-slate-400 mb-2.5">
             Faites glisser les sections pour les réordonner. Les modifications sont sauvegardées automatiquement.
           </p>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={page.sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {page.sections.map((section, idx) => (
                   <SortableSectionCard
                     key={section.id}

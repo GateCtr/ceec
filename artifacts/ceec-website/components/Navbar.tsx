@@ -29,8 +29,12 @@ export default function Navbar({ initialNavInfo }: Props) {
   const { isSignedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // Initialise avec les données serveur si disponibles
   const [navInfo, setNavInfo] = useState<NavInfo>(initialNavInfo ?? EMPTY_NAV);
+
+  // Sync avec les données serveur quand elles changent (navigation côté client)
+  useEffect(() => {
+    if (initialNavInfo) setNavInfo(initialNavInfo);
+  }, [initialNavInfo]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -38,9 +42,9 @@ export default function Navbar({ initialNavInfo }: Props) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Réinitialise quand l'utilisateur se déconnecte
+  // Réinitialise quand l'utilisateur se déconnecte (isSignedIn passe de true à false)
   useEffect(() => {
-    if (!isSignedIn) setNavInfo(EMPTY_NAV);
+    if (isSignedIn === false) setNavInfo(EMPTY_NAV);
   }, [isSignedIn]);
 
   const links = [

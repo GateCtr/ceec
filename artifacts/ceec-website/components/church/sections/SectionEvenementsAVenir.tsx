@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
+import ChurchSectionHeader from "./ChurchSectionHeader";
 
 type EvenementConfig = {
   titre?: string;
@@ -30,60 +31,60 @@ export default function SectionEvenementsAVenir({
   if (evenements.length === 0) return null;
 
   return (
-    <section style={{ background: bgColor, padding: "5rem 1rem" }}>
-      <div style={{ maxWidth: 920, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
-          <h2 style={{ fontWeight: 800, color: "var(--church-primary, #1e3a8a)", fontSize: "clamp(1.5rem,3vw,1.85rem)", margin: 0 }}>
-            {titre}
-          </h2>
-          <Link href="/c/evenements" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <section className="py-20 px-4" style={{ background: bgColor }}>
+      <div className="max-w-[920px] mx-auto">
+        {/* En-tête avec lien */}
+        <div className="flex justify-between items-end mb-8 flex-wrap gap-3">
+          <ChurchSectionHeader badge="Agenda" title={titre} align="left" />
+          <Link
+            href="/c/evenements"
+            className="font-semibold text-sm no-underline inline-flex items-center gap-1 mb-10 transition-all hover:gap-2"
+            style={{ color: "var(--church-accent, #c59b2e)" }}
+          >
             {voirPlusLabel} <ChevronRight size={14} />
           </Link>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Liste */}
+        <div className="flex flex-col gap-4">
           {evenements.map((evt) => (
-            <Link key={evt.id} href={`/c/evenements/${evt.id}`} style={{ textDecoration: "none" }}>
-              <div
-                style={{
-                  background: "white", borderRadius: 14, overflow: "hidden",
-                  border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  display: "flex", transition: "box-shadow 0.2s",
-                }}
-              >
+            <Link key={evt.id} href={`/c/evenements/${evt.id}`} className="no-underline">
+              <div className="card card-hover flex overflow-hidden">
+                {/* Date badge */}
                 <div
-                  style={{
-                    width: 90, flexShrink: 0,
-                    background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), #1e2d6b)",
-                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                    color: "white", padding: "1rem",
-                  }}
+                  className="w-[90px] shrink-0 flex flex-col items-center justify-center text-white p-4"
+                  style={{ background: "linear-gradient(135deg, var(--church-primary, #1e3a8a), color-mix(in srgb, var(--church-primary, #1e3a8a) 80%, black))" }}
                 >
-                  <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>
+                  <div className="text-[28px] font-black leading-none">
                     {new Date(evt.dateDebut).getDate()}
                   </div>
-                  <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>
+                  <div className="text-xs opacity-85 mt-0.5">
                     {new Date(evt.dateDebut).toLocaleString("fr-FR", { month: "short" }).toUpperCase()}
                   </div>
-                  <div style={{ fontSize: 11, opacity: 0.65, marginTop: 2 }}>
+                  <div className="text-[11px] opacity-65 mt-0.5">
                     {new Date(evt.dateDebut).getFullYear()}
                   </div>
                 </div>
+
+                {/* Image optionnelle */}
                 {evt.imageUrl && (
                   <img
                     src={evt.imageUrl}
                     alt={evt.titre}
-                    style={{ width: 120, height: "auto", objectFit: "cover", flexShrink: 0 }}
+                    className="w-[120px] object-cover shrink-0 hidden sm:block"
                   />
                 )}
-                <div style={{ padding: "1.25rem", flex: 1 }}>
-                  <h3 style={{ fontWeight: 700, color: "#0f172a", margin: "0 0 6px", fontSize: 16 }}>{evt.titre}</h3>
+
+                {/* Contenu */}
+                <div className="p-5 flex-1">
+                  <h3 className="font-bold text-foreground text-base mb-1.5">{evt.titre}</h3>
                   {evt.lieu && (
-                    <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 4 }}>
+                    <p className="text-muted-foreground text-[13px] mb-1.5 flex items-center gap-1">
                       <MapPin size={12} /> {evt.lieu}
                     </p>
                   )}
                   {evt.description && (
-                    <p style={{ color: "#475569", fontSize: 13, lineHeight: 1.65, margin: 0 }}>
+                    <p className="text-slate-600 text-[13px] leading-relaxed m-0">
                       {evt.description.length > 140 ? evt.description.slice(0, 140) + "…" : evt.description}
                     </p>
                   )}

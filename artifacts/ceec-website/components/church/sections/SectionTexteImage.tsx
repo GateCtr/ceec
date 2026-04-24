@@ -1,4 +1,5 @@
 import { safeUrl } from "@/lib/sanitize-url";
+import ChurchSectionHeader from "./ChurchSectionHeader";
 
 type TexTeImageConfig = {
   titre?: string;
@@ -25,62 +26,46 @@ export default function SectionTexteImage({ config }: { config: TexTeImageConfig
 
   const imageFirst = disposition === "image_gauche";
 
+  const imageBlock = imageUrl ? (
+    <div className="rounded-2xl overflow-hidden shadow-xl">
+      <img src={imageUrl} alt={titre} className="w-full h-full object-cover block max-h-[420px]" />
+    </div>
+  ) : null;
+
   return (
-    <section style={{ background: bgColor, padding: "5rem 1rem" }}>
+    <section className="py-20 px-4" style={{ background: bgColor }}>
       <div
-        style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: imageUrl ? "repeat(2, 1fr)" : "1fr",
-          gap: "3.5rem",
-          alignItems: "center",
-        }}
+        className={`max-w-[1100px] mx-auto grid items-center gap-14 ${
+          imageUrl ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-[720px]"
+        }`}
       >
-        {imageFirst && imageUrl && (
-          <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }}>
-            <img src={imageUrl} alt={titre} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", maxHeight: 420 }} />
-          </div>
-        )}
+        {imageFirst && imageBlock}
 
         <div>
-          {sousTitre && (
-            <p style={{ color: "var(--church-accent, #c59b2e)", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
-              {sousTitre}
-            </p>
-          )}
-          {titre && (
-            <h2 style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 800, fontSize: "clamp(1.5rem,3vw,2.25rem)", marginBottom: 20, lineHeight: 1.2 }}>
-              {titre}
-            </h2>
-          )}
+          <ChurchSectionHeader
+            badge={sousTitre}
+            title={titre}
+            align="left"
+          />
           {texte && (
-            <div style={{ color: "#475569", fontSize: 16, lineHeight: 1.85 }}>
+            <div className="text-slate-600 text-base leading-[1.85] -mt-4">
               {texte.split("\n").map((line, i) => (
-                <p key={i} style={{ marginBottom: 12 }}>{line}</p>
+                <p key={i} className="mb-3">{line}</p>
               ))}
             </div>
           )}
           {ctaLabel && ctaHref && (
             <a
               href={safeUrl(ctaHref)}
-              style={{
-                display: "inline-block", marginTop: 24,
-                padding: "11px 26px", borderRadius: 8,
-                background: "var(--church-primary, #1e3a8a)",
-                color: "white", fontWeight: 600, fontSize: 15, textDecoration: "none",
-              }}
+              className="inline-block mt-6 px-7 py-3 rounded-lg font-semibold text-[15px] text-white no-underline transition-all duration-200 hover:brightness-110 hover:scale-[1.02]"
+              style={{ background: "var(--church-primary, #1e3a8a)" }}
             >
               {ctaLabel}
             </a>
           )}
         </div>
 
-        {!imageFirst && imageUrl && (
-          <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }}>
-            <img src={imageUrl} alt={titre} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", maxHeight: 420 }} />
-          </div>
-        )}
+        {!imageFirst && imageBlock}
       </div>
     </section>
   );

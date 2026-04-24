@@ -6,15 +6,13 @@ import { UserButton, useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import type { EgliseData } from "@/lib/church-context";
 
-type PageLink = {
-  titre: string;
-  slug: string;
-};
+type PageLink = { titre: string; slug: string };
+type NavbarConfig = { couleurPrimaire?: string; couleurAccent?: string };
 
-type NavbarConfig = {
-  couleurPrimaire?: string;
-  couleurAccent?: string;
-};
+const NON_HERO_PATHS = [
+  "/c/connexion", "/c/inscription",
+  "/c/mon-espace", "/c/oauth-callback", "/c/suspendu",
+];
 
 export default function ChurchNavbar({
   eglise,
@@ -30,13 +28,8 @@ export default function ChurchNavbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Pages sans hero sombre — navbar reste opaque
-  const NON_HERO_PATHS = [
-    "/c/connexion", "/c/inscription",
-    "/c/mon-espace", "/c/oauth-callback", "/c/suspendu",
-  ];
   const isHeroPage = !NON_HERO_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
+    (p) => pathname === p || pathname.startsWith(p + "/"),
   );
 
   useEffect(() => {
@@ -46,104 +39,78 @@ export default function ChurchNavbar({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const primary = config?.couleurPrimaire ?? "var(--church-primary, #1e3a8a)";
-  const accent = config?.couleurAccent ?? "var(--church-accent, #c59b2e)";
-  const navBg = primary.startsWith("#") ? primary : "#1e3a8a";
-  const accentColor = accent.startsWith("#") ? accent : "#c59b2e";
-
+  const primary = config?.couleurPrimaire ?? "#1e3a8a";
+  const accent = config?.couleurAccent ?? "#c59b2e";
   const transparent = isHeroPage && !scrolled;
 
-  const baseLinks = [
+  const links = [
     { href: "/c", label: "Accueil" },
     { href: "/c/annonces", label: "Annonces" },
     { href: "/c/evenements", label: "Événements" },
     { href: "/c/marathons", label: "Marathons" },
+    ...pages.map((p) => ({ href: `/c/${p.slug}`, label: p.titre })),
   ];
 
-  const customLinks = pages.map((p) => ({
-    href: `/c/${p.slug}`,
-    label: p.titre,
-  }));
-
-  const links = [...baseLinks, ...customLinks];
-
   const isActive = (href: string) =>
-    href === "/c"
-      ? pathname === "/c"
-      : pathname === href || pathname.startsWith(href + "/");
+    href === "/c" ? pathname === "/c" : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <nav
-      style={{
-        background: transparent ? "transparent" : navBg,
-        color: "white",
-        boxShadow: transparent ? "none" : "0 2px 12px rgba(0,0,0,0.18)",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        transition: "background 0.3s ease, box-shadow 0.3s ease",
-        backdropFilter: transparent ? "none" : "blur(2px)",
-      }}
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        transparent
+          ? "bg-transparent"
+          : "backdrop-blur-sm shadow-[0_2px_12px_rgba(0,0,0,0.18)]"
+      }`}
+      style={{ background: transparent ? "transparent" : primary, color: "white" }}
     >
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 1.25rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 64,
-        }}
-      >
-        {/* Logo + Name */}
-        <Link href="/c" style={{ display: "flex", alignItems: "center", gap: 11, textDecoration: "none", flexShrink: 0 }}>
+      <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-16">
+
+        {/* ── Logo ──────────────────────────────────── */}
+        <Link href="/c" className="flex items-center gap-3 no-underline shrink-0 group">
           {eglise.logoUrl ? (
             <img
               src={eglise.logoUrl}
               alt={eglise.nom}
-              style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: `2px solid ${accentColor}` }}
+              className="w-10 h-10 rounded-full object-cover border-2 transition-transform duration-200 group-hover:scale-105"
+              style={{ borderColor: accent }}
             />
           ) : (
             <div
-              style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: accentColor,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: 800, fontSize: 16, color: navBg, flexShrink: 0,
-              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0"
+              style={{ background: accent, color: primary }}
             >
               {eglise.nom.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.2, color: "white", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
+            <div
+              className="font-bold text-sm leading-tight text-white max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap"
+              style={{ textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}
+            >
               {eglise.nom}
             </div>
-            <div style={{ fontSize: 10, opacity: 0.75, lineHeight: 1.2, textShadow: transparent ? "0 1px 3px rgba(0,0,0,0.4)" : "none" }}>
+            <div
+              className="text-[10px] text-white/75 leading-tight"
+              style={{ textShadow: transparent ? "0 1px 3px rgba(0,0,0,0.4)" : "none" }}
+            >
               {eglise.ville} — CEEC
             </div>
           </div>
         </Link>
 
-        {/* Desktop nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }} className="church-desktop-nav">
+        {/* ── Desktop nav ───────────────────────────── */}
+        <div className="hidden md:flex items-center gap-0.5">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              className={`px-3 py-1.5 rounded-[7px] text-sm text-white no-underline transition-all duration-150 border-b-2 ${
+                isActive(link.href)
+                  ? "bg-white/20 font-semibold"
+                  : "font-normal hover:bg-white/10 border-transparent"
+              }`}
               style={{
-                padding: "6px 12px",
-                borderRadius: 7,
-                fontSize: 14,
-                fontWeight: isActive(link.href) ? 600 : 400,
-                background: isActive(link.href) ? "rgba(255,255,255,0.2)" : "transparent",
-                borderBottom: isActive(link.href) ? `2px solid ${accentColor}` : "2px solid transparent",
-                color: "white",
-                textDecoration: "none",
-                transition: "background 0.15s",
+                borderBottomColor: isActive(link.href) ? accent : "transparent",
                 textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
               }}
             >
@@ -151,115 +118,118 @@ export default function ChurchNavbar({
             </Link>
           ))}
 
-          <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.2)", margin: "0 4px" }} />
+          <div className="w-px h-5 mx-1 bg-white/20" />
 
           {isSignedIn ? (
             <>
-              <Link href="/c/mon-espace" style={{
-                padding: "6px 12px", borderRadius: 7, fontSize: 14,
-                background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.2)" : "transparent",
-                borderBottom: pathname === "/c/mon-espace" ? `2px solid ${accentColor}` : "2px solid transparent",
-                color: "white", textDecoration: "none", fontWeight: pathname === "/c/mon-espace" ? 600 : 400,
-                textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
-              }}>
+              <Link
+                href="/c/mon-espace"
+                className={`px-3 py-1.5 rounded-[7px] text-sm text-white no-underline transition-all duration-150 border-b-2 ${
+                  pathname === "/c/mon-espace"
+                    ? "bg-white/20 font-semibold"
+                    : "font-normal hover:bg-white/10 border-transparent"
+                }`}
+                style={{
+                  borderBottomColor: pathname === "/c/mon-espace" ? accent : "transparent",
+                  textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
+                }}
+              >
                 Mon espace
               </Link>
-              <div style={{ marginLeft: 8 }}>
+              <div className="ml-2">
                 <UserButton />
               </div>
             </>
           ) : (
-            <>
-              <Link href="/c/connexion" style={{
-                padding: "6px 16px", borderRadius: 7, fontSize: 14,
-                background: "rgba(255,255,255,0.12)", color: "white", fontWeight: 500,
-                marginLeft: 4, textDecoration: "none",
-                textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none",
-              }}>
+            <div className="flex items-center gap-1 ml-1">
+              <Link
+                href="/c/connexion"
+                className="px-4 py-1.5 rounded-[7px] text-sm font-medium text-white bg-white/12 no-underline transition-all duration-150 hover:bg-white/20"
+                style={{ textShadow: transparent ? "0 1px 4px rgba(0,0,0,0.5)" : "none" }}
+              >
                 Connexion
               </Link>
-              <Link href="/c/inscription" style={{
-                padding: "6px 16px", borderRadius: 7, fontSize: 14,
-                background: accentColor,
-                color: navBg, fontWeight: 700, marginLeft: 4, textDecoration: "none",
-              }}>
-                S&apos;inscrire
+              <Link
+                href="/c/inscription"
+                className="px-4 py-1.5 rounded-[7px] text-sm font-bold no-underline transition-all duration-150 hover:brightness-110"
+                style={{ background: accent, color: primary }}
+              >
+                Rejoindre
               </Link>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Mobile hamburger */}
+        {/* ── Hamburger mobile ──────────────────────── */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden flex flex-col justify-center gap-1.5 p-2 rounded-md text-white bg-transparent border-none cursor-pointer"
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          style={{ background: "transparent", border: "none", color: "white", cursor: "pointer", padding: 8 }}
-          className="church-mobile-btn"
         >
-          <span style={{ display: "block", width: 24, height: 2, background: "white", marginBottom: 5, transition: "transform 0.2s", transform: menuOpen ? "rotate(45deg) translate(4px,5px)" : "none" }} />
-          <span style={{ display: "block", width: 24, height: 2, background: "white", marginBottom: 5, transition: "opacity 0.2s", opacity: menuOpen ? 0 : 1 }} />
-          <span style={{ display: "block", width: 24, height: 2, background: "white", transition: "transform 0.2s", transform: menuOpen ? "rotate(-45deg) translate(4px,-5px)" : "none" }} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div style={{ background: `${navBg}f0`, backdropFilter: "blur(8px)", padding: "1rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+      {/* ── Mobile menu ─────────────────────────────── */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ${
+          menuOpen ? "max-h-[600px] border-t border-white/12" : "max-h-0"
+        }`}
+        style={{ background: `${primary}f0`, backdropFilter: "blur(8px)" }}
+      >
+        <div className="px-5 py-3 flex flex-col gap-1">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              style={{
-                display: "block", padding: "12px 14px", borderRadius: 8,
-                color: "white", fontSize: 15, fontWeight: isActive(link.href) ? 600 : 400,
-                background: isActive(link.href) ? "rgba(255,255,255,0.15)" : "transparent",
-                marginBottom: 4, textDecoration: "none",
-                borderLeft: isActive(link.href) ? `3px solid ${accentColor}` : "3px solid transparent",
-              }}
+              className={`block px-3.5 py-3 rounded-lg text-[15px] text-white no-underline transition-colors duration-150 border-l-[3px] ${
+                isActive(link.href)
+                  ? "bg-white/15 font-semibold"
+                  : "font-normal border-transparent hover:bg-white/5"
+              }`}
+              style={{ borderLeftColor: isActive(link.href) ? accent : "transparent" }}
             >
               {link.label}
             </Link>
           ))}
+
           {isSignedIn ? (
-            <Link href="/c/mon-espace" onClick={() => setMenuOpen(false)} style={{
-              display: "block", padding: "12px 14px", borderRadius: 8,
-              color: "white", fontSize: 15, marginBottom: 4, textDecoration: "none",
-              background: pathname === "/c/mon-espace" ? "rgba(255,255,255,0.15)" : "transparent",
-              borderLeft: pathname === "/c/mon-espace" ? `3px solid ${accentColor}` : "3px solid transparent",
-            }}>
+            <Link
+              href="/c/mon-espace"
+              onClick={() => setMenuOpen(false)}
+              className={`block px-3.5 py-3 rounded-lg text-[15px] text-white no-underline transition-colors duration-150 border-l-[3px] ${
+                pathname === "/c/mon-espace"
+                  ? "bg-white/15 font-semibold"
+                  : "font-normal border-transparent hover:bg-white/5"
+              }`}
+              style={{ borderLeftColor: pathname === "/c/mon-espace" ? accent : "transparent" }}
+            >
               Mon espace
             </Link>
           ) : (
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <Link href="/c/connexion" onClick={() => setMenuOpen(false)} style={{
-                flex: 1, padding: "11px", borderRadius: 8,
-                background: "rgba(255,255,255,0.14)", color: "white",
-                fontWeight: 600, textAlign: "center", fontSize: 14, textDecoration: "none",
-              }}>
+            <div className="flex gap-2 mt-2 pt-2 border-t border-white/10">
+              <Link
+                href="/c/connexion"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-white/14 no-underline"
+              >
                 Connexion
               </Link>
-              <Link href="/c/inscription" onClick={() => setMenuOpen(false)} style={{
-                flex: 1, padding: "11px", borderRadius: 8,
-                background: accentColor,
-                color: navBg, fontWeight: 700, textAlign: "center", fontSize: 14, textDecoration: "none",
-              }}>
-                S&apos;inscrire
+              <Link
+                href="/c/inscription"
+                onClick={() => setMenuOpen(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center no-underline"
+                style={{ background: accent, color: primary }}
+              >
+                Rejoindre
               </Link>
             </div>
           )}
         </div>
-      )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          .church-desktop-nav { display: none !important; }
-          .church-mobile-btn { display: block !important; }
-        }
-        @media (min-width: 769px) {
-          .church-mobile-btn { display: none !important; }
-        }
-      `}</style>
+      </div>
     </nav>
   );
 }

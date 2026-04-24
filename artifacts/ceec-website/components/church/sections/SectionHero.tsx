@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { safeUrl } from "@/lib/sanitize-url";
+import { ChevronDown } from "lucide-react";
 
 type HeroConfig = {
   titre?: string;
@@ -16,12 +17,20 @@ type HeroConfig = {
   ctaHref2?: string;
 };
 
+type EgliseInfo = {
+  nom: string;
+  ville: string;
+  pasteur?: string | null;
+  logoUrl?: string | null;
+  description?: string | null;
+};
+
 export default function SectionHero({
   config,
   eglise,
 }: {
   config: HeroConfig;
-  eglise: { nom: string; ville: string; pasteur?: string | null; logoUrl?: string | null; description?: string | null };
+  eglise: EgliseInfo;
 }) {
   const titre = config.titre ?? eglise.nom;
   const sousTitre = config.sousTitre ?? `${eglise.ville}, République Démocratique du Congo`;
@@ -34,99 +43,139 @@ export default function SectionHero({
   const textAlign = config.textAlign ?? "center";
   const textColor = config.textColor || "white";
 
-  // overlayOpacity may be stored as 0-100 (new) or 0-1 (legacy)
   const rawOpacity = config.overlayOpacity ?? 60;
   const overlayOpacity = rawOpacity > 1 ? rawOpacity / 100 : rawOpacity;
 
+  const overlayBg = imageUrl
+    ? `rgba(15,23,42,${overlayOpacity})`
+    : config.bgColor
+      ? config.bgColor
+      : "linear-gradient(135deg, var(--church-primary, #1e3a8a) 0%, color-mix(in srgb, var(--church-primary, #1e3a8a) 80%, black) 60%, #0f172a 100%)";
+
+  const isCenter = textAlign === "center";
+
   return (
     <section
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        color: textColor,
-        padding: "7rem 1rem 5rem",
-        textAlign,
-        minHeight: "clamp(480px, 60vh, 700px)",
-        marginTop: -64,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="relative overflow-hidden flex items-center justify-center -mt-16 pt-32 pb-20 px-4"
+      style={{ color: textColor, minHeight: "clamp(480px, 60vh, 700px)", textAlign }}
     >
-      {imageUrl ? (
+      {/* Image de fond */}
+      {imageUrl && (
         <div
-          style={{
-            position: "absolute", inset: 0,
-            backgroundImage: `url(${imageUrl})`,
-            backgroundSize: "cover", backgroundPosition: "center",
-          }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${imageUrl})` }}
         />
-      ) : null}
+      )}
+
+      {/* Overlay */}
+      <div className="absolute inset-0" style={{ background: overlayBg }} />
+
+      {/* Motif croix */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04]" aria-hidden>
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="church-hero-crosses" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M30 10v20M20 20h20" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#church-hero-crosses)" />
+        </svg>
+      </div>
+
+      {/* Halo doré */}
       <div
+        className="absolute rounded-full pointer-events-none"
         style={{
-          position: "absolute", inset: 0,
-          background: imageUrl
-            ? `rgba(15,23,42,${overlayOpacity})`
-            : config.bgColor
-            ? config.bgColor
-            : "linear-gradient(135deg, var(--church-primary, #1e3a8a) 0%, #1e2d6b 60%, #0f172a 100%)",
+          top: "20%",
+          right: "15%",
+          width: 500,
+          height: 500,
+          background: "var(--church-accent, #c59b2e)",
+          opacity: 0.06,
+          filter: "blur(120px)",
         }}
       />
-      {/* Cross pattern overlay */}
+
+      {/* Contenu */}
       <div
-        style={{
-          position: "absolute", inset: 0, opacity: 0.04,
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E\")",
-        }}
-      />
-      <div style={{ maxWidth: 720, margin: "0 auto", position: "relative", textAlign }}>
+        className={`relative max-w-[720px] ${isCenter ? "mx-auto" : ""}`}
+        style={{ textAlign }}
+      >
+        {/* Badge communauté */}
+        <span
+          className="inline-block text-[11px] font-bold tracking-widest uppercase rounded-full px-4 py-1 mb-6"
+          style={{
+            color: "var(--church-accent, #c59b2e)",
+            background: "rgba(197,155,46,0.12)",
+            border: "1px solid rgba(197,155,46,0.3)",
+          }}
+        >
+          Paroisse CEEC
+        </span>
+
+        {/* Logo */}
         {eglise.logoUrl && (
-          <img
-            src={eglise.logoUrl}
-            alt={eglise.nom}
-            style={{
-              width: 88, height: 88, borderRadius: "50%", objectFit: "cover",
-              marginBottom: 24, border: "3px solid var(--church-accent, #c59b2e)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
-            }}
-          />
+          <div className={`mb-6 ${isCenter ? "flex justify-center" : ""}`}>
+            <img
+              src={eglise.logoUrl}
+              alt={eglise.nom}
+              className="w-[88px] h-[88px] rounded-full object-cover border-[3px] shadow-xl"
+              style={{ borderColor: "var(--church-accent, #c59b2e)" }}
+            />
+          </div>
         )}
-        <h1 style={{ fontSize: "clamp(2rem,5vw,3rem)", fontWeight: 900, marginBottom: 12, lineHeight: 1.15, letterSpacing: "-0.02em" }}>
+
+        {/* Titre */}
+        <h1
+          className="font-black mb-3 leading-[1.15] tracking-tight text-[clamp(2rem,5vw,3rem)]"
+          style={{ textShadow: imageUrl ? "0 4px 30px rgba(0,0,0,0.5)" : "none" }}
+        >
           {titre}
         </h1>
-        <p style={{ opacity: 0.85, fontSize: 17, marginBottom: 8 }}>{sousTitre}</p>
+
+        {/* Sous-titre */}
+        <p className="text-[17px] opacity-85 mb-2">{sousTitre}</p>
+
+        {/* Pasteur */}
         {eglise.pasteur && (
-          <p style={{ opacity: 0.65, fontSize: 14 }}>Pasteur : {eglise.pasteur}</p>
+          <p className="text-sm opacity-65">Pasteur : {eglise.pasteur}</p>
         )}
+
+        {/* Description */}
         {description && (
-          <p style={{ marginTop: 20, opacity: 0.85, fontSize: 15, lineHeight: 1.75, maxWidth: 580, margin: "20px auto 0" }}>
+          <p
+            className={`mt-5 opacity-85 text-[15px] leading-[1.75] ${isCenter ? "max-w-[580px] mx-auto" : "max-w-[580px]"}`}
+          >
             {description}
           </p>
         )}
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+
+        {/* Boutons CTA */}
+        <div
+          className={`flex gap-3.5 mt-8 flex-wrap ${isCenter ? "justify-center" : ""}`}
+        >
           <Link
             href={safeUrl(ctaHref1)}
+            className="px-7 py-3.5 rounded-[10px] font-bold text-[15px] no-underline shadow-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.02]"
             style={{
-              padding: "13px 30px", borderRadius: 10,
               background: "var(--church-accent, #c59b2e)",
-              color: "#1e3a8a", fontWeight: 700, fontSize: 15, textDecoration: "none",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.2)", transition: "opacity 0.15s",
+              color: "var(--church-primary, #1e3a8a)",
             }}
           >
             {ctaLabel1}
           </Link>
           <Link
             href={safeUrl(ctaHref2)}
-            style={{
-              padding: "13px 30px", borderRadius: 10,
-              background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)",
-              color: "white", fontWeight: 600, fontSize: 15, textDecoration: "none",
-              transition: "background 0.15s",
-            }}
+            className="px-7 py-3.5 rounded-[10px] font-semibold text-[15px] text-white no-underline transition-all duration-200 hover:bg-white/20 bg-white/14 border border-white/30"
           >
             {ctaLabel2}
           </Link>
         </div>
+      </div>
+
+      {/* Flèche scroll */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+        <ChevronDown size={24} />
       </div>
     </section>
   );

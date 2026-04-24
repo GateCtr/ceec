@@ -6,16 +6,21 @@ const BASE_URL =
     ? `https://${process.env.REPLIT_DEV_DOMAIN}`
     : "http://localhost:3000");
 
+const LOGO_URL = `${BASE_URL}/icon.png`;
+
 function buildInviteLink(token: string) {
   return `${BASE_URL}/setup/${token}`;
 }
 
-// ─── Shared send helper ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// Envoi d'email
+// ═══════════════════════════════════════════════════════════════════════════════
 
 async function sendEmail(
   to: string | string[],
   subject: string,
-  html: string
+  html: string,
+  attachments?: Array<{ filename: string; content: Buffer }>
 ): Promise<{ success: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const toList = Array.isArray(to) ? to.join(", ") : to;
@@ -36,6 +41,7 @@ async function sendEmail(
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
+      ...(attachments ? { attachments } : {}),
     });
 
     if (error) {
@@ -50,40 +56,74 @@ async function sendEmail(
   }
 }
 
-// ─── Base HTML wrapper ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// Template HTML — Composants réutilisables
+// ═══════════════════════════════════════════════════════════════════════════════
 
 function emailWrapper(title: string, body: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif">
+<body style="margin:0;padding:0;background:#f0f4ff;font-family:'Segoe UI',Arial,sans-serif">
   <div style="max-width:580px;margin:40px auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
-    <div style="background:linear-gradient(135deg,#1e3a8a,#1e2d6b);padding:32px 40px;text-align:center">
-      <div style="font-size:12px;color:#fcd34d;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">CEEC — Communauté Évangélique</div>
-      <h1 style="color:white;margin:0;font-size:22px;font-weight:800;line-height:1.3">${title}</h1>
+
+    <!-- Header avec logo -->
+    <div style="background:linear-gradient(135deg,#1e3a8a,#1e2d6b);padding:28px 40px;text-align:center">
+      <img src="${LOGO_URL}" alt="CEEC" width="48" height="48" style="display:block;margin:0 auto 14px;border-radius:50%;border:2px solid rgba(197,155,46,0.5)" />
+      <h1 style="color:white;margin:0;font-size:20px;font-weight:800;line-height:1.3">${title}</h1>
     </div>
+
+    <!-- Filet doré -->
+    <div style="height:3px;background:linear-gradient(90deg,#c59b2e,#fcd34d,#c59b2e)"></div>
+
+    <!-- Contenu -->
     <div style="padding:32px 40px">${body}</div>
-    <div style="background:#f8fafc;padding:18px 40px;text-align:center;border-top:1px solid #e2e8f0">
-      <p style="color:#94a3b8;font-size:12px;margin:0">CEEC — Communauté des Églises Évangéliques du Congo</p>
+
+    <!-- Footer -->
+    <div style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #e2e8f0">
+      <img src="${LOGO_URL}" alt="CEEC" width="28" height="28" style="display:block;margin:0 auto 8px;opacity:0.5;border-radius:50%" />
+      <p style="color:#94a3b8;font-size:11px;margin:0 0 4px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">
+        Communauté des Églises Évangéliques au Congo
+      </p>
+      <p style="color:#cbd5e1;font-size:11px;margin:0">
+        <a href="${BASE_URL}" style="color:#94a3b8;text-decoration:none">ceec-rdc.org</a>
+        &nbsp;·&nbsp; Kinshasa, RDC
+      </p>
     </div>
+
   </div>
 </body>
 </html>`;
 }
 
+/** Paragraphe standard */
 function p(text: string) {
   return `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">${text}</p>`;
 }
 
+/** Encadré coloré avec bordure latérale */
 function callout(color: string, bg: string, text: string) {
   return `<div style="background:${bg};border-left:4px solid ${color};border-radius:8px;padding:14px 18px;margin:20px 0"><p style="color:${color};font-size:14px;line-height:1.6;margin:0">${text}</p></div>`;
 }
 
+/** Bouton d'action centré */
 function cta(href: string, label: string) {
   return `<div style="text-align:center;margin:28px 0"><a href="${href}" style="display:inline-block;background:#1e3a8a;color:white;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none">${label} →</a></div>`;
 }
 
-// ─── Helpers : find recipients ────────────────────────────────────────────────
+/** Texte secondaire (petite taille, gris) */
+function small(text: string) {
+  return `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">${text}</p>`;
+}
+
+/** Séparateur avec lien direct */
+function directLink(href: string) {
+  return `<hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0"><p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">Lien direct : <a href="${href}" style="color:#1e3a8a">${href}</a></p>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Helpers : trouver les destinataires
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export async function getChurchStaffEmails(egliseId: number): Promise<string[]> {
   const staffRoles = ["admin_eglise", "pasteur", "secretaire"];
@@ -117,9 +157,7 @@ export async function getSuperAdminEmails(): Promise<string[]> {
         const user = await clerk.users.getUser(ur.clerkUserId);
         const email = user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress;
         if (email) emails.push(email);
-      } catch {
-        // skip
-      }
+      } catch { /* skip */ }
     }
     return emails;
   } catch {
@@ -127,7 +165,11 @@ export async function getSuperAdminEmails(): Promise<string[]> {
   }
 }
 
-// ─── Template 1 : Invitation (admin setup) ───────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// Templates d'email
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── 1. Invitation admin église ───────────────────────────────────────────────
 
 export async function sendInviteEmail(
   to: string,
@@ -141,14 +183,13 @@ export async function sendInviteEmail(
     p(`Vous avez été désigné(e) comme administrateur principal de l'église <strong style="color:#1e3a8a">${egliseNom}</strong> sur la plateforme CEEC.`) +
     p("Cliquez sur le bouton ci-dessous pour créer votre compte et configurer votre espace de gestion d'église.") +
     cta(inviteLink, "Configurer mon espace") +
-    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.</p>
-     <hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0">
-     <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">Lien direct : <a href="${inviteLink}" style="color:#1e3a8a">${inviteLink}</a></p>`
+    small("Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.") +
+    directLink(inviteLink)
   );
   return sendEmail(to, `Invitation — Configurez l'espace de ${egliseNom} sur CEEC`, html);
 }
 
-// ─── Template 1b : Invitation admin plateforme ───────────────────────────────
+// ── 2. Invitation admin plateforme ───────────────────────────────────────────
 
 export async function sendAdminPlatformInviteEmail(
   to: string,
@@ -159,20 +200,19 @@ export async function sendAdminPlatformInviteEmail(
   const html = emailWrapper(
     "Invitation — Administration CEEC",
     p("Bonjour,") +
-    p(`Vous avez été invité(e) à rejoindre l&apos;équipe d&apos;administration de la plateforme CEEC avec le rôle <strong style="color:#1e3a8a">${roleLabel}</strong>.`) +
+    p(`Vous avez été invité(e) à rejoindre l'équipe d'administration de la plateforme CEEC avec le rôle <strong style="color:#1e3a8a">${roleLabel}</strong>.`) +
     callout("#1e3a8a", "#eff6ff",
-      `<strong>Rôle :</strong> ${roleLabel}<br>Ce rôle vous donnera accès à l&apos;interface d&apos;administration de la plateforme.`
+      `<strong>Rôle :</strong> ${roleLabel}<br>Ce rôle vous donnera accès à l'interface d'administration de la plateforme.`
     ) +
-    p("Cliquez sur le bouton ci-dessous pour accepter l&apos;invitation. Vous devrez vous connecter ou créer un compte avec cette adresse email.") +
+    p("Cliquez sur le bouton ci-dessous pour accepter l'invitation. Vous devrez vous connecter ou créer un compte avec cette adresse email.") +
     cta(inviteLink, "Accepter l'invitation") +
-    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, ignorez cet email.</p>
-     <hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0">
-     <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">Lien direct : <a href="${inviteLink}" style="color:#1e3a8a">${inviteLink}</a></p>`
+    small("Ce lien est valable 7 jours. Si vous n'avez pas demandé cette invitation, ignorez cet email.") +
+    directLink(inviteLink)
   );
   return sendEmail(to, `Invitation — Accès administration CEEC (${roleLabel})`, html);
 }
 
-// ─── Template 2 : Contenu approuvé ───────────────────────────────────────────
+// ── 3. Contenu approuvé ──────────────────────────────────────────────────────
 
 export async function sendContentApprovedEmail(
   to: string,
@@ -191,7 +231,7 @@ export async function sendContentApprovedEmail(
   return sendEmail(to, `✓ ${label.charAt(0).toUpperCase() + label.slice(1)} approuvé(e) — ${egliseNom}`, html);
 }
 
-// ─── Template 3 : Contenu rejeté ─────────────────────────────────────────────
+// ── 4. Contenu rejeté ────────────────────────────────────────────────────────
 
 export async function sendContentRejectedEmail(
   to: string,
@@ -212,7 +252,7 @@ export async function sendContentRejectedEmail(
   return sendEmail(to, `Votre ${label} n'a pas été publié(e) — ${egliseNom}`, html);
 }
 
-// ─── Template 4 : Nouveau membre (notif au staff) ────────────────────────────
+// ── 5. Nouveau membre (notif au staff) ───────────────────────────────────────
 
 export async function sendNewMemberEmail(
   to: string | string[],
@@ -235,7 +275,7 @@ export async function sendNewMemberEmail(
   return sendEmail(toArr, `Nouveau membre — ${egliseNom}`, html);
 }
 
-// ─── Template 5 : Confirmation inscription événement (pour le membre) ─────────
+// ── 6. Confirmation inscription événement ────────────────────────────────────
 
 export async function sendParticipationConfirmationEmail(
   to: string,
@@ -264,7 +304,7 @@ export async function sendParticipationConfirmationEmail(
   return sendEmail(to, `Inscription confirmée — ${evenementTitre}`, html);
 }
 
-// ─── Template 6 : Nouvelle église créée (pour les super admins) ──────────────
+// ── 7. Nouvelle église créée (notif super admins) ────────────────────────────
 
 export async function sendNewChurchNotificationEmail(
   to: string | string[],
@@ -287,7 +327,7 @@ export async function sendNewChurchNotificationEmail(
   return sendEmail(toArr, `Nouvelle église — ${egliseNom} (${ville})`, html);
 }
 
-// ─── Template 7 : Alerte présence marathon ───────────────────────────────────
+// ── 8. Alerte présence marathon ──────────────────────────────────────────────
 
 export async function sendMarathonAlertEmail({
   to,
@@ -314,19 +354,19 @@ export async function sendMarathonAlertEmail({
   const html = emailWrapper(
     `⚠️ Alerte présence — ${marathonTitre}`,
     p("Bonjour,") +
-    p(`Le taux de présence du <strong>Jour ${numeroJour}</strong> du marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est en dessous du seuil d&apos;alerte configuré.`) +
+    p(`Le taux de présence du <strong>Jour ${numeroJour}</strong> du marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est en dessous du seuil d'alerte configuré.`) +
     callout("#b45309", "#fffbeb",
       `<strong>Scannés :</strong> ${scanned} / ${expected} participants<br>` +
       `<strong>Taux de présence :</strong> <span style="color:#b91c1c;font-weight:700">${taux}%</span><br>` +
-      `<strong>Seuil d&apos;alerte :</strong> ${seuil}%`
+      `<strong>Seuil d'alerte :</strong> ${seuil}%`
     ) +
-    p("Des participants n&apos;ont pas encore été scannés. Vérifiez le tableau de bord en direct pour voir la liste des absents.") +
+    p("Des participants n'ont pas encore été scannés. Vérifiez le tableau de bord en direct pour voir la liste des absents.") +
     cta(dashboardUrl, "Voir le suivi en direct")
   );
   return sendEmail(toArr, `⚠️ Alerte présence J${numeroJour} — ${marathonTitre}`, html);
 }
 
-// ─── Template 9 : Badge marathon par email ───────────────────────────────────
+// ── 9. Badge marathon par email ──────────────────────────────────────────────
 
 export async function sendMarathonBadgeEmail({
   to,
@@ -404,53 +444,26 @@ export async function sendMarathonBadgeEmail({
 
   const html = emailWrapper(
     `Votre badge — ${marathonTitre}`,
-    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Bonjour <strong>${participantPrenom}</strong>,</p>` +
-    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Votre carte de participant pour le marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est jointe à cet email en format PDF.</p>` +
-    `<div style="background:#eff6ff;border-left:4px solid #1e3a8a;border-radius:8px;padding:14px 18px;margin:20px 0">` +
-    `<p style="color:#1e3a8a;font-size:14px;line-height:1.6;margin:0">` +
-    `<strong>N° de participant :</strong> ${participantNumeroId}<br>` +
-    `<strong>Période :</strong> ${marathonDateRange}` +
-    (marathonTheme ? `<br><strong>Thème :</strong> ${marathonTheme}` : "") +
-    `</p></div>` +
-    `<p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px">Présentez le code QR figurant sur votre carte à l'entrée de chaque journée du marathon pour enregistrer votre présence.</p>` +
-    `<p style="color:#94a3b8;font-size:13px;line-height:1.6;margin:0">Si vous avez des questions, contactez l'équipe organisatrice.</p>`
+    p(`Bonjour <strong>${participantPrenom}</strong>,`) +
+    p(`Votre carte de participant pour le marathon <strong style="color:#1e3a8a">${marathonTitre}</strong> est jointe à cet email en format PDF.`) +
+    callout("#1e3a8a", "#eff6ff",
+      `<strong>N° de participant :</strong> ${participantNumeroId}<br>` +
+      `<strong>Période :</strong> ${marathonDateRange}` +
+      (marathonTheme ? `<br><strong>Thème :</strong> ${marathonTheme}` : "")
+    ) +
+    p("Présentez le code QR figurant sur votre carte à l'entrée de chaque journée du marathon pour enregistrer votre présence.") +
+    small("Si vous avez des questions, contactez l'équipe organisatrice.")
   );
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.log("=== BADGE EMAIL (Resend non configuré — console) ===");
-    console.log(`À : ${to} | Participant : ${participantPrenom} ${participantNom} (${participantNumeroId})`);
-    console.log("====================================================");
-    return { success: true };
-  }
-
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
-      from: "CEEC Platform <noreply@ceec-rdc.org>",
-      to: [to],
-      subject: `Votre badge de participant — ${marathonTitre}`,
-      html,
-      attachments: [
-        {
-          filename: `badge-marathon-${participantNumeroId}.pdf`,
-          content: pdfBuffer,
-        },
-      ],
-    });
-    if (error) {
-      console.error("Resend badge error:", error);
-      return { success: false, error: error.message };
-    }
-    return { success: true };
-  } catch (err) {
-    console.error("Badge email send failed:", err);
-    return { success: false, error: String(err) };
-  }
+  return sendEmail(
+    to,
+    `Votre badge de participant — ${marathonTitre}`,
+    html,
+    [{ filename: `badge-marathon-${participantNumeroId}.pdf`, content: pdfBuffer }]
+  );
 }
 
-// ─── Template 9 : Message de contact reçu ───────────────────────────────────
+// ── 10. Message de contact reçu ──────────────────────────────────────────────
 
 export async function sendContactEmail({
   to,

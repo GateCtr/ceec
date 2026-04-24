@@ -71,14 +71,14 @@ export default function Navbar({ initialNavInfo }: Props) {
   const navLinkClass = (href: string) =>
     `px-3 py-1.5 rounded-md text-sm text-white transition-all duration-150 ${
       isActive(href)
-        ? "bg-white/[0.18] font-semibold border-b-2 border-secondary"
+        ? "bg-white/18 font-semibold border-b-2 border-secondary"
         : "font-normal hover:bg-white/10 border-b-2 border-transparent"
     }`;
 
   const mobileLinkClass = (href: string) =>
     `block px-4 py-3 rounded-lg text-sm text-white transition-colors duration-150 ${
       isActive(href)
-        ? "bg-white/[0.12] font-semibold border-l-[3px] border-secondary"
+        ? "bg-white/12 font-semibold border-l-[3px] border-secondary"
         : "font-normal border-l-[3px] border-transparent hover:bg-white/5"
     }`;
 
@@ -96,7 +96,7 @@ export default function Navbar({ initialNavInfo }: Props) {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 no-underline group">
-          <div className="flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+          <div className="shrink-0 transition-transform duration-200 group-hover:scale-105">
             <img
               src="/ceec-emblem.svg"
               alt="Logo CEEC"
@@ -125,11 +125,11 @@ export default function Navbar({ initialNavInfo }: Props) {
             <UserMenu navInfo={navInfo} />
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/sign-in" className="px-4 py-1.5 rounded-md text-sm font-medium text-white bg-white/[0.12] transition-all duration-150 hover:bg-white/20">
+              <Link href="/sign-in" className="px-4 py-1.5 rounded-md text-sm font-medium text-white bg-white/12 transition-all duration-150 hover:bg-white/20">
                 Connexion
               </Link>
               <Link href="/sign-up" className="px-4 py-1.5 rounded-md text-sm font-semibold text-primary bg-secondary transition-all duration-150 hover:brightness-110">
-                S&apos;inscrire
+                Rejoindre
               </Link>
             </div>
           )}
@@ -160,11 +160,11 @@ export default function Navbar({ initialNavInfo }: Props) {
             <UserMenuMobile navInfo={navInfo} onClose={() => setMenuOpen(false)} />
           ) : (
             <div className="flex gap-2 mt-2 pt-2 border-t border-white/10">
-              <Link href="/sign-in" onClick={() => setMenuOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-white/[0.12]">
+              <Link href="/sign-in" onClick={() => setMenuOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-white/12">
                 Connexion
               </Link>
               <Link href="/sign-up" onClick={() => setMenuOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm font-bold text-center text-primary bg-secondary">
-                S&apos;inscrire
+                Rejoindre
               </Link>
             </div>
           )}

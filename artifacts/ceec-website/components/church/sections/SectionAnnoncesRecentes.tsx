@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import ChurchSectionHeader from "./ChurchSectionHeader";
 
 type AnnonceConfig = {
   titre?: string;
@@ -17,10 +18,10 @@ type Annonce = {
   imageUrl?: string | null;
 };
 
-const prioriteStyle = (p: string) => {
-  if (p === "urgente") return { bg: "#fee2e2", color: "#dc2626", label: "Urgent" };
-  if (p === "haute") return { bg: "#fef3c7", color: "#d97706", label: "Important" };
-  return { bg: "#e0f2fe", color: "#0369a1", label: "Information" };
+const prioriteClass = (p: string) => {
+  if (p === "urgente") return { cls: "bg-red-100 text-red-600", label: "Urgent" };
+  if (p === "haute") return { cls: "bg-amber-100 text-amber-600", label: "Important" };
+  return { cls: "bg-sky-100 text-sky-700", label: "Information" };
 };
 
 export default function SectionAnnoncesRecentes({
@@ -35,46 +36,45 @@ export default function SectionAnnoncesRecentes({
   if (annonces.length === 0) return null;
 
   return (
-    <section style={{ background: bgColor, padding: "5rem 1rem" }}>
-      <div style={{ maxWidth: 920, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
-          <h2 style={{ fontWeight: 800, color: "var(--church-primary, #1e3a8a)", fontSize: "clamp(1.5rem,3vw,1.85rem)", margin: 0 }}>
-            {titre}
-          </h2>
-          <Link href="/c/annonces" style={{ color: "var(--church-primary, #1e3a8a)", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <section className="py-20 px-4" style={{ background: bgColor }}>
+      <div className="max-w-[920px] mx-auto">
+        {/* En-tête avec lien */}
+        <div className="flex justify-between items-end mb-8 flex-wrap gap-3">
+          <ChurchSectionHeader badge="Actualités" title={titre} align="left" />
+          <Link
+            href="/c/annonces"
+            className="font-semibold text-sm no-underline inline-flex items-center gap-1 mb-10 transition-all hover:gap-2"
+            style={{ color: "var(--church-accent, #c59b2e)" }}
+          >
             {voirPlusLabel} <ChevronRight size={14} />
           </Link>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Liste */}
+        <div className="flex flex-col gap-4">
           {annonces.map((annonce) => {
-            const style = prioriteStyle(annonce.priorite);
+            const pStyle = prioriteClass(annonce.priorite);
             return (
-              <Link key={annonce.id} href={`/c/annonces/${annonce.id}`} style={{ textDecoration: "none" }}>
-                <div
-                  style={{
-                    background: "white", borderRadius: 14, overflow: "hidden",
-                    border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    display: "flex", transition: "box-shadow 0.2s",
-                  }}
-                >
+              <Link key={annonce.id} href={`/c/annonces/${annonce.id}`} className="no-underline">
+                <div className="card card-hover flex overflow-hidden">
                   {annonce.imageUrl && (
                     <img
                       src={annonce.imageUrl}
                       alt={annonce.titre}
-                      style={{ width: 120, height: "100%", objectFit: "cover", flexShrink: 0, minHeight: 100 }}
+                      className="w-[120px] min-h-[100px] object-cover shrink-0 hidden sm:block"
                     />
                   )}
-                  <div style={{ padding: "1.25rem", flex: 1 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
-                      <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: style.bg, color: style.color }}>
-                        {style.label}
+                  <div className="p-5 flex-1">
+                    <div className="flex justify-between items-start mb-2.5 flex-wrap gap-2">
+                      <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full ${pStyle.cls}`}>
+                        {pStyle.label}
                       </span>
-                      <span style={{ color: "#94a3b8", fontSize: 12 }}>
+                      <span className="text-xs text-slate-400">
                         {new Date(annonce.datePublication).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                       </span>
                     </div>
-                    <h3 style={{ fontWeight: 700, color: "#0f172a", margin: "0 0 6px", fontSize: 16 }}>{annonce.titre}</h3>
-                    <p style={{ color: "#475569", fontSize: 13, lineHeight: 1.65, margin: 0 }}>
+                    <h3 className="font-bold text-foreground text-base mb-1.5">{annonce.titre}</h3>
+                    <p className="text-slate-600 text-[13px] leading-relaxed m-0">
                       {annonce.contenu.length > 180 ? annonce.contenu.slice(0, 180) + "…" : annonce.contenu}
                     </p>
                   </div>

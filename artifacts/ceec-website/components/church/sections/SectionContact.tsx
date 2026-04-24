@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, CheckCircle } from "lucide-react";
 
 type ContactConfig = {
   titre?: string;
@@ -40,10 +40,6 @@ export default function SectionContact({
     bgColor.startsWith("#1e3") ||
     bgColor.startsWith("#0f1") ||
     bgColor.startsWith("#1e2");
-
-  const textColor = useDark ? "white" : "var(--church-primary, #1e3a8a)";
-  const subColor = useDark ? "rgba(255,255,255,0.8)" : "#475569";
-  const infoColor = useDark ? "rgba(255,255,255,0.9)" : "#334155";
 
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", sujet: "", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -87,58 +83,46 @@ export default function SectionContact({
     }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "10px 14px",
-    borderRadius: 8,
-    border: "1px solid rgba(255,255,255,0.3)",
-    background: useDark ? "rgba(255,255,255,0.12)" : "white",
-    color: useDark ? "white" : "#0f172a",
-    fontSize: 14,
-    outline: "none",
-    boxSizing: "border-box",
-  };
+  const inputCls = useDark
+    ? "w-full px-3.5 py-2.5 rounded-lg border border-white/30 bg-white/12 text-white text-sm outline-none placeholder:text-white/40 focus:border-white/60 transition-colors"
+    : "input";
 
-  const labelStyle: React.CSSProperties = {
-    display: "block",
-    fontSize: 12,
-    fontWeight: 600,
-    marginBottom: 4,
-    color: subColor,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.05em",
-  };
+  const labelCls = useDark
+    ? "block text-xs font-semibold mb-1 text-white/70 uppercase tracking-wider"
+    : "label";
 
   return (
-    <section style={{ background: bgColor, padding: "4rem 1rem" }}>
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <h2 style={{ fontWeight: 800, fontSize: "clamp(1.5rem,3vw,2rem)", marginBottom: 12, color: textColor }}>
+    <section className="py-16 px-4" style={{ background: bgColor }}>
+      <div className="max-w-[800px] mx-auto">
+        {/* Titre */}
+        <div className="text-center mb-10">
+          <h2 className={`font-extrabold text-[clamp(1.5rem,3vw,2rem)] mb-3 ${useDark ? "text-white" : "text-primary"}`}>
             {titre}
           </h2>
           {texte && (
-            <p style={{ fontSize: 15, lineHeight: 1.75, color: subColor, maxWidth: 560, margin: "0 auto" }}>
+            <p className={`text-[15px] leading-relaxed max-w-[560px] mx-auto ${useDark ? "text-white/80" : "text-slate-600"}`}>
               {texte}
             </p>
           )}
         </div>
 
+        {/* Infos de contact */}
         {(eglise.adresse || eglise.telephone || eglise.email) && (
-          <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", fontSize: 15, marginBottom: 36 }}>
+          <div className={`flex gap-6 justify-center flex-wrap text-[15px] mb-9 ${useDark ? "text-white/90" : "text-slate-700"}`}>
             {eglise.adresse && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor }}>
+              <div className="flex items-center gap-2">
                 <MapPin size={18} />
                 <span>{eglise.adresse}{eglise.ville ? `, ${eglise.ville}` : ""}</span>
               </div>
             )}
             {eglise.telephone && (
-              <a href={`tel:${eglise.telephone}`} style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor, textDecoration: "none" }}>
+              <a href={`tel:${eglise.telephone}`} className={`flex items-center gap-2 no-underline ${useDark ? "text-white/90" : "text-slate-700"}`}>
                 <Phone size={18} />
                 <span>{eglise.telephone}</span>
               </a>
             )}
             {eglise.email && (
-              <a href={`mailto:${eglise.email}`} style={{ display: "flex", alignItems: "center", gap: 8, color: infoColor, textDecoration: "none" }}>
+              <a href={`mailto:${eglise.email}`} className={`flex items-center gap-2 no-underline ${useDark ? "text-white/90" : "text-slate-700"}`}>
                 <Mail size={18} />
                 <span>{eglise.email}</span>
               </a>
@@ -146,113 +130,84 @@ export default function SectionContact({
           </div>
         )}
 
+        {/* Formulaire */}
         {egliseId && status !== "success" && (
-          <form onSubmit={handleSubmit} style={{ background: useDark ? "rgba(255,255,255,0.08)" : "white", borderRadius: 16, padding: "2rem", border: useDark ? "1px solid rgba(255,255,255,0.15)" : "1px solid #e2e8f0", maxWidth: 560, margin: "0 auto" }}>
-            <h3 style={{ fontWeight: 700, fontSize: 16, color: textColor, marginBottom: 20, textAlign: "center" }}>
+          <form
+            onSubmit={handleSubmit}
+            className={`rounded-2xl p-8 max-w-[560px] mx-auto ${
+              useDark
+                ? "bg-white/8 border border-white/15"
+                : "bg-white border border-border shadow-card"
+            }`}
+          >
+            <h3 className={`font-bold text-base mb-5 text-center ${useDark ? "text-white" : "text-foreground"}`}>
               Envoyez-nous un message
             </h3>
 
             {status === "error" && (
-              <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
-                {errorMsg}
-              </div>
+              <div className="alert alert-danger mb-4 text-[13px]">{errorMsg}</div>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label style={labelStyle}>Nom *</label>
-                <input
-                  required
-                  value={form.nom}
-                  onChange={(e) => updateField("nom", e.target.value)}
-                  placeholder="Votre nom"
-                  style={inputStyle}
-                />
+                <label className={labelCls}>Nom *</label>
+                <input required value={form.nom} onChange={(e) => updateField("nom", e.target.value)} placeholder="Votre nom" className={inputCls} />
               </div>
               <div>
-                <label style={labelStyle}>Email *</label>
-                <input
-                  required
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => updateField("email", e.target.value)}
-                  placeholder="votre@email.com"
-                  style={inputStyle}
-                />
+                <label className={labelCls}>Email *</label>
+                <input required type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} placeholder="votre@email.com" className={inputCls} />
               </div>
             </div>
 
             {champsActifs.telephone && (
-              <div style={{ marginBottom: 12 }}>
-                <label style={labelStyle}>Téléphone</label>
-                <input
-                  value={form.telephone}
-                  onChange={(e) => updateField("telephone", e.target.value)}
-                  placeholder="+243 XXX XXX XXX"
-                  style={inputStyle}
-                />
+              <div className="mb-3">
+                <label className={labelCls}>Téléphone</label>
+                <input value={form.telephone} onChange={(e) => updateField("telephone", e.target.value)} placeholder="+243 XXX XXX XXX" className={inputCls} />
               </div>
             )}
 
             {champsActifs.sujet && (
-              <div style={{ marginBottom: 12 }}>
-                <label style={labelStyle}>Sujet</label>
-                <input
-                  value={form.sujet}
-                  onChange={(e) => updateField("sujet", e.target.value)}
-                  placeholder="Objet de votre message"
-                  style={inputStyle}
-                />
+              <div className="mb-3">
+                <label className={labelCls}>Sujet</label>
+                <input value={form.sujet} onChange={(e) => updateField("sujet", e.target.value)} placeholder="Objet de votre message" className={inputCls} />
               </div>
             )}
 
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Message *</label>
+            <div className="mb-4">
+              <label className={labelCls}>Message *</label>
               <textarea
                 required
                 value={form.message}
                 onChange={(e) => updateField("message", e.target.value)}
                 placeholder="Écrivez votre message ici…"
                 rows={5}
-                style={{ ...inputStyle, resize: "vertical", minHeight: 100 }}
+                className={`${inputCls} resize-y min-h-[100px]`}
               />
             </div>
 
             <button
               type="submit"
               disabled={status === "loading"}
-              style={{
-                width: "100%",
-                padding: "12px 24px",
-                borderRadius: 10,
-                background: useDark ? "white" : "var(--church-primary, #1e3a8a)",
-                color: useDark ? "var(--church-primary, #1e3a8a)" : "white",
-                border: "none",
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: status === "loading" ? "not-allowed" : "pointer",
-                opacity: status === "loading" ? 0.7 : 1,
-              }}
+              className={`btn btn-full ${
+                useDark ? "bg-white text-primary font-bold" : "btn-primary"
+              } ${status === "loading" ? "opacity-70 cursor-not-allowed" : ""}`}
+              style={useDark ? { color: "var(--church-primary, #1e3a8a)" } : undefined}
             >
               {status === "loading" ? "Envoi en cours…" : "Envoyer le message"}
             </button>
           </form>
         )}
 
+        {/* Succès */}
         {egliseId && status === "success" && (
-          <div style={{
-            background: useDark ? "rgba(255,255,255,0.1)" : "#dcfce7",
-            color: useDark ? "white" : "#15803d",
-            padding: "2rem",
-            borderRadius: 16,
-            textAlign: "center",
-            maxWidth: 560,
-            margin: "0 auto",
-            border: useDark ? "1px solid rgba(255,255,255,0.2)" : "1px solid #bbf7d0",
-          }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>✓</div>
-            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Message envoyé !</p>
-            <p style={{ fontSize: 14, opacity: 0.9 }}>{confirmation}</p>
+          <div className={`rounded-2xl p-8 text-center max-w-[560px] mx-auto ${
+            useDark
+              ? "bg-white/10 border border-white/20 text-white"
+              : "bg-green-50 border border-green-200 text-green-800"
+          }`}>
+            <CheckCircle size={40} className="mx-auto mb-3" />
+            <p className="font-bold text-base mb-2">Message envoyé !</p>
+            <p className="text-sm opacity-90">{confirmation}</p>
           </div>
         )}
       </div>

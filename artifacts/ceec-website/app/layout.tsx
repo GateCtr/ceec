@@ -107,7 +107,7 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="fr" className={`${playfairDisplay.variable} ${lato.variable}`}>
+      <html lang="fr" className={`${playfairDisplay.variable} ${lato.variable}`} suppressHydrationWarning>
         <head>
           <meta name="theme-color" content="#1e3a8a" />
         </head>

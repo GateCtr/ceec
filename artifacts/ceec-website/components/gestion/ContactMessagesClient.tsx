@@ -106,89 +106,78 @@ export default function ContactMessagesClient({
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 1fr" : "1fr", gap: 20 }}>
+    <div className={`grid gap-5 ${selected ? "grid-cols-2" : "grid-cols-1"}`}>
       <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-          <div style={{ fontSize: 14, color: "#64748b" }}>
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <div className="text-sm text-muted-foreground">
             {total} message{total !== 1 ? "s" : ""}
             {nonLus > 0 && (
-              <span style={{ marginLeft: 8, background: "#1e3a8a", color: "white", borderRadius: 12, padding: "2px 8px", fontSize: 12, fontWeight: 700 }}>
+              <span className="badge badge-primary ml-2 text-white bg-primary">
                 {nonLus} non lu{nonLus !== 1 ? "s" : ""}
               </span>
             )}
           </div>
           <button
             onClick={toggleFilter}
-            style={{
-              padding: "6px 14px", borderRadius: 7,
-              background: filterNonLu ? "#1e3a8a" : "white",
-              color: filterNonLu ? "white" : "#374151",
-              border: "1px solid " + (filterNonLu ? "#1e3a8a" : "#d1d5db"),
-              fontSize: 13, fontWeight: 600, cursor: "pointer",
-            }}
+            className={`btn btn-sm cursor-pointer ${
+              filterNonLu ? "btn-primary" : "btn-outline border-gray-300 text-slate-700"
+            }`}
           >
-            {filterNonLu ? <><X size={12} style={{ marginRight: 4 }} />Non lus seulement</> : "Non lus seulement"}
+            {filterNonLu ? <><X size={12} className="mr-1" />Non lus seulement</> : "Non lus seulement"}
           </button>
           <button
             onClick={() => fetchPage(page, filterNonLu)}
             disabled={loading}
-            style={{ padding: "6px 14px", borderRadius: 7, background: "white", color: "#374151", border: "1px solid #d1d5db", fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}
+            className="btn btn-sm btn-outline border-gray-300 text-slate-700 cursor-pointer"
           >
             <RefreshCw size={13} /> Actualiser
           </button>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>Chargement…</div>
+          <div className="text-center p-12 text-slate-400">Chargement…</div>
         ) : messages.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8", background: "white", borderRadius: 12, border: "1px solid #e2e8f0" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-              <Mail size={40} color="#e2e8f0" />
+          <div className="card text-center p-12 text-slate-400">
+            <div className="flex justify-center mb-3">
+              <Mail size={40} className="text-border" />
             </div>
-            <p style={{ fontWeight: 600 }}>Aucun message{filterNonLu ? " non lu" : ""}</p>
+            <p className="font-semibold">Aucun message{filterNonLu ? " non lu" : ""}</p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="flex flex-col gap-2">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 onClick={() => openMessage(msg)}
-                style={{
-                  background: "white",
-                  border: `1px solid ${selected?.id === msg.id ? "#1e3a8a" : "#e2e8f0"}`,
-                  borderRadius: 10,
-                  padding: "14px 16px",
-                  cursor: "pointer",
-                  position: "relative",
-                  borderLeft: `4px solid ${msg.lu ? "#e2e8f0" : "#1e3a8a"}`,
-                  transition: "border-color 0.15s",
-                }}
+                className={`bg-white rounded-[10px] py-3.5 px-4 cursor-pointer relative transition-colors duration-150 border ${
+                  selected?.id === msg.id ? "border-primary" : "border-border"
+                } ${msg.lu ? "border-l-4 border-l-border" : "border-l-4 border-l-primary"}`}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
                       {!msg.lu && (
-                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1e3a8a", flexShrink: 0, display: "inline-block" }} />
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 inline-block" />
                       )}
-                      <span style={{ fontWeight: msg.lu ? 600 : 700, fontSize: 14, color: "#0f172a" }}>
+                      <span className={`${msg.lu ? "font-semibold" : "font-bold"} text-sm text-foreground`}>
                         {msg.nom}
                       </span>
-                      <span style={{ fontSize: 12, color: "#94a3b8", flexShrink: 0 }}>{formatDate(msg.createdAt)}</span>
+                      <span className="text-xs text-slate-400 shrink-0">{formatDate(msg.createdAt)}</span>
                     </div>
-                    <div style={{ fontSize: 13, color: "#475569", marginBottom: 2 }}>{msg.email}</div>
+                    <div className="text-[13px] text-slate-600 mb-0.5">{msg.email}</div>
                     {msg.sujet && (
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      <div className="text-[13px] font-semibold text-slate-700 mb-1">
                         {msg.sujet}
                       </div>
                     )}
-                    <div style={{ fontSize: 13, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <div className="text-[13px] text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
                       {msg.message}
                     </div>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteMessage(msg.id); }}
                     disabled={deleting === msg.id}
-                    style={{ background: "none", border: "none", color: "#cbd5e1", cursor: "pointer", padding: "0 4px", flexShrink: 0, display: "flex", alignItems: "center" }}
+                    className="bg-transparent border-none text-slate-300 cursor-pointer px-1 shrink-0 flex items-center hover:text-red-400 transition-colors"
                     title="Supprimer"
                   >
                     <Trash2 size={15} />
@@ -200,14 +189,22 @@ export default function ContactMessagesClient({
         )}
 
         {pages > 1 && (
-          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 16 }}>
-            <button onClick={() => fetchPage(page - 1, filterNonLu)} disabled={page <= 1 || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page <= 1 ? 0.5 : 1, display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <div className="flex justify-center gap-2 mt-4">
+            <button
+              onClick={() => fetchPage(page - 1, filterNonLu)}
+              disabled={page <= 1 || loading}
+              className={`btn btn-sm btn-outline border-gray-300 text-slate-700 cursor-pointer ${page <= 1 ? "opacity-50" : ""}`}
+            >
               <ChevronLeft size={14} /> Préc.
             </button>
-            <span style={{ padding: "7px 14px", fontSize: 13, color: "#64748b" }}>
+            <span className="py-1.5 px-3.5 text-[13px] text-muted-foreground">
               Page {page} / {pages}
             </span>
-            <button onClick={() => fetchPage(page + 1, filterNonLu)} disabled={page >= pages || loading} style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 13, cursor: "pointer", opacity: page >= pages ? 0.5 : 1, display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <button
+              onClick={() => fetchPage(page + 1, filterNonLu)}
+              disabled={page >= pages || loading}
+              className={`btn btn-sm btn-outline border-gray-300 text-slate-700 cursor-pointer ${page >= pages ? "opacity-50" : ""}`}
+            >
               Suiv. <ChevronRight size={14} />
             </button>
           </div>
@@ -215,57 +212,57 @@ export default function ContactMessagesClient({
       </div>
 
       {selected && (
-        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 14, padding: "1.5rem", alignSelf: "start", position: "sticky", top: 20 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-            <h3 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: 0 }}>Détail du message</h3>
-            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", display: "flex", alignItems: "center" }}><X size={18} /></button>
+        <div className="card p-6 self-start sticky top-5">
+          <div className="flex justify-between items-start mb-5">
+            <h3 className="font-bold text-base text-foreground m-0">Détail du message</h3>
+            <button onClick={() => setSelected(null)} className="bg-transparent border-none cursor-pointer text-slate-400 flex items-center"><X size={18} /></button>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ background: "#f8fafc", borderRadius: 10, padding: "12px 14px" }}>
-              <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 2, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Expéditeur</div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{selected.nom}</div>
-              <a href={`mailto:${selected.email}`} style={{ fontSize: 14, color: "#1e3a8a", textDecoration: "none" }}>{selected.email}</a>
+          <div className="flex flex-col gap-3">
+            <div className="bg-primary-50 rounded-[10px] py-3 px-3.5">
+              <div className="overline mb-0.5">Expéditeur</div>
+              <div className="font-bold text-[15px] text-foreground">{selected.nom}</div>
+              <a href={`mailto:${selected.email}`} className="text-sm text-primary no-underline">{selected.email}</a>
               {selected.telephone && (
-                <div style={{ fontSize: 14, color: "#475569", marginTop: 4, display: "flex", alignItems: "center", gap: 5 }}>
-                  <Phone size={13} color="#94a3b8" />{selected.telephone}
+                <div className="text-sm text-slate-600 mt-1 flex items-center gap-1.5">
+                  <Phone size={13} className="text-slate-400" />{selected.telephone}
                 </div>
               )}
             </div>
 
             {selected.sujet && (
               <div>
-                <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Sujet</div>
-                <div style={{ fontWeight: 600, fontSize: 14, color: "#374151" }}>{selected.sujet}</div>
+                <div className="overline mb-1">Sujet</div>
+                <div className="font-semibold text-sm text-slate-700">{selected.sujet}</div>
               </div>
             )}
 
             <div>
-              <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Message</div>
-              <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{selected.message}</div>
+              <div className="overline mb-1">Message</div>
+              <div className="text-sm text-slate-700 leading-[1.7] whitespace-pre-wrap">{selected.message}</div>
             </div>
 
-            <div style={{ fontSize: 12, color: "#94a3b8" }}>Reçu le {formatDate(selected.createdAt)}</div>
+            <div className="text-xs text-slate-400">Reçu le {formatDate(selected.createdAt)}</div>
 
-            <div style={{ display: "flex", gap: 10, paddingTop: 8 }}>
+            <div className="flex gap-2.5 pt-2">
               <a
                 href={`mailto:${selected.email}?subject=${encodeURIComponent("Re: " + (selected.sujet ?? "Votre message"))}`}
-                style={{ flex: 1, padding: "9px 16px", borderRadius: 8, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 13, textAlign: "center", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                className="btn btn-primary flex-1 text-center"
               >
-                <Mail size={14} color="white" /> Répondre
+                <Mail size={14} /> Répondre
               </a>
               <button
                 onClick={() => markAsRead(selected.id, !selected.lu)}
-                style={{ padding: "9px 16px", borderRadius: 8, background: "white", border: "1px solid #d1d5db", color: "#374151", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                className="btn btn-outline border-gray-300 text-slate-700"
               >
                 {selected.lu ? "Marquer non lu" : "Marquer lu"}
               </button>
               <button
                 onClick={() => deleteMessage(selected.id)}
                 disabled={deleting === selected.id}
-                style={{ padding: "9px 16px", borderRadius: 8, background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", fontWeight: 600, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                className="btn btn-danger bg-red-100 border-red-300 text-red-700"
               >
-                <Trash2 size={14} color="#b91c1c" />
+                <Trash2 size={14} />
               </button>
             </div>
           </div>

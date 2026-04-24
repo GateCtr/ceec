@@ -68,52 +68,56 @@ export default function GestionParametresClient({ eglise }: Props) {
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 16, padding: "2rem", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+    <div className="card p-8">
       {eglise.slug && (
-        <div style={{ background: "#f1f5f9", borderRadius: 8, padding: "8px 14px", marginBottom: 20, fontSize: 13, color: "#64748b" }}>
-          Slug : <code style={{ fontWeight: 600, color: "#1e3a8a" }}>{eglise.slug}</code>
-          <span style={{ marginLeft: 8, color: "#94a3b8" }}>(non modifiable)</span>
+        <div className="rounded-lg bg-muted px-3.5 py-2 mb-5 text-[13px] text-muted-foreground">
+          Slug : <code className="font-semibold text-primary">{eglise.slug}</code>
+          <span className="ml-2 text-slate-400">(non modifiable)</span>
         </div>
       )}
 
-      {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{error}</div>}
-      {success && <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}><CheckCircle size={16} color="#15803d" /> Informations mises à jour avec succès.</div>}
+      {error && <div className="alert alert-danger mb-4">{error}</div>}
+      {success && (
+        <div className="alert alert-success mb-4">
+          <CheckCircle size={16} /> Informations mises à jour avec succès.
+        </div>
+      )}
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        <div>
-          <label style={s.label}>Nom de l&apos;église *</label>
-          <input style={s.input} {...field("nom")} required />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
+        <div className="form-group">
+          <label className="label">Nom de l&apos;église *</label>
+          <input className="input" {...field("nom")} required />
         </div>
 
-        <div>
-          <label style={s.label}>Description</label>
-          <textarea style={{ ...s.input, minHeight: 100, resize: "vertical" }} {...field("description")} placeholder="Courte description de votre église…" />
+        <div className="form-group">
+          <label className="label">Description</label>
+          <textarea className="input textarea" {...field("description")} placeholder="Courte description de votre église…" />
         </div>
 
-        <div style={{ display: "flex", gap: 16 }}>
-          <div style={{ flex: 1 }}>
-            <label style={s.label}>Ville *</label>
-            <input style={s.input} {...field("ville")} required />
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="label">Ville *</label>
+            <input className="input" {...field("ville")} required />
           </div>
-          <div style={{ flex: 2 }}>
-            <label style={s.label}>Adresse</label>
-            <input style={s.input} {...field("adresse")} placeholder="Rue, quartier…" />
+          <div className="flex-2">
+            <label className="label">Adresse</label>
+            <input className="input" {...field("adresse")} placeholder="Rue, quartier…" />
           </div>
         </div>
 
-        <div>
-          <label style={s.label}>Nom du pasteur</label>
-          <input style={s.input} {...field("pasteur")} placeholder="Pasteur Jean Dupont" />
+        <div className="form-group">
+          <label className="label">Nom du pasteur</label>
+          <input className="input" {...field("pasteur")} placeholder="Pasteur Jean Dupont" />
         </div>
 
-        <div style={{ display: "flex", gap: 16 }}>
-          <div style={{ flex: 1 }}>
-            <label style={s.label}>Téléphone</label>
-            <input type="tel" style={s.input} {...field("telephone")} placeholder="+243 8xx xxx xxx" />
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="label">Téléphone</label>
+            <input type="tel" className="input" {...field("telephone")} placeholder="+243 8xx xxx xxx" />
           </div>
-          <div style={{ flex: 1 }}>
-            <label style={s.label}>E-mail de contact</label>
-            <input type="email" style={s.input} {...field("email")} placeholder="contact@eglise.cd" />
+          <div className="flex-1">
+            <label className="label">E-mail de contact</label>
+            <input type="email" className="input" {...field("email")} placeholder="contact@eglise.cd" />
           </div>
         </div>
 
@@ -124,8 +128,8 @@ export default function GestionParametresClient({ eglise }: Props) {
           egliseId={eglise.id}
         />
 
-        <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9" }}>
-          <button type="submit" style={s.submitBtn} disabled={loading}>
+        <div className="pt-2 border-t border-slate-100">
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
             {loading ? "Enregistrement…" : "Sauvegarder les modifications"}
           </button>
         </div>
@@ -133,9 +137,3 @@ export default function GestionParametresClient({ eglise }: Props) {
     </div>
   );
 }
-
-const s = {
-  label: { fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 } as React.CSSProperties,
-  input: { width: "100%", padding: "10px 14px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" as const } as React.CSSProperties,
-  submitBtn: { padding: "11px 28px", borderRadius: 8, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 15, cursor: "pointer" } as React.CSSProperties,
-};

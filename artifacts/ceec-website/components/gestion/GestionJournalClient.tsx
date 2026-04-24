@@ -40,16 +40,16 @@ function EntityIcon({ type, color }: { type: string; color: string }) {
   }
 }
 
-const ACTION_COLORS: Record<string, { bg: string; color: string }> = {
-  creer: { bg: "#dcfce7", color: "#15803d" },
-  modifier: { bg: "#dbeafe", color: "#1d4ed8" },
-  supprimer: { bg: "#fee2e2", color: "#b91c1c" },
-  suspendre: { bg: "#fee2e2", color: "#b91c1c" },
-  reactiver: { bg: "#dcfce7", color: "#15803d" },
-  inviter: { bg: "#e0e7ff", color: "#4338ca" },
-  revoquer: { bg: "#fef3c7", color: "#b45309" },
-  publier: { bg: "#dcfce7", color: "#15803d" },
-  depublier: { bg: "#f1f5f9", color: "#64748b" },
+const ACTION_COLORS: Record<string, { bg: string; color: string; badgeCls: string }> = {
+  creer:     { bg: "bg-green-100",  color: "#15803d", badgeCls: "badge badge-success" },
+  modifier:  { bg: "bg-blue-100",   color: "#1d4ed8", badgeCls: "badge badge-primary" },
+  supprimer: { bg: "bg-red-100",    color: "#b91c1c", badgeCls: "badge badge-danger" },
+  suspendre: { bg: "bg-red-100",    color: "#b91c1c", badgeCls: "badge badge-danger" },
+  reactiver: { bg: "bg-green-100",  color: "#15803d", badgeCls: "badge badge-success" },
+  inviter:   { bg: "bg-indigo-100", color: "#4338ca", badgeCls: "badge badge-primary" },
+  revoquer:  { bg: "bg-amber-100",  color: "#b45309", badgeCls: "badge badge-warning" },
+  publier:   { bg: "bg-green-100",  color: "#15803d", badgeCls: "badge badge-success" },
+  depublier: { bg: "bg-slate-100",  color: "#64748b", badgeCls: "badge badge-muted" },
 };
 
 const ALL_ACTIONS = ["creer", "modifier", "supprimer", "suspendre", "reactiver", "inviter", "revoquer"];
@@ -88,22 +88,14 @@ export default function GestionJournalClient({
   return (
     <div>
       {/* Filter bar */}
-      <div style={{
-        background: "white", borderRadius: 12, padding: "1rem 1.25rem",
-        border: "1px solid #e2e8f0", marginBottom: 20,
-        display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center",
-      }}>
+      <div className="card flex flex-wrap items-center gap-3 p-4 px-5 mb-5">
         {/* Action filter pills */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", flex: 1 }}>
+        <div className="flex flex-wrap gap-1.5 flex-1">
           <button
             onClick={() => { setAction(""); applyFilters("", dateRange); }}
-            style={{
-              padding: "4px 12px", borderRadius: 6, fontSize: 12, cursor: "pointer",
-              border: action === "" ? "none" : "1.5px solid #e2e8f0",
-              background: action === "" ? "#1e3a8a" : "white",
-              color: action === "" ? "white" : "#374151",
-              fontWeight: action === "" ? 700 : 400,
-            }}
+            className={`btn btn-xs cursor-pointer ${
+              action === "" ? "btn-primary" : "btn-outline border-border text-slate-700"
+            }`}
           >
             Toutes
           </button>
@@ -111,13 +103,9 @@ export default function GestionJournalClient({
             <button
               key={a}
               onClick={() => { setAction(a); applyFilters(a, dateRange); }}
-              style={{
-                padding: "4px 12px", borderRadius: 6, fontSize: 12, cursor: "pointer",
-                border: action === a ? "none" : "1.5px solid #e2e8f0",
-                background: action === a ? "#1e3a8a" : "white",
-                color: action === a ? "white" : "#374151",
-                fontWeight: action === a ? 700 : 400,
-              }}
+              className={`btn btn-xs cursor-pointer ${
+                action === a ? "btn-primary" : "btn-outline border-border text-slate-700"
+              }`}
             >
               {ACTION_LABELS[a] ?? a}
             </button>
@@ -125,12 +113,12 @@ export default function GestionJournalClient({
         </div>
 
         {/* Date range filter */}
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <label style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Période :</label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-muted-foreground font-semibold">Période :</label>
           <select
             value={dateRange}
             onChange={(e) => { setDateRange(e.target.value); applyFilters(action, e.target.value); }}
-            style={{ fontSize: 13, padding: "5px 10px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "white" }}
+            className="input select text-[13px] py-1.5 px-2.5 w-auto!"
           >
             {DATE_RANGES.map((dr) => (
               <option key={dr.value} value={dr.value}>{dr.label}</option>
@@ -141,58 +129,53 @@ export default function GestionJournalClient({
         {hasFilters && (
           <button
             onClick={() => { setAction(""); setDateRange(""); applyFilters("", ""); }}
-            style={{ fontSize: 12, padding: "5px 12px", borderRadius: 6, border: "1.5px solid #e2e8f0", background: "#f8fafc", color: "#64748b", cursor: "pointer" }}
+            className="btn btn-xs btn-ghost bg-primary-50 text-muted-foreground cursor-pointer"
           >
             Réinitialiser
           </button>
         )}
 
-        <span style={{ fontSize: 12, color: "#94a3b8", flexShrink: 0 }}>
+        <span className="text-xs text-slate-400 shrink-0">
           {logs.length} entrée{logs.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Log list */}
-      <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+      <div className="card overflow-hidden">
         {logs.length === 0 ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "#94a3b8", fontSize: 14 }}>
+          <div className="p-12 text-center text-slate-400 text-sm">
             Aucune activité enregistrée.
-            <div style={{ marginTop: 8, fontSize: 12 }}>Les actions comme créer ou modifier une annonce apparaîtront ici.</div>
+            <div className="mt-2 text-xs">Les actions comme créer ou modifier une annonce apparaîtront ici.</div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="flex flex-col">
             {logs.map((log, i) => {
-              const ac = ACTION_COLORS[log.action] ?? { bg: "#f1f5f9", color: "#64748b" };
+              const ac = ACTION_COLORS[log.action] ?? { bg: "bg-slate-100", color: "#64748b", badgeCls: "badge badge-muted" };
               return (
                 <div
                   key={log.id}
-                  style={{
-                    display: "flex", gap: 12, alignItems: "flex-start",
-                    padding: "14px 20px",
-                    borderBottom: i < logs.length - 1 ? "1px solid #f1f5f9" : "none",
-                  }}
+                  className={`flex gap-3 items-start py-3.5 px-5 ${
+                    i < logs.length - 1 ? "border-b border-slate-100" : ""
+                  }`}
                 >
-                  <div style={{
-                    width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-                    background: ac.bg, display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
+                  <div className={`w-9 h-9 rounded-full shrink-0 ${ac.bg} flex items-center justify-center`}>
                     <EntityIcon type={log.entiteType} color={ac.color} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.5 }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] text-foreground leading-relaxed">
                       <strong>{log.acteurNom}</strong>
                       {" "}
-                      <span style={{ ...badgeStyle, background: ac.bg, color: ac.color }}>
+                      <span className={ac.badgeCls}>
                         {ACTION_LABELS[log.action] ?? log.action}
                       </span>
                       {" "}
-                      <span style={{ color: "#64748b" }}>{log.entiteType}</span>
+                      <span className="text-muted-foreground">{log.entiteType}</span>
                       {log.entiteLabel && (
-                        <> : <span style={{ fontWeight: 600, color: "#1e3a8a" }}>{log.entiteLabel}</span></>
+                        <> : <span className="font-semibold text-primary">{log.entiteLabel}</span></>
                       )}
                     </div>
                   </div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", flexShrink: 0, textAlign: "right" }}>
+                  <div className="text-[11px] text-slate-400 shrink-0 text-right">
                     {new Date(log.createdAt).toLocaleDateString("fr-FR", {
                       day: "numeric", month: "short", year: "numeric",
                     })}
@@ -207,7 +190,3 @@ export default function GestionJournalClient({
     </div>
   );
 }
-
-const badgeStyle: React.CSSProperties = {
-  display: "inline-block", padding: "1px 7px", borderRadius: 100, fontSize: 11, fontWeight: 700,
-};

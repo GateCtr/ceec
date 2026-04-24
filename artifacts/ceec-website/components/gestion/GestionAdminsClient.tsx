@@ -25,9 +25,9 @@ interface Props {
   currentUserId: string;
 }
 
-const roleLabels: Record<string, { label: string; bg: string; color: string }> = {
-  admin_eglise: { label: "Admin église", bg: "#dcfce7", color: "#15803d" },
-  moderateur: { label: "Modérateur", bg: "#fef3c7", color: "#b45309" },
+const roleLabels: Record<string, { label: string; badgeClass: string }> = {
+  admin_eglise: { label: "Admin église", badgeClass: "badge badge-success" },
+  moderateur: { label: "Modérateur", badgeClass: "badge badge-warning" },
 };
 
 export default function GestionAdminsClient({ initialUserRoles, pendingInvites: initialInvites, currentUserId }: Props) {
@@ -91,54 +91,54 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+    <div className="flex flex-col gap-7">
       <ConfirmDialog />
       {successMsg && (
-        <div style={{ background: "#dcfce7", color: "#15803d", padding: "10px 14px", borderRadius: 8, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
-          <CheckCircle size={16} color="#15803d" />
+        <div className="alert alert-success">
+          <CheckCircle size={16} className="shrink-0 text-success" />
           {successMsg}
         </div>
       )}
 
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: 0 }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-bold text-base text-foreground !m-0">
             Administrateurs actifs ({userRoles.length})
           </h2>
           <button
             onClick={() => { setShowInviteForm(true); setError(null); }}
-            style={{ background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+            className="btn btn-primary btn-sm"
           >
             <Plus size={15} /> Inviter un admin
           </button>
         </div>
 
         {showInviteForm && (
-          <div style={{ background: "white", borderRadius: 12, padding: "1.25rem 1.5rem", border: "1px solid #e2e8f0", marginBottom: 16, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }}>
-            <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Inviter un administrateur</h3>
-            {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "8px 12px", borderRadius: 6, marginBottom: 12, fontSize: 13 }}>{error}</div>}
-            <form onSubmit={handleInvite} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
-              <div style={{ flex: 2, minWidth: 200 }}>
-                <label style={s.label}>Email *</label>
+          <div className="card mb-4 p-5 shadow-md">
+            <h3 className="!m-0 !mb-3.5 text-[15px] font-bold text-foreground">Inviter un administrateur</h3>
+            {error && <div className="alert alert-danger mb-3 text-[13px]">{error}</div>}
+            <form onSubmit={handleInvite} className="flex gap-3 items-end flex-wrap">
+              <div className="flex-[2] min-w-[200px]">
+                <label className="label">Email *</label>
                 <input
                   type="email"
-                  style={s.input}
+                  className="input"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="admin@eglise.cd"
                   required
                 />
               </div>
-              <div style={{ flex: 1, minWidth: 160 }}>
-                <label style={s.label}>Rôle</label>
-                <select style={s.input} value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
+              <div className="flex-1 min-w-[160px]">
+                <label className="label">Rôle</label>
+                <select className="input select" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
                   <option value="moderateur">Modérateur</option>
                   <option value="admin_eglise">Admin église</option>
                 </select>
               </div>
-              <div style={{ display: "flex", gap: 8, paddingBottom: 1 }}>
-                <button type="button" onClick={() => setShowInviteForm(false)} style={s.cancelBtn}>Annuler</button>
-                <button type="submit" style={s.submitBtn} disabled={loading}>
+              <div className="flex gap-2 pb-px">
+                <button type="button" onClick={() => setShowInviteForm(false)} className="btn btn-outline btn-sm">Annuler</button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>
                   {loading ? "Envoi…" : "Générer l'invitation"}
                 </button>
               </div>
@@ -147,32 +147,29 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
         )}
 
         {userRoles.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "2rem", background: "white", borderRadius: 12, border: "1px dashed #cbd5e1" }}>
-            <p style={{ color: "#64748b", fontSize: 14 }}>Aucun administrateur pour l&apos;instant.</p>
+          <div className="text-center p-8 bg-white rounded-xl border border-dashed border-border">
+            <p className="text-muted-foreground text-sm">Aucun administrateur pour l&apos;instant.</p>
           </div>
         ) : (
-          <div style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+          <div className="bg-white rounded-xl border border-border overflow-hidden">
             {userRoles.map((ur, idx) => {
               const rl = roleLabels[ur.roleNom] ?? roleLabels.moderateur;
               const isMe = ur.clerkUserId === currentUserId;
               return (
-                <div key={ur.id} style={{
-                  padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: 12, justifyContent: "space-between",
-                  borderTop: idx > 0 ? "1px solid #f1f5f9" : "none",
-                }}>
+                <div key={ur.id} className={`px-6 py-4 flex items-center gap-3 justify-between ${idx > 0 ? "border-t border-slate-100" : ""}`}>
                   <div>
-                    <div style={{ fontSize: 13, color: "#64748b" }}>
-                      ID Clerk: <code style={{ fontSize: 11, background: "#f1f5f9", padding: "1px 6px", borderRadius: 4 }}>{ur.clerkUserId.slice(0, 24)}…</code>
-                      {isMe && <span style={{ marginLeft: 8, fontSize: 11, color: "#1e3a8a", fontWeight: 600 }}>Vous</span>}
+                    <div className="text-[13px] text-muted-foreground">
+                      ID Clerk: <code className="text-[11px] bg-slate-100 px-1.5 py-px rounded">{ur.clerkUserId.slice(0, 24)}…</code>
+                      {isMe && <span className="ml-2 text-[11px] text-primary font-semibold">Vous</span>}
                     </div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
                       Depuis le {new Date(ur.createdAt).toLocaleDateString("fr-FR")}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: rl.bg, color: rl.color }}>{rl.label}</span>
+                  <div className="flex gap-2 items-center">
+                    <span className={rl.badgeClass}>{rl.label}</span>
                     {!isMe && (
-                      <button onClick={() => handleRevoke(ur.id)} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#b91c1c", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>
+                      <button onClick={() => handleRevoke(ur.id)} className="btn btn-danger btn-xs">
                         Révoquer
                       </button>
                     )}
@@ -186,28 +183,25 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
 
       {invites.length > 0 && (
         <div>
-          <h2 style={{ fontWeight: 700, fontSize: 16, color: "#0f172a", margin: "0 0 14px" }}>
+          <h2 className="font-bold text-base text-foreground !m-0 !mb-3.5">
             Invitations en attente ({invites.length})
           </h2>
-          <div style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+          <div className="bg-white rounded-xl border border-border overflow-hidden">
             {invites.map((inv, idx) => {
               const rl = roleLabels[inv.roleNom] ?? roleLabels.moderateur;
               return (
-                <div key={inv.id} style={{
-                  padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: 12, justifyContent: "space-between", flexWrap: "wrap",
-                  borderTop: idx > 0 ? "1px solid #f1f5f9" : "none",
-                }}>
+                <div key={inv.id} className={`px-6 py-4 flex items-center gap-3 justify-between flex-wrap ${idx > 0 ? "border-t border-slate-100" : ""}`}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: "#0f172a" }}>{inv.email}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                    <div className="font-semibold text-sm text-foreground">{inv.email}</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
                       Expire le {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: rl.bg, color: rl.color }}>{rl.label}</span>
+                  <div className="flex gap-2 items-center">
+                    <span className={rl.badgeClass}>{rl.label}</span>
                     <button
                       onClick={() => copyToken(inv.token)}
-                      style={{ padding: "6px 14px", borderRadius: 7, border: "1.5px solid #e2e8f0", background: "white", color: "#1e3a8a", fontWeight: 600, fontSize: 12, cursor: "pointer" }}
+                      className="btn btn-outline btn-xs"
                     >
                       {copiedToken === inv.token ? "Copié !" : "Copier le lien"}
                     </button>
@@ -221,10 +215,3 @@ export default function GestionAdminsClient({ initialUserRoles, pendingInvites: 
     </div>
   );
 }
-
-const s = {
-  label: { fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 } as React.CSSProperties,
-  input: { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" as const } as React.CSSProperties,
-  cancelBtn: { padding: "9px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "white", color: "#374151", fontWeight: 600, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
-  submitBtn: { padding: "9px 18px", borderRadius: 8, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer" } as React.CSSProperties,
-};

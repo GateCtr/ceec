@@ -114,76 +114,76 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
   return (
     <>
       <ConfirmDialog />
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+      <div className="flex justify-end mb-5">
         <button
           onClick={openCreate}
-          style={{ padding: "9px 20px", borderRadius: 9, background: "#1e3a8a", color: "white", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+          className="btn btn-primary font-bold text-sm"
         >
           <Plus size={16} /> Ajouter une vidéo
         </button>
       </div>
 
       {showForm && (
-        <div style={{ background: "white", borderRadius: 14, padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-          <h3 style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 16 }}>
+        <div className="card p-6 mb-6 shadow-md">
+          <h3 className="font-bold text-[15px] text-foreground mb-4">
             {editing ? "Modifier la vidéo" : "Nouvelle vidéo YouTube"}
           </h3>
-          {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{error}</div>}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Titre *</label>
+          {error && <div className="alert alert-danger mb-3 text-[13px]">{error}</div>}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <div className="form-group mb-0!">
+              <label className="label">Titre *</label>
               <input required value={form.titre} onChange={(e) => updateField("titre", e.target.value)}
-                style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
+                className="input"
                 placeholder="Ex: Culte du dimanche 12 janvier" />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>URL YouTube *</label>
+            <div className="form-group mb-0!">
+              <label className="label">URL YouTube *</label>
               <input required value={form.urlYoutube} onChange={(e) => updateField("urlYoutube", e.target.value)}
-                style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }}
+                className="input"
                 placeholder="https://youtube.com/watch?v=..." />
             </div>
             {form.urlYoutube && getYoutubeId(form.urlYoutube) && (
-              <div style={{ borderRadius: 8, overflow: "hidden", maxWidth: 320 }}>
+              <div className="rounded-lg overflow-hidden max-w-xs">
                 <img
                   src={`https://img.youtube.com/vi/${getYoutubeId(form.urlYoutube)}/hqdefault.jpg`}
                   alt="Miniature YouTube"
-                  style={{ width: "100%", display: "block" }}
+                  className="w-full block"
                 />
               </div>
             )}
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Description</label>
+            <div className="form-group mb-0!">
+              <label className="label">Description</label>
               <textarea value={form.description} onChange={(e) => updateField("description", e.target.value)} rows={2}
-                style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box", resize: "vertical" }} />
+                className="input textarea" />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#374151" }}>Date du stream</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="form-group mb-0!">
+                <label className="label">Date du stream</label>
                 <input type="datetime-local" value={form.dateStream} onChange={(e) => updateField("dateStream", e.target.value)}
-                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 7, fontSize: 14, boxSizing: "border-box" }} />
+                  className="input" />
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 22 }}>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+              <div className="flex flex-col gap-2.5 pt-[22px]">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="checkbox" checked={form.estEnDirect} onChange={(e) => updateField("estEnDirect", e.target.checked)} />
-                  <span style={{ color: "#b91c1c", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><Radio size={13} color="#b91c1c" /> En direct</span>
+                  <span className="text-red-700 font-semibold flex items-center gap-1"><Radio size={13} className="text-red-700" /> En direct</span>
                 </label>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="checkbox" checked={form.epingle} onChange={(e) => updateField("epingle", e.target.checked)} />
                   Épingler en haut
                 </label>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="checkbox" checked={form.publie} onChange={(e) => updateField("publie", e.target.checked)} />
                   Publié
                 </label>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <div className="flex gap-2.5 justify-end">
               <button type="button" onClick={() => setShowForm(false)}
-                style={{ padding: "9px 18px", borderRadius: 7, border: "1px solid #d1d5db", background: "white", fontSize: 14, cursor: "pointer" }}>
+                className="btn btn-outline text-slate-700 border-border bg-white">
                 Annuler
               </button>
               <button type="submit" disabled={loading}
-                style={{ padding: "9px 18px", borderRadius: 7, background: "#1e3a8a", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
+                className={`btn btn-primary font-bold ${loading ? "opacity-70" : ""}`}>
                 {loading ? "Enregistrement…" : (editing ? "Mettre à jour" : "Ajouter")}
               </button>
             </div>
@@ -192,53 +192,53 @@ export default function GestionVideosClient({ initialVideos }: { initialVideos: 
       )}
 
       {videos.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "4rem", background: "white", borderRadius: 14, border: "1px dashed #e2e8f0" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <Play size={40} color="#e2e8f0" />
+        <div className="text-center p-16 bg-white rounded-xl border border-dashed border-border">
+          <div className="flex justify-center mb-3">
+            <Play size={40} className="text-border" />
           </div>
-          <h3 style={{ color: "#0f172a", fontWeight: 700, marginBottom: 8 }}>Aucune vidéo</h3>
-          <p style={{ color: "#64748b", fontSize: 14 }}>Ajoutez vos lives et replays YouTube pour les afficher sur votre site.</p>
+          <h3 className="text-foreground font-bold mb-2">Aucune vidéo</h3>
+          <p className="text-muted-foreground text-sm">Ajoutez vos lives et replays YouTube pour les afficher sur votre site.</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
           {videos.map((v) => {
             const ytId = getYoutubeId(v.urlYoutube);
             return (
-              <div key={v.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+              <div key={v.id} className="card overflow-hidden">
                 {ytId ? (
-                  <div style={{ aspectRatio: "16/9", background: "#0f172a", overflow: "hidden" }}>
-                    <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt={v.titre} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <div className="aspect-video bg-foreground overflow-hidden">
+                    <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt={v.titre} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div style={{ aspectRatio: "16/9", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Play size={32} color="#94a3b8" />
+                  <div className="aspect-video bg-slate-100 flex items-center justify-center">
+                    <Play size={32} className="text-slate-400" />
                   </div>
                 )}
-                <div style={{ padding: "12px 14px" }}>
-                  <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
-                    {v.epingle && <span style={{ fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: 99, display: "inline-flex", alignItems: "center", gap: 3 }}><Pin size={9} color="#b45309" /> Épinglé</span>}
-                    {v.estEnDirect && <span style={{ fontSize: 10, fontWeight: 700, background: "#fee2e2", color: "#b91c1c", padding: "2px 8px", borderRadius: 99, display: "inline-flex", alignItems: "center", gap: 3 }}><Radio size={9} color="#b91c1c" /> En direct</span>}
-                    {!v.publie && <span style={{ fontSize: 10, fontWeight: 700, background: "#f1f5f9", color: "#64748b", padding: "2px 8px", borderRadius: 99 }}>Brouillon</span>}
+                <div className="px-3.5 py-3">
+                  <div className="flex gap-1.5 mb-2 flex-wrap">
+                    {v.epingle && <span className="badge bg-amber-100 text-amber-700 inline-flex items-center gap-1"><Pin size={9} className="text-amber-700" /> Épinglé</span>}
+                    {v.estEnDirect && <span className="badge bg-red-100 text-red-700 inline-flex items-center gap-1"><Radio size={9} className="text-red-700" /> En direct</span>}
+                    {!v.publie && <span className="badge badge-muted">Brouillon</span>}
                   </div>
-                  <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 14, marginBottom: 4, lineHeight: 1.3 }}>{v.titre}</div>
-                  {v.description && <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10, lineHeight: 1.4 }}>{v.description.slice(0, 100)}{v.description.length > 100 ? "…" : ""}</div>}
+                  <div className="font-bold text-foreground text-sm mb-1 leading-tight">{v.titre}</div>
+                  {v.description && <div className="text-xs text-muted-foreground mb-2.5 leading-snug">{v.description.slice(0, 100)}{v.description.length > 100 ? "…" : ""}</div>}
                   {v.dateStream && (
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 10 }}>
+                    <div className="text-[11px] text-slate-400 mb-2.5">
                       {new Date(v.dateStream).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  <div className="flex gap-1.5 flex-wrap">
                     <button onClick={() => openEdit(v)}
-                      style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "white", fontSize: 12, fontWeight: 600, color: "#374151", cursor: "pointer" }}>
+                      className="btn btn-outline btn-sm flex-1 text-slate-700 border-border bg-white">
                       Modifier
                     </button>
                     <button onClick={() => togglePin(v)}
-                      style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: v.epingle ? "#fef3c7" : "white", fontSize: 12, cursor: "pointer", color: "#b45309" }}>
+                      className={`btn btn-sm border-border text-amber-700 ${v.epingle ? "bg-amber-100" : "bg-white"}`}>
                       {v.epingle ? "Désépingler" : "Épingler"}
                     </button>
                     <button onClick={() => handleDelete(v.id)}
                       title="Supprimer"
-                      style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                      className="btn btn-sm bg-red-100 text-red-700 border-red-300 flex items-center">
                       <X size={13} />
                     </button>
                   </div>
